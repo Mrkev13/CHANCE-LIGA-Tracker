@@ -1,0 +1,6 @@
+{
+  "apiKey": "VÁŠ_API_KLÍČ",
+  "baseUrl": "https://api.provider.com/v1",
+  "requestLimit": 100,
+  "cacheTime": 60
+}
