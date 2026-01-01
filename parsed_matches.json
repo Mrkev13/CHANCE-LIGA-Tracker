@@ -1,0 +1,2420 @@
+[
+  {
+    "id": "2025-08-16-t_duk-t_plz",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-08-16T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-16-t_olo-t_zli",
+    "homeTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-08-16T15:00:00Z",
+    "stadium": "Andrův stadion",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-16-t_mbo-t_hrk",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-08-16T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-16-t_slo-t_tep",
+    "homeTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-16T15:00:00Z",
+    "stadium": "Městský stadion Miroslava Valenty",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-16-t_jab-t_sla",
+    "homeTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-16T15:00:00Z",
+    "stadium": "Stadion Střelnice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-17-t_kar-t_boh",
+    "homeTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-08-17T15:00:00Z",
+    "stadium": "Městský stadion Karviná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-17-t_lib-t_spa",
+    "homeTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-08-17T15:00:00Z",
+    "stadium": "Stadion U Nisy",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-08-19-t_mbo-t_plz",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 5
+    },
+    "status": "finished",
+    "date": "2025-08-19T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "3",
+    "events": []
+  },
+  {
+    "id": "2025-08-23-t_plz-t_kar",
+    "homeTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-23T15:00:00Z",
+    "stadium": "Doosan Arena",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-23-t_zli-t_lib",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-08-23T15:00:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-23-t_tep-t_jab",
+    "homeTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-23T15:00:00Z",
+    "stadium": "Stadion Na Stínadlech",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-23-t_sla-t_par",
+    "homeTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-23T15:00:00Z",
+    "stadium": "Eden Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-24-t_hrk-t_olo",
+    "homeTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-08-24T15:00:00Z",
+    "stadium": "Malšovická aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-24-t_ban-t_slo",
+    "homeTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-08-24T15:00:00Z",
+    "stadium": "Městský stadion Vítkovice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-24-t_spa-t_duk",
+    "homeTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-08-24T15:00:00Z",
+    "stadium": "Letná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-08-30-t_kar-t_tep",
+    "homeTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "score": {
+      "home": 4,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-30T15:00:00Z",
+    "stadium": "Městský stadion Karviná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-30-t_duk-t_hrk",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-30T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-30-t_par-t_boh",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-30T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-30-t_slo-t_jab",
+    "homeTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-08-30T15:00:00Z",
+    "stadium": "Městský stadion Miroslava Valenty",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-30-t_mbo-t_sla",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-08-30T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-31-t_lib-t_plz",
+    "homeTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-31T15:00:00Z",
+    "stadium": "Stadion U Nisy",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-31-t_olo-t_ban",
+    "homeTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-08-31T15:00:00Z",
+    "stadium": "Andrův stadion",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-08-31-t_spa-t_zli",
+    "homeTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-08-31T15:00:00Z",
+    "stadium": "Letná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "7",
+    "events": []
+  },
+  {
+    "id": "2025-09-13-t_plz-t_olo",
+    "homeTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-09-13T15:00:00Z",
+    "stadium": "Doosan Arena",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-13-t_ban-t_lib",
+    "homeTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-13T15:00:00Z",
+    "stadium": "Městský stadion Vítkovice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-13-t_tep-t_mbo",
+    "homeTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-09-13T15:00:00Z",
+    "stadium": "Stadion Na Stínadlech",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-13-t_zli-t_duk",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-13T15:00:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-13-t_sla-t_kar",
+    "homeTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-13T15:00:00Z",
+    "stadium": "Eden Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-14-t_jab-t_par",
+    "homeTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-14T15:00:00Z",
+    "stadium": "Stadion Střelnice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-14-t_boh-t_slo",
+    "homeTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-09-14T15:00:00Z",
+    "stadium": "Ďolíček",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-14-t_hrk-t_spa",
+    "homeTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-14T15:00:00Z",
+    "stadium": "Malšovická aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "8",
+    "events": []
+  },
+  {
+    "id": "2025-09-20-t_zli-t_hrk",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-20T15:00:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-20-t_olo-t_tep",
+    "homeTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-09-20T15:00:00Z",
+    "stadium": "Andrův stadion",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-20-t_par-t_slo",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-20T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-20-t_kar-t_jab",
+    "homeTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-20T15:00:00Z",
+    "stadium": "Městský stadion Karviná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-20-t_spa-t_plz",
+    "homeTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-20T15:00:00Z",
+    "stadium": "Letná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-21-t_duk-t_boh",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-21T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-21-t_lib-t_sla",
+    "homeTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-21T15:00:00Z",
+    "stadium": "Stadion U Nisy",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-21-t_mbo-t_ban",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-21T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "9",
+    "events": []
+  },
+  {
+    "id": "2025-09-26-t_sla-t_duk",
+    "homeTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-09-26T15:00:00Z",
+    "stadium": "Eden Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-27-t_boh-t_olo",
+    "homeTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-27T15:00:00Z",
+    "stadium": "Ďolíček",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-27-t_slo-t_kar",
+    "homeTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-09-27T15:00:00Z",
+    "stadium": "Městský stadion Miroslava Valenty",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-27-t_ban-t_spa",
+    "homeTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-09-27T15:00:00Z",
+    "stadium": "Městský stadion Vítkovice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-27-t_hrk-t_lib",
+    "homeTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-09-27T15:00:00Z",
+    "stadium": "Malšovická aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-28-t_tep-t_par",
+    "homeTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-09-28T15:00:00Z",
+    "stadium": "Stadion Na Stínadlech",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-28-t_jab-t_mbo",
+    "homeTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-09-28T15:00:00Z",
+    "stadium": "Stadion Střelnice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-09-28-t_plz-t_zli",
+    "homeTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-09-28T15:00:00Z",
+    "stadium": "Doosan Arena",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "10",
+    "events": []
+  },
+  {
+    "id": "2025-10-01-t_par-t_ban",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-01T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "5",
+    "events": []
+  },
+  {
+    "id": "2025-10-04-t_mbo-t_slo",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-04T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-04-t_duk-t_tep",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-10-04T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-04-t_par-t_kar",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-04T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-04-t_lib-t_boh",
+    "homeTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-04T15:00:00Z",
+    "stadium": "Stadion U Nisy",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-05-t_zli-t_ban",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-05T15:00:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-05-t_plz-t_hrk",
+    "homeTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-10-05T15:00:00Z",
+    "stadium": "Doosan Arena",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-05-t_olo-t_jab",
+    "homeTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-05T15:00:00Z",
+    "stadium": "Andrův stadion",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-05-t_spa-t_sla",
+    "homeTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-05T15:00:00Z",
+    "stadium": "Letná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "11",
+    "events": []
+  },
+  {
+    "id": "2025-10-18-t_par-t_mbo",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-18T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-18-t_tep-t_lib",
+    "homeTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-18T15:00:00Z",
+    "stadium": "Stadion Na Stínadlech",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-18-t_kar-t_olo",
+    "homeTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-18T15:00:00Z",
+    "stadium": "Městský stadion Karviná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-18-t_boh-t_plz",
+    "homeTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-18T15:00:00Z",
+    "stadium": "Ďolíček",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-18-t_sla-t_zli",
+    "homeTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-18T15:00:00Z",
+    "stadium": "Eden Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-19-t_ban-t_hrk",
+    "homeTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-19T15:00:00Z",
+    "stadium": "Městský stadion Vítkovice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-19-t_slo-t_spa",
+    "homeTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-19T15:00:00Z",
+    "stadium": "Městský stadion Miroslava Valenty",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-19-t_jab-t_duk",
+    "homeTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-19T15:00:00Z",
+    "stadium": "Stadion Střelnice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "12",
+    "events": []
+  },
+  {
+    "id": "2025-10-22-t_boh-t_mbo",
+    "homeTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-22T15:00:00Z",
+    "stadium": "Ďolíček",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "6",
+    "events": []
+  },
+  {
+    "id": "2025-10-25-t_hrk-t_tep",
+    "homeTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-25T15:00:00Z",
+    "stadium": "Malšovická aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-25-t_mbo-t_kar",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 4
+    },
+    "status": "finished",
+    "date": "2025-10-25T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-25-t_duk-t_slo",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-25T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-25-t_zli-t_par",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-10-25T15:00:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-25-t_lib-t_jab",
+    "homeTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-10-25T15:00:00Z",
+    "stadium": "Stadion U Nisy",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-26-t_olo-t_sla",
+    "homeTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-26T15:00:00Z",
+    "stadium": "Andrův stadion",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-26-t_plz-t_ban",
+    "homeTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-10-26T15:00:00Z",
+    "stadium": "Doosan Arena",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-10-28-t_spa-t_boh",
+    "homeTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-10-28T15:00:00Z",
+    "stadium": "Letná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "13",
+    "events": []
+  },
+  {
+    "id": "2025-11-01-t_slo-t_lib",
+    "homeTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-11-01T15:00:00Z",
+    "stadium": "Městský stadion Miroslava Valenty",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-01-t_jab-t_zli",
+    "homeTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 3
+    },
+    "status": "finished",
+    "date": "2025-11-01T15:00:00Z",
+    "stadium": "Stadion Střelnice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-01-t_par-t_duk",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-11-01T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-01-t_sla-t_ban",
+    "homeTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-11-01T15:00:00Z",
+    "stadium": "Eden Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-02-t_mbo-t_olo",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 4
+    },
+    "status": "finished",
+    "date": "2025-11-02T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-02-t_boh-t_hrk",
+    "homeTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-11-02T15:00:00Z",
+    "stadium": "Ďolíček",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-02-t_kar-t_spa",
+    "homeTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-11-02T15:00:00Z",
+    "stadium": "Městský stadion Karviná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-02-t_tep-t_plz",
+    "homeTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-11-02T15:00:00Z",
+    "stadium": "Stadion Na Stínadlech",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "14",
+    "events": []
+  },
+  {
+    "id": "2025-11-08-t_duk-t_mbo",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-11-08T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-08-t_zli-t_boh",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "FC Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_boh",
+      "name": "Bohemians Praha 1905",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-11-08T15:00:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-08-t_hrk-t_slo",
+    "homeTeam": {
+      "id": "t_hrk",
+      "name": "Hradec Králové",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_slo",
+      "name": "1. FC Slovácko",
+      "logo": ""
+    },
+    "score": {
+      "home": 4,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-11-08T15:00:00Z",
+    "stadium": "Malšovická aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-08-t_ban-t_jab",
+    "homeTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_jab",
+      "name": "FK Jablonec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 1
+    },
+    "status": "finished",
+    "date": "2025-11-08T15:00:00Z",
+    "stadium": "Městský stadion Vítkovice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-09-t_lib-t_kar",
+    "homeTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_kar",
+      "name": "MFK Karviná",
+      "logo": ""
+    },
+    "score": {
+      "home": 6,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-11-09T15:00:00Z",
+    "stadium": "Stadion U Nisy",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-09-t_spa-t_tep",
+    "homeTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-11-09T15:00:00Z",
+    "stadium": "Letná",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-09-t_olo-t_par",
+    "homeTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-11-09T15:00:00Z",
+    "stadium": "Andrův stadion",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-09-t_plz-t_sla",
+    "homeTeam": {
+      "id": "t_plz",
+      "name": "FC Viktoria Plzeň",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_sla",
+      "name": "Slavia Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 3,
+      "away": 5
+    },
+    "status": "finished",
+    "date": "2025-11-09T15:00:00Z",
+    "stadium": "Doosan Arena",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "15",
+    "events": []
+  },
+  {
+    "id": "2025-11-22-t_duk-t_olo",
+    "homeTeam": {
+      "id": "t_duk",
+      "name": "Dukla Praha",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "SK Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 2,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-11-22T15:00:00Z",
+    "stadium": "Juliska",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "16",
+    "events": []
+  },
+  {
+    "id": "2025-11-22-t_par-t_lib",
+    "homeTeam": {
+      "id": "t_par",
+      "name": "FK Pardubice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_lib",
+      "name": "Slovan Liberec",
+      "logo": ""
+    },
+    "score": {
+      "home": 0,
+      "away": 4
+    },
+    "status": "finished",
+    "date": "2025-11-22T15:00:00Z",
+    "stadium": "CFIG Aréna",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "16",
+    "events": []
+  },
+  {
+    "id": "2025-11-22-t_tep-t_ban",
+    "homeTeam": {
+      "id": "t_tep",
+      "name": "FK Teplice",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_ban",
+      "name": "FC Baník Ostrava",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-11-22T15:00:00Z",
+    "stadium": "Stadion Na Stínadlech",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "16",
+    "events": []
+  },
+  {
+    "id": "2025-11-22-t_mbo-t_spa",
+    "homeTeam": {
+      "id": "t_mbo",
+      "name": "FK Mladá Boleslav",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_spa",
+      "name": "Sparta Praha",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 2
+    },
+    "status": "finished",
+    "date": "2025-11-22T15:00:00Z",
+    "stadium": "Městský stadion Mladá Boleslav",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "16",
+    "events": []
+  }
+]

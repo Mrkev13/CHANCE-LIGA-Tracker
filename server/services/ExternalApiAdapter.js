@@ -32,7 +32,9 @@ class ExternalApiAdapter {
    */
   getHeaders() {
     return {
-      'X-API-KEY': this.apiKey,
+      'Authorization': `Bearer ${this.apiKey}`,
+      'Accept': 'application/json',
+      'User-Agent': 'fortuna-liga-tracker/1.0',
       'Content-Type': 'application/json'
     };
   }

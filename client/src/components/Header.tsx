@@ -61,8 +61,6 @@ const Header: React.FC = () => {
         <NavLinks>
           <NavLink to="/">Zápasy</NavLink>
           <NavLink to="/table">Tabulka</NavLink>
-          <NavLink to="/teams">Týmy</NavLink>
-          <NavLink to="/players/stats/goals">Statistiky</NavLink>
         </NavLinks>
       </Nav>
     </HeaderContainer>

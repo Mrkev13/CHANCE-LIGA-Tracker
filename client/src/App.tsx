@@ -8,7 +8,6 @@ import Footer from './components/Footer.tsx';
 import HomePage from './pages/HomePage.tsx';
 import MatchDetailPage from './pages/MatchDetailPage.tsx';
 import TeamPage from './pages/TeamPage.tsx';
-import PlayerPage from './pages/PlayerPage.tsx';
 import TablePage from './pages/TablePage.tsx';
 
 const App: React.FC = () => {
@@ -22,7 +21,6 @@ const App: React.FC = () => {
             <Route path="/" element={<HomePage />} />
             <Route path="/match/:id" element={<MatchDetailPage />} />
             <Route path="/team/:id" element={<TeamPage />} />
-            <Route path="/player/:id" element={<PlayerPage />} />
             <Route path="/table" element={<TablePage />} />
           </Routes>
         </main>

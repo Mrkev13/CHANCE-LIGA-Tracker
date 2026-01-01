@@ -1,0 +1,18 @@
+[
+  { "id": "t_sla", "name": "Slavia Praha", "logo": "", "stadium": "Eden Aréna" },
+  { "id": "t_spa", "name": "Sparta Praha", "logo": "", "stadium": "Letná" },
+  { "id": "t_jab", "name": "FK Jablonec", "logo": "", "stadium": "Stadion Střelnice" },
+  { "id": "t_olo", "name": "SK Sigma Olomouc", "logo": "", "stadium": "Andrův stadion" },
+  { "id": "t_lib", "name": "Slovan Liberec", "logo": "", "stadium": "Stadion U Nisy" },
+  { "id": "t_plz", "name": "FC Viktoria Plzeň", "logo": "", "stadium": "Doosan Arena" },
+  { "id": "t_kar", "name": "MFK Karviná", "logo": "", "stadium": "Městský stadion Karviná" },
+  { "id": "t_hrk", "name": "Hradec Králové", "logo": "", "stadium": "Malšovická aréna" },
+  { "id": "t_zli", "name": "FC Zlín", "logo": "", "stadium": "Stadion Letná Zlín" },
+  { "id": "t_boh", "name": "Bohemians Praha 1905", "logo": "", "stadium": "Ďolíček" },
+  { "id": "t_tep", "name": "FK Teplice", "logo": "", "stadium": "Stadion Na Stínadlech" },
+  { "id": "t_duk", "name": "Dukla Praha", "logo": "", "stadium": "Juliska" },
+  { "id": "t_mbo", "name": "FK Mladá Boleslav", "logo": "", "stadium": "Městský stadion Mladá Boleslav" },
+  { "id": "t_par", "name": "FK Pardubice", "logo": "", "stadium": "CFIG Aréna" },
+  { "id": "t_slo", "name": "1. FC Slovácko", "logo": "", "stadium": "Městský stadion Miroslava Valenty" },
+  { "id": "t_ban", "name": "FC Baník Ostrava", "logo": "", "stadium": "Městský stadion Vítkovice" }
+]
