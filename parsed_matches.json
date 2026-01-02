@@ -2416,5 +2416,496 @@
     },
     "round": "16",
     "events": []
+  },
+  {
+    "id": "2025-12-14-t_zli-t_olo",
+    "homeTeam": {
+      "id": "t_zli",
+      "name": "Zlín",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_olo",
+      "name": "Sigma Olomouc",
+      "logo": ""
+    },
+    "score": {
+      "home": 5,
+      "away": 0
+    },
+    "status": "finished",
+    "date": "2025-12-14T15:30:00Z",
+    "stadium": "Stadion Letná Zlín",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "19",
+    "events": [
+      {
+        "id": "e1",
+        "minute": 3,
+        "team": "home",
+        "type": "goal",
+        "player": {
+          "name": "Kanu S."
+        },
+        "assistPlayer": {
+          "name": "Ulbrich T."
+        }
+      },
+      {
+        "id": "e2",
+        "minute": 13,
+        "team": "home",
+        "type": "goal",
+        "player": {
+          "name": "Cupák M."
+        },
+        "assistPlayer": {
+          "name": "Kanu S."
+        }
+      },
+      {
+        "id": "e3",
+        "minute": 36,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Machalík D."
+        },
+        "note": "odchod: Didiba J. (Zranění)"
+      },
+      {
+        "id": "e4",
+        "minute": 46,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Král J."
+        },
+        "note": "Faul"
+      },
+      {
+        "id": "e5",
+        "minute": 46,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Tijani M."
+        },
+        "note": "odchod: Šíp J."
+      },
+      {
+        "id": "e6",
+        "minute": 46,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Janošek D."
+        },
+        "note": "odchod: Beran M."
+      },
+      {
+        "id": "e7",
+        "minute": 55,
+        "team": "home",
+        "type": "goal",
+        "player": {
+          "name": "Petruta S."
+        },
+        "assistPlayer": {
+          "name": "Bartošák L."
+        }
+      },
+      {
+        "id": "e8",
+        "minute": 58,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Huk T."
+        },
+        "note": "Nesportovní chování"
+      },
+      {
+        "id": "e9",
+        "minute": 59,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Kliment J."
+        },
+        "note": "odchod: Kostadinov T."
+      },
+      {
+        "id": "e10",
+        "minute": 59,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Ghali A."
+        },
+        "note": "odchod: Michez S."
+      },
+      {
+        "id": "e11",
+        "minute": 72,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Hellebrand T."
+        },
+        "note": "odchod: Ulbrich T."
+      },
+      {
+        "id": "e12",
+        "minute": 72,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Kalabiška J."
+        },
+        "note": "odchod: Bartošák L."
+      },
+      {
+        "id": "e13",
+        "minute": 73,
+        "team": "home",
+        "type": "goal",
+        "player": {
+          "name": "Petruta S."
+        }
+      },
+      {
+        "id": "e14",
+        "minute": 75,
+        "team": "home",
+        "type": "goal",
+        "player": {
+          "name": "Petruta S."
+        },
+        "assistPlayer": {
+          "name": "Hellebrand T."
+        }
+      },
+      {
+        "id": "e15",
+        "minute": 75,
+        "team": "home",
+        "type": "yellow_card",
+        "player": {
+          "name": "Petruta S."
+        },
+        "note": "Nesportovní chování"
+      },
+      {
+        "id": "e16",
+        "minute": 85,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Langer Š."
+        },
+        "note": "odchod: Huk T. (Zranění)"
+      },
+      {
+        "id": "e17",
+        "minute": 87,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Bránecký L."
+        },
+        "note": "odchod: Petruta S."
+      },
+      {
+        "id": "e18",
+        "minute": 87,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Poznar T."
+        },
+        "note": "odchod: Kanu S."
+      },
+      {
+        "id": "e19",
+        "minute": 91,
+        "team": "home",
+        "type": "yellow_card",
+        "player": {
+          "name": "Bránecký L."
+        },
+        "note": "Faul"
+      },
+      {
+        "id": "e20",
+        "minute": 92,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Kliment J."
+        },
+        "note": "Nesportovní chování"
+      }
+    ]
+  },
+  {
+    "id": "2025-12-13-t_ban-t_par",
+    "homeTeam": {
+      "id": "t_ban",
+      "name": "Baník Ostrava",
+      "logo": ""
+    },
+    "awayTeam": {
+      "id": "t_par",
+      "name": "Pardubice",
+      "logo": ""
+    },
+    "score": {
+      "home": 1,
+      "away": 4
+    },
+    "status": "finished",
+    "date": "2025-12-13T15:00:00Z",
+    "stadium": "Městský stadion Vítkovice",
+    "competition": {
+      "id": "chance",
+      "name": "Chance Liga 2025/26"
+    },
+    "round": "19",
+    "events": [
+      {
+        "id": "e1",
+        "minute": 5,
+        "team": "away",
+        "type": "goal",
+        "player": {
+          "name": "Noslin J."
+        },
+        "assistPlayer": {
+          "name": "Mahuta R."
+        }
+      },
+      {
+        "id": "e2",
+        "minute": 9,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Mahuta R."
+        },
+        "note": "Zdržování hry"
+      },
+      {
+        "id": "e3",
+        "minute": 15,
+        "team": "home",
+        "type": "goal",
+        "player": {
+          "name": "Kričfaluši O."
+        },
+        "assistPlayer": {
+          "name": "Havran M."
+        }
+      },
+      {
+        "id": "e4",
+        "minute": 27,
+        "team": "away",
+        "type": "goal",
+        "player": {
+          "name": "Tanko A."
+        },
+        "assistPlayer": {
+          "name": "Smékal D."
+        }
+      },
+      {
+        "id": "e5",
+        "minute": 32,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Šimek S."
+        },
+        "note": "Podražení"
+      },
+      {
+        "id": "e6",
+        "minute": 36,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Konečný M."
+        },
+        "note": "Faul"
+      },
+      {
+        "id": "e7",
+        "minute": 50,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Tanko A."
+        },
+        "note": "Podražení"
+      },
+      {
+        "id": "e8",
+        "minute": 46,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Munksgaard A."
+        },
+        "note": "odchod: Pojezný K."
+      },
+      {
+        "id": "e9",
+        "minute": 46,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Tiéhi C."
+        },
+        "note": "odchod: Chaluš M."
+      },
+      {
+        "id": "e10",
+        "minute": 46,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Buchta D."
+        },
+        "note": "odchod: Plavšič S."
+      },
+      {
+        "id": "e11",
+        "minute": 46,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Vecheta F."
+        },
+        "note": "odchod: Smékal D."
+      },
+      {
+        "id": "e12",
+        "minute": 51,
+        "team": "away",
+        "type": "goal",
+        "player": {
+          "name": "Vecheta F."
+        },
+        "assistPlayer": {
+          "name": "Mahuta R."
+        }
+      },
+      {
+        "id": "e13",
+        "minute": 62,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Řezníček J."
+        },
+        "note": "odchod: Solil T."
+      },
+      {
+        "id": "e14",
+        "minute": 63,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Řezníček J."
+        },
+        "note": "Hrubost"
+      },
+      {
+        "id": "e15",
+        "minute": 64,
+        "team": "home",
+        "type": "yellow_card",
+        "player": {
+          "name": "Boula J."
+        },
+        "note": "Nesportovní chování"
+      },
+      {
+        "id": "e16",
+        "minute": 72,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Owusu D."
+        },
+        "note": "odchod: Havran M."
+      },
+      {
+        "id": "e17",
+        "minute": 72,
+        "team": "home",
+        "type": "substitution",
+        "player": {
+          "name": "Pira J."
+        },
+        "note": "odchod: Zlatohlávek T."
+      },
+      {
+        "id": "e18",
+        "minute": 79,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Samuel V."
+        },
+        "note": "odchod: Botos G."
+      },
+      {
+        "id": "e19",
+        "minute": 79,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Sychra V."
+        },
+        "note": "odchod: Tanko A."
+      },
+      {
+        "id": "e20",
+        "minute": 85,
+        "team": "away",
+        "type": "yellow_card",
+        "player": {
+          "name": "Vecheta F."
+        },
+        "note": "Držení"
+      },
+      {
+        "id": "e21",
+        "minute": 89,
+        "team": "away",
+        "type": "substitution",
+        "player": {
+          "name": "Míšek Š."
+        },
+        "note": "odchod: Mahuta R."
+      },
+      {
+        "id": "e22",
+        "minute": 92,
+        "team": "away",
+        "type": "goal",
+        "player": {
+          "name": "Vecheta F."
+        },
+        "assistPlayer": {
+          "name": "Sychra V."
+        }
+      }
+    ]
   }
 ]
