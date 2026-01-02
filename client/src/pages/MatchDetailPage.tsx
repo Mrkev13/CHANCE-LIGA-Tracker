@@ -79,6 +79,30 @@ const RoundInfo = styled.div`
   margin-top: 0.25rem;
 `;
 
+const MatchMetaInfo = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-size: 0.9rem;
+  flex-wrap: wrap;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  span {
+    font-weight: 600;
+    color: white;
+  }
+`;
+
 const TimelineSection = styled.div`
   background: white;
   border-radius: 12px;
