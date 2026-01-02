@@ -79,27 +79,24 @@ const RoundInfo = styled.div`
   margin-top: 0.25rem;
 `;
 
-const MatchMetaInfo = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 1.5rem;
-  margin-top: 2rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+const MatchDetailsText = styled.div`
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
   color: #cbd5e1;
-  font-size: 0.9rem;
-  flex-wrap: wrap;
-`;
-
-const MetaItem = styled.div`
+  text-align: center;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.35rem;
   
+  div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+
   span {
-    font-weight: 600;
-    color: white;
+    opacity: 0.8;
   }
 `;
 
@@ -185,6 +182,18 @@ const MatchDetailPage: React.FC = () => {
     ? '-:-'
     : `${currentMatch.score.home}-${currentMatch.score.away}`;
 
+  const dateObj = new Date(currentMatch.date);
+  const dateStr = dateObj.toLocaleDateString('cs-CZ', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+  const timeStr = dateObj.toLocaleTimeString('cs-CZ', {
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+  const stadiumName = currentMatch.stadium;
+
   return (
     <Container>
       <Header>
@@ -198,6 +207,15 @@ const MatchDetailPage: React.FC = () => {
             <Score>{combinedScore}</Score>
             <MatchStatus>{statusLabel}</MatchStatus>
             {(currentMatch as any).round && <RoundInfo>{(currentMatch as any).round}. kolo</RoundInfo>}
+            
+            <MatchDetailsText>
+              <div>
+                <span>📅</span> {dateStr} | {timeStr}
+              </div>
+              <div>
+                <span>🏟️</span> {stadiumName}
+              </div>
+            </MatchDetailsText>
           </ScoreColumn>
 
           <TeamColumn>
