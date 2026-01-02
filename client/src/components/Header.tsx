@@ -16,12 +16,13 @@ const Nav = styled.nav`
   margin: 0 auto;
 `;
 
-const Logo = styled.div`
+const Logo = styled(Link)`
   font-size: 1.5rem;
   font-weight: bold;
   color: white;
   display: flex;
   align-items: center;
+  text-decoration: none;
   
   span {
     color: ${({ theme }) => theme.colors.secondary};
@@ -55,7 +56,7 @@ const Header: React.FC = () => {
   return (
     <HeaderContainer>
       <Nav>
-        <Logo>
+        <Logo to="/">
           CHANCE:<span>LIGA</span> Tracker
         </Logo>
         <NavLinks>
