@@ -52,6 +52,7 @@
   "devDependencies": {
     "@types/node": "^24.8.0",
     "@types/react": "^18.3.26",
-    "@types/styled-components": "^5.1.26"
+    "@types/styled-components": "^5.1.26",
+    "baseline-browser-mapping": "^2.9.11"
   }
 }

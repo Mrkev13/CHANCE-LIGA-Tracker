@@ -1,6 +1,0 @@
-{
-  "apiKey": "055c39f31aa9ea2dc4e5aa774d203152f8b28b8d",
-  "baseUrl": "https://is.test.mobil-api.fotbal.cz/v1",
-  "requestLimit": 100,
-  "cacheTime": 60
-}

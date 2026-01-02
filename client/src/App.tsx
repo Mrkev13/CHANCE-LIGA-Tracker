@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { GlobalStyle } from './styles/GlobalStyle.tsx';
+import { GlobalStyle } from './styles/GlobalStyle.ts';
 import { theme } from './styles/theme.ts';
 import Header from './components/Header.tsx';
 import Footer from './components/Footer.tsx';

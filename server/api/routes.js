@@ -11,8 +11,6 @@ const competitionController = require('../controllers/competitionController');
 router.get('/matches', matchController.getAllMatches);
 router.get('/matches/live', matchController.getLiveMatches);
 router.get('/matches/:id', matchController.getMatchById);
-// Debug routes
-router.get('/debug/raw-matches', matchController.getRawMatches);
 
 // Team routes
 router.get('/teams', teamController.getAllTeams);

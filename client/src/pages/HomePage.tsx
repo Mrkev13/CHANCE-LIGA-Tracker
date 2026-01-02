@@ -1,10 +1,10 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styled, { css } from 'styled-components';
-import { fetchMatches } from '../redux/slices/matchesSlice.ts';
+import { FaSearch, FaArrowUp } from 'react-icons/fa';
+import styled from 'styled-components';
+import { fetchMatches, Match } from '../redux/slices/matchesSlice.ts';
 import { RootState, AppDispatch } from '../redux/store.ts';
-// odstraněn import format (již se nepoužívá)
 import { theme } from '../styles/theme.ts';
 import { getTeamLogo } from '../utils/teamLogos.ts';
 
@@ -198,8 +198,6 @@ const MatchStatus = styled.span<{ status: string }>`
   color: white;
 `;
 
-// DateSelector a DateButton odstraněny (nepoužívají se)
-
 const LoadingMessage = styled.div`
   text-align: center;
   padding: 2rem;
@@ -214,10 +212,96 @@ const ErrorMessage = styled.div`
 
 const FilterContainer = styled.div`
   position: relative;
-  margin-bottom: 2rem;
   width: 100%;
   max-width: 300px;
   z-index: 10;
+`;
+
+const ControlsContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  
+  @media (min-width: 768px) {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+`;
+
+const SearchContainer = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 300px;
+`;
+
+const SearchInput = styled.input`
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  background-color: ${({ theme }) => theme.colors.lightGray};
+  color: white;
+  border: 1px solid transparent;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: ${({ theme }) => theme.shadows.small};
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.secondary};
+    background-color: #495057;
+  }
+  
+  &::placeholder {
+    color: #adb5bd;
+  }
+`;
+
+const SearchIconWrapper = styled.div`
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #adb5bd;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const ScrollTopButton = styled.button<{ visible: boolean }>`
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 50px;
+  height: 50px;
+  background-color: ${({ theme }) => theme.colors.secondary};
+  color: white;
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  opacity: ${({ visible }) => visible ? 1 : 0};
+  visibility: ${({ visible }) => visible ? 'visible' : 'hidden'};
+  transform: ${({ visible }) => visible ? 'translateY(0)' : 'translateY(20px)'};
+  transition: all 0.3s ease;
+  z-index: 99;
+
+  &:hover {
+    background-color: #a90d27;
+    transform: ${({ visible }) => visible ? 'translateY(-5px)' : 'translateY(20px)'};
+  }
+  
+  @media (max-width: 768px) {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 45px;
+    height: 45px;
+  }
 `;
 
 const FilterButton = styled.button<{ isOpen: boolean }>`
@@ -309,15 +393,36 @@ const HomePage: React.FC = () => {
   const { matches, loading, error } = useSelector(
     (state: RootState) => state.matches
   );
-  // odstraněno filtrování podle data a živé zápasy
   
   const [selectedRound, setSelectedRound] = useState<string>('all');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showScrollTop, setShowScrollTop] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     dispatch(fetchMatches());
   }, [dispatch]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -330,28 +435,27 @@ const HomePage: React.FC = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownRef]);
-  
-  // pomocná funkce byla nevyužitá, odstraněno kvůli eslint varování
-  
-  // filtrování podle data odstraněno; sekce Zápasy s datumy byla odstraněna
-
-  const finishedSortedMatches: any[] = [];
 
   // Seskupení podle kola (Livesport styl)
-  const roundsMap: Record<string, any[]> = {};
-  matches.forEach((m: any) => {
-    if (m.round) {
-      const key = String(m.round);
-      if (!roundsMap[key]) roundsMap[key] = [];
-      roundsMap[key].push(m);
-    }
-  });
-  const sortedRoundKeys = Object.keys(roundsMap)
-    .sort((a, b) => Number(b) - Number(a));
+  const { roundsMap, sortedRoundKeys } = useMemo(() => {
+    const map: Record<string, Match[]> = {};
+    matches.forEach((m: Match) => {
+      if (m.round) {
+        const key = String(m.round);
+        if (!map[key]) map[key] = [];
+        map[key].push(m);
+      }
+    });
+    const keys = Object.keys(map).sort((a, b) => Number(b) - Number(a));
+    return { roundsMap: map, sortedRoundKeys: keys };
+  }, [matches]);
   
-  const filteredRoundKeys = selectedRound === 'all' 
-    ? sortedRoundKeys 
-    : sortedRoundKeys.filter(key => key === selectedRound);
+  const filteredRoundKeys = useMemo(() => 
+    selectedRound === 'all' 
+      ? sortedRoundKeys 
+      : sortedRoundKeys.filter((key: string) => key === selectedRound),
+    [selectedRound, sortedRoundKeys]
+  );
 
   return (
     <HomeContainer>
@@ -366,56 +470,82 @@ const HomePage: React.FC = () => {
         <ErrorMessage theme={theme}>{error}</ErrorMessage>
       ) : (
         <section>
-          <FilterContainer ref={dropdownRef}>
-            <FilterButton 
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              isOpen={isDropdownOpen}
-              aria-haspopup="listbox"
-              aria-expanded={isDropdownOpen}
-            >
-              {selectedRound === 'all' ? 'Všechna kola' : `Kolo ${selectedRound}`}
-            </FilterButton>
-            <DropdownMenu isOpen={isDropdownOpen} role="listbox">
-              <DropdownItem 
-                isSelected={selectedRound === 'all'}
-                onClick={() => {
-                  setSelectedRound('all');
-                  setIsDropdownOpen(false);
-                }}
-                role="option"
-                aria-selected={selectedRound === 'all'}
+          <ControlsContainer>
+            <FilterContainer ref={dropdownRef}>
+              <FilterButton 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                isOpen={isDropdownOpen}
+                aria-haspopup="listbox"
+                aria-expanded={isDropdownOpen}
               >
-                Všechna kola
-              </DropdownItem>
-              {sortedRoundKeys.map((roundKey) => (
-                <DropdownItem
-                  key={roundKey}
-                  isSelected={selectedRound === roundKey}
+                {selectedRound === 'all' ? 'Všechna kola' : `Kolo ${selectedRound}`}
+              </FilterButton>
+              <DropdownMenu isOpen={isDropdownOpen} role="listbox">
+                <DropdownItem 
+                  isSelected={selectedRound === 'all'}
                   onClick={() => {
-                    setSelectedRound(roundKey);
+                    setSelectedRound('all');
                     setIsDropdownOpen(false);
                   }}
                   role="option"
-                  aria-selected={selectedRound === roundKey}
+                  aria-selected={selectedRound === 'all'}
                 >
-                  Kolo {roundKey}
+                  Všechna kola
                 </DropdownItem>
-              ))}
-            </DropdownMenu>
-          </FilterContainer>
+                {sortedRoundKeys.map((roundKey: string) => (
+                  <DropdownItem
+                    key={roundKey}
+                    isSelected={selectedRound === roundKey}
+                    onClick={() => {
+                      setSelectedRound(roundKey);
+                      setIsDropdownOpen(false);
+                    }}
+                    role="option"
+                    aria-selected={selectedRound === roundKey}
+                  >
+                    Kolo {roundKey}
+                  </DropdownItem>
+                ))}
+              </DropdownMenu>
+            </FilterContainer>
+
+            <SearchContainer>
+              <SearchIconWrapper>
+                <FaSearch />
+              </SearchIconWrapper>
+              <SearchInput 
+                type="text" 
+                placeholder="Hledat tým..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </SearchContainer>
+          </ControlsContainer>
 
           <SectionTitle>Zápasy podle kola</SectionTitle>
           {filteredRoundKeys.length > 0 ? (
             <div>
               {filteredRoundKeys.map((roundKey: string) => {
-                const roundMatches = roundsMap[roundKey]
-                  .slice(0, 8)
-                  .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                let roundMatches = roundsMap[roundKey]
+                  .sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                
+                if (searchQuery) {
+                  const lowerQuery = searchQuery.toLowerCase();
+                  roundMatches = roundMatches.filter((m: Match) => 
+                    m.homeTeam.name.toLowerCase().includes(lowerQuery) || 
+                    m.awayTeam.name.toLowerCase().includes(lowerQuery)
+                  );
+                } else if (selectedRound === 'all') {
+                  roundMatches = roundMatches.slice(0, 8);
+                }
+
+                if (roundMatches.length === 0) return null;
+
                 return (
                   <div key={roundKey} style={{ marginBottom: '1.5rem' }}>
                     {selectedRound === 'all' && <SectionTitle>Kolo {roundKey}</SectionTitle>}
                     <MatchesGrid>
-                      {roundMatches.map((match: any) => (
+                      {roundMatches.map((match: Match) => (
                         <MatchCard 
                           key={match.id} 
                           to={`/match/${match.id}`}
@@ -478,6 +608,13 @@ const HomePage: React.FC = () => {
           )}
         </section>
       )}
+      <ScrollTopButton 
+        visible={showScrollTop} 
+        onClick={scrollToTop}
+        aria-label="Scroll to top"
+      >
+        <FaArrowUp />
+      </ScrollTopButton>
     </HomeContainer>
   );
 };

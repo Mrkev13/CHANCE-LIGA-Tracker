@@ -4,7 +4,7 @@ const matches = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../../parsed_matches.json'), 'utf-8')
 );
 const teams = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../../shared/teams.json'), 'utf-8')
+  fs.readFileSync(path.join(__dirname, '../../client/src/shared/teams.json'), 'utf-8')
 );
 
 function computeTableFromMatches(ms) {

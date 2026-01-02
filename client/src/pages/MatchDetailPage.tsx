@@ -4,7 +4,6 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store.ts';
 import { fetchMatchById } from '../redux/slices/matchesSlice.ts';
 import styled from 'styled-components';
-import { theme } from '../styles/theme.ts';
 import { getTeamLogo } from '../utils/teamLogos.ts';
 
 const Container = styled.div`
@@ -161,6 +160,7 @@ const TimelineSection = styled.div`
   border-radius: 12px;
   padding: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  color: #000;
   
   @media (min-width: 768px) {
     padding: 1.5rem;

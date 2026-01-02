@@ -3,8 +3,8 @@ export const theme = {
     primary: '#0C2340',      // Tmavě modrá
     secondary: '#C8102E',    // Červená
     background: '#1E1E1E',   // Tmavě šedá
-    text: '#000000ff',         // Bílá
-    accent: '#05c6edff',       // Světle modrá
+    text: '#FFFFFF',         // Bílá
+    accent: '#05c6ed',       // Světle modrá
     success: '#28a745',      // Zelená
     warning: '#ffc107',      // Žlutá
     danger: '#dc3545',       // Červená (pro chyby)
