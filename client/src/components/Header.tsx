@@ -56,7 +56,7 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <Nav>
         <Logo>
-          FORTUNA:<span>LIGA</span> Tracker
+          CHANCE:<span>LIGA</span> Tracker
         </Logo>
         <NavLinks>
           <NavLink to="/">Zápasy</NavLink>

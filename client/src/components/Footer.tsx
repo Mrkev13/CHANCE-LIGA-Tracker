@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
   return (
     <FooterContainer>
       <FooterContent>
-        &copy; {new Date().getFullYear()} FORTUNA:LIGA Tracker | Všechna práva vyhrazena
+        &copy; {new Date().getFullYear()} CHANCE:LIGA Tracker | Všechna práva vyhrazena
       </FooterContent>
     </FooterContainer>
   );

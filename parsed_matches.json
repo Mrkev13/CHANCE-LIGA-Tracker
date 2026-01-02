@@ -2907,5 +2907,66 @@
         }
       }
     ]
+  },
+  {
+    "id": "2025-12-13-t_sla-t_jab",
+    "homeTeam": { "id": "t_sla", "name": "Slavia Praha", "logo": "" },
+    "awayTeam": { "id": "t_jab", "name": "FK Jablonec", "logo": "" },
+    "score": { "home": 4, "away": 3 },
+    "status": "finished",
+    "date": "2025-12-13T15:00:00Z",
+    "stadium": "Eden Aréna",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "19",
+    "events": [
+      { "id": "e1", "minute": 10, "team": "home", "type": "goal", "player": { "name": "Provod L." }, "assistPlayer": { "name": "Chorý T." } },
+      { "id": "e2", "minute": 34, "team": "away", "type": "goal", "player": { "name": "Tekijaški N." }, "assistPlayer": { "name": "Růsek A." } },
+      { "id": "e3", "minute": 38, "team": "home", "type": "goal", "player": { "name": "Chorý T." }, "note": "Penalta" },
+      { "id": "e4", "minute": 47, "team": "away", "type": "goal", "player": { "name": "Zorvan F." } },
+      { "id": "e5", "minute": 46, "team": "away", "type": "yellow_card", "player": { "name": "Innocenti N." }, "note": "Držení" },
+      { "id": "e6", "minute": 55, "team": "home", "type": "goal", "player": { "name": "Chaloupek Š." }, "assistPlayer": { "name": "Vlček T." } },
+      { "id": "e7", "minute": 56, "team": "away", "type": "substitution", "player": { "name": "Jawo L." }, "note": "odchod: Chramosta J." },
+      { "id": "e8", "minute": 57, "team": "away", "type": "goal", "player": { "name": "Jawo L." } },
+      { "id": "e9", "minute": 61, "team": "home", "type": "yellow_card", "player": { "name": "Zafeiris C." }, "note": "Nafilmovaný pád" },
+      { "id": "e10", "minute": 71, "team": "home", "type": "goal", "player": { "name": "Chorý T." }, "assistPlayer": { "name": "Holeš T." } },
+      { "id": "e11", "minute": 73, "team": "home", "type": "substitution", "player": { "name": "Cham M." }, "note": "odchod: Chytil M." },
+      { "id": "e12", "minute": 73, "team": "home", "type": "substitution", "player": { "name": "Bořil J." }, "note": "odchod: Sanyang Y." },
+      { "id": "e13", "minute": 73, "team": "home", "type": "substitution", "player": { "name": "Kušej V." }, "note": "odchod: Zafeiris C." },
+      { "id": "e14", "minute": 77, "team": "away", "type": "yellow_card", "player": { "name": "Jawo L." }, "note": "Faul, Stop na další zápas" },
+      { "id": "e15", "minute": 78, "team": "away", "type": "substitution", "player": { "name": "Malensek M." }, "note": "odchod: Alegue A." },
+      { "id": "e16", "minute": 78, "team": "away", "type": "substitution", "player": { "name": "Souček D." }, "note": "odchod: Pantalon R." },
+      { "id": "e17", "minute": 78, "team": "away", "type": "substitution", "player": { "name": "Puškáč D." }, "note": "odchod: Růsek A." },
+      { "id": "e18", "minute": 86, "team": "away", "type": "substitution", "player": { "name": "Suchan J." }, "note": "odchod: Sedláček R." },
+      { "id": "e19", "minute": 86, "team": "home", "type": "substitution", "player": { "name": "Schranz I." }, "note": "odchod: Chorý T." },
+      { "id": "e20", "minute": 91, "team": "away", "type": "yellow_card", "player": { "name": "Cedidla M." }, "note": "Držení" },
+      { "id": "e21", "minute": 94, "team": "home", "type": "substitution", "player": { "name": "Ogbu I." }, "note": "odchod: Douděra D." }
+    ]
+  },
+  {
+    "id": "2025-12-13-t_hrk-t_mbo",
+    "homeTeam": { "id": "t_hrk", "name": "Hradec Králové", "logo": "" },
+    "awayTeam": { "id": "t_mbo", "name": "FK Mladá Boleslav", "logo": "" },
+    "score": { "home": 1, "away": 1 },
+    "status": "finished",
+    "date": "2025-12-13T15:00:00Z",
+    "stadium": "Malšovická aréna",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "19",
+    "events": [
+      { "id": "e1", "minute": 11, "team": "away", "type": "yellow_card", "player": { "name": "Kolářík J." }, "note": "Hrubost" },
+      { "id": "e2", "minute": 25, "team": "home", "type": "yellow_card", "player": { "name": "Slončík T." }, "note": "Podražení" },
+      { "id": "e3", "minute": 35, "team": "home", "type": "yellow_card", "player": { "name": "Petrášek T." }, "note": "Podražení" },
+      { "id": "e4", "minute": 43, "team": "away", "type": "goal", "player": { "name": "Vojta M." } },
+      { "id": "e5", "minute": 45, "team": "home", "type": "yellow_card", "player": { "name": "Uhrinčať J." }, "note": "Hrubost" },
+      { "id": "e6", "minute": 64, "team": "home", "type": "goal", "player": { "name": "Pilař V." }, "note": "Penalta" },
+      { "id": "e7", "minute": 65, "team": "away", "type": "substitution", "player": { "name": "Langhamer D." }, "note": "odchod: Ševčík M." },
+      { "id": "e8", "minute": 65, "team": "away", "type": "substitution", "player": { "name": "Penner N." }, "note": "odchod: Kolářík J." },
+      { "id": "e9", "minute": 71, "team": "home", "type": "yellow_card", "player": { "name": "Horejš D." }, "note": "Mimo hřiště" },
+      { "id": "e10", "minute": 73, "team": "away", "type": "substitution", "player": { "name": "Fulnek J." }, "note": "odchod: Prebsl F. (Zranění)" },
+      { "id": "e11", "minute": 79, "team": "away", "type": "yellow_card", "player": { "name": "Vojta M." }, "note": "Nesportovní chování" },
+      { "id": "e12", "minute": 81, "team": "home", "type": "substitution", "player": { "name": "Griger A." }, "note": "odchod: Pilař V." },
+      { "id": "e13", "minute": 87, "team": "home", "type": "substitution", "player": { "name": "Kubr L." }, "note": "odchod: van Buren M." },
+      { "id": "e14", "minute": 90, "team": "away", "type": "substitution", "player": { "name": "John S." }, "note": "odchod: Zíka J." }
+    ]
   }
 ]
