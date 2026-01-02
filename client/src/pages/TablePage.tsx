@@ -24,7 +24,10 @@ const NavContainer = styled.div`
 `;
 
 const NavButton = styled(Link)<{ $active?: boolean }>`
-  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
   background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : theme.colors.lightGray};
   color: white;
   border-radius: ${({ theme }) => theme.borderRadius.medium};

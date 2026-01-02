@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { fetchMatches } from '../redux/slices/matchesSlice.ts';
 import { RootState, AppDispatch } from '../redux/store.ts';
 // odstraněn import format (již se nepoužívá)
@@ -9,9 +9,9 @@ import { theme } from '../styles/theme.ts';
 import { getTeamLogo } from '../utils/teamLogos.ts';
 
 const HomeContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
+  padding: 2rem 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
 `;
 
 const SectionTitle = styled.h2`
@@ -34,7 +34,10 @@ const NavContainer = styled.div`
 `;
 
 const NavButton = styled(Link)<{ $active?: boolean }>`
-  padding: 0.75rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.25rem;
   background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : theme.colors.lightGray};
   color: white;
   border-radius: ${({ theme }) => theme.borderRadius.medium};
@@ -44,11 +47,6 @@ const NavButton = styled(Link)<{ $active?: boolean }>`
   transition: all 0.2s;
   box-shadow: ${({ theme }) => theme.shadows.small};
   border: 1px solid ${({ theme, $active }) => $active ? theme.colors.secondary : 'transparent'};
-
-  @media (max-width: 768px) {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-  }
 
   &:hover {
     background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#495057'};
@@ -214,6 +212,98 @@ const ErrorMessage = styled.div`
   color: ${({ theme }: { theme: any }) => theme.colors.danger};
 `;
 
+const FilterContainer = styled.div`
+  position: relative;
+  margin-bottom: 2rem;
+  width: 100%;
+  max-width: 300px;
+  z-index: 10;
+`;
+
+const FilterButton = styled.button<{ isOpen: boolean }>`
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  background-color: ${({ theme }) => theme.colors.lightGray};
+  color: white;
+  border: 1px solid transparent;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+  box-shadow: ${({ theme }) => theme.shadows.small};
+
+  &:hover {
+    background-color: #495057;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.colors.secondary};
+    box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.2);
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid white;
+    transition: transform 0.2s;
+    transform: ${({ isOpen }) => isOpen ? 'rotate(180deg)' : 'rotate(0)'};
+  }
+`;
+
+const DropdownMenu = styled.div<{ isOpen: boolean }>`
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: #2c3034;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  margin-top: 0.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.large};
+  opacity: ${({ isOpen }) => isOpen ? 1 : 0};
+  visibility: ${({ isOpen }) => isOpen ? 'visible' : 'hidden'};
+  transform: ${({ isOpen }) => isOpen ? 'translateY(0)' : 'translateY(-10px)'};
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  z-index: 20;
+`;
+
+const DropdownItem = styled.button<{ isSelected: boolean }>`
+  width: 100%;
+  padding: 0.75rem 1.25rem;
+  background-color: ${({ isSelected, theme }) => isSelected ? theme.colors.secondary : 'transparent'};
+  color: white;
+  border: none;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: ${({ isSelected, theme }) => isSelected ? theme.colors.secondary : '#3d4248'};
+  }
+
+  &:focus {
+    outline: none;
+    background-color: ${({ isSelected, theme }) => isSelected ? theme.colors.secondary : '#3d4248'};
+  }
+`;
+
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const { matches, loading, error } = useSelector(
@@ -221,9 +311,25 @@ const HomePage: React.FC = () => {
   );
   // odstraněno filtrování podle data a živé zápasy
   
+  const [selectedRound, setSelectedRound] = useState<string>('all');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     dispatch(fetchMatches());
   }, [dispatch]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [dropdownRef]);
   
   // pomocná funkce byla nevyužitá, odstraněno kvůli eslint varování
   
@@ -243,16 +349,10 @@ const HomePage: React.FC = () => {
   const sortedRoundKeys = Object.keys(roundsMap)
     .sort((a, b) => Number(b) - Number(a));
   
-  if (loading && matches.length === 0) {
-    return <LoadingMessage theme={theme}>Načítání zápasů...</LoadingMessage>;
-  }
-  
-  // Pokud dojde k chybě (např. živé zápasy 401), nezablokujeme celou stránku,
-  // ale zobrazíme chybu jen pokud nejsou žádné zápasy k zobrazení.
-  if (error && matches.length === 0) {
-    return <ErrorMessage theme={theme}>{error}</ErrorMessage>;  
-  }
-  
+  const filteredRoundKeys = selectedRound === 'all' 
+    ? sortedRoundKeys 
+    : sortedRoundKeys.filter(key => key === selectedRound);
+
   return (
     <HomeContainer>
       <NavContainer>
@@ -260,80 +360,124 @@ const HomePage: React.FC = () => {
         <NavButton to="/table">Tabulka</NavButton>
       </NavContainer>
 
-      <section>
-        <SectionTitle>Zápasy podle kola</SectionTitle>
-        {sortedRoundKeys.length > 0 ? (
-          <div>
-            {sortedRoundKeys.map((roundKey: string) => {
-              const roundMatches = roundsMap[roundKey]
-                .slice(0, 8)
-                .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-              return (
-                <div key={roundKey} style={{ marginBottom: '1.5rem' }}>
-                  <SectionTitle>Kolo {roundKey}</SectionTitle>
-                  <MatchesGrid>
-                    {roundMatches.map((match: any) => (
-                      <MatchCard 
-                        key={match.id} 
-                        to={`/match/${match.id}`}
-                        className={match.status === 'live' ? 'live' : ''}
-                      >
-                        <MatchHeader>
-                          <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>
-                          <HeaderRight>
-                            <MatchStatus status={match.status}>
-                              {match.status === 'live' 
-                                ? 'ŽIVĚ' 
-                                : match.status === 'finished' 
-                                  ? 'KONEC' 
-                                  : match.status === 'awarded'
-                                    ? 'KONTUMACE'
-                                    : match.status === 'canceled'
-                                      ? 'ZRUŠENO'
-                                      : match.status === 'not_played'
-                                        ? 'NEODEHRÁNO'
-                                        : 'NAPLÁNOVÁNO'}
-                            </MatchStatus>
-                          </HeaderRight>
-                        </MatchHeader>
-                        
-                        <MatchContent>
-                          <TeamSide align="left">
-                            <TeamLogo src={getTeamLogo(match.homeTeam.name, match.homeTeam.logo)} alt={match.homeTeam.name} />
-                            <TeamName>{match.homeTeam.name}</TeamName>
-                          </TeamSide>
-                          
-                          <ScoreSection>
-                            <VersusScore>
-                              {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' 
-                                ? '-:-' 
-                                : `${match.score.home}:${match.score.away}`}
-                            </VersusScore>
-                          </ScoreSection>
-                          
-                          <TeamSide align="right">
-                            <TeamLogo src={getTeamLogo(match.awayTeam.name, match.awayTeam.logo)} alt={match.awayTeam.name} />
-                            <TeamName>{match.awayTeam.name}</TeamName>
-                          </TeamSide>
-                        </MatchContent>
+      {loading && matches.length === 0 ? (
+        <LoadingMessage theme={theme}>Načítání zápasů...</LoadingMessage>
+      ) : error && matches.length === 0 ? (
+        <ErrorMessage theme={theme}>{error}</ErrorMessage>
+      ) : (
+        <section>
+          <FilterContainer ref={dropdownRef}>
+            <FilterButton 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              isOpen={isDropdownOpen}
+              aria-haspopup="listbox"
+              aria-expanded={isDropdownOpen}
+            >
+              {selectedRound === 'all' ? 'Všechna kola' : `Kolo ${selectedRound}`}
+            </FilterButton>
+            <DropdownMenu isOpen={isDropdownOpen} role="listbox">
+              <DropdownItem 
+                isSelected={selectedRound === 'all'}
+                onClick={() => {
+                  setSelectedRound('all');
+                  setIsDropdownOpen(false);
+                }}
+                role="option"
+                aria-selected={selectedRound === 'all'}
+              >
+                Všechna kola
+              </DropdownItem>
+              {sortedRoundKeys.map((roundKey) => (
+                <DropdownItem
+                  key={roundKey}
+                  isSelected={selectedRound === roundKey}
+                  onClick={() => {
+                    setSelectedRound(roundKey);
+                    setIsDropdownOpen(false);
+                  }}
+                  role="option"
+                  aria-selected={selectedRound === roundKey}
+                >
+                  Kolo {roundKey}
+                </DropdownItem>
+              ))}
+            </DropdownMenu>
+          </FilterContainer>
 
-                        {match.stadium || match.competition?.name ? (
-                          <MatchDate style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                            {match.stadium ? `Stadion: ${match.stadium}` : ''}
-                            {match.competition?.name ? `${match.stadium ? ' • ' : ''}${match.competition.name}` : ''}
-                          </MatchDate>
-                        ) : null}
-                      </MatchCard>
-                    ))}
-                  </MatchesGrid>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <p>Žádná data o kolech nejsou k dispozici.</p>
-        )}
-      </section>
+          <SectionTitle>Zápasy podle kola</SectionTitle>
+          {filteredRoundKeys.length > 0 ? (
+            <div>
+              {filteredRoundKeys.map((roundKey: string) => {
+                const roundMatches = roundsMap[roundKey]
+                  .slice(0, 8)
+                  .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                return (
+                  <div key={roundKey} style={{ marginBottom: '1.5rem' }}>
+                    {selectedRound === 'all' && <SectionTitle>Kolo {roundKey}</SectionTitle>}
+                    <MatchesGrid>
+                      {roundMatches.map((match: any) => (
+                        <MatchCard 
+                          key={match.id} 
+                          to={`/match/${match.id}`}
+                          className={match.status === 'live' ? 'live' : ''}
+                        >
+                          <MatchHeader>
+                            <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>
+                            <HeaderRight>
+                              <MatchStatus status={match.status}>
+                                {match.status === 'live' 
+                                  ? 'ŽIVĚ' 
+                                  : match.status === 'finished' 
+                                    ? 'KONEC' 
+                                    : match.status === 'awarded'
+                                      ? 'KONTUMACE'
+                                      : match.status === 'canceled'
+                                        ? 'ZRUŠENO'
+                                        : match.status === 'not_played'
+                                          ? 'NEODEHRÁNO'
+                                          : 'NAPLÁNOVÁNO'}
+                              </MatchStatus>
+                            </HeaderRight>
+                          </MatchHeader>
+                          
+                          <MatchContent>
+                            <TeamSide align="left">
+                              <TeamLogo src={getTeamLogo(match.homeTeam.name, match.homeTeam.logo)} alt={match.homeTeam.name} />
+                              <TeamName>{match.homeTeam.name}</TeamName>
+                            </TeamSide>
+                            
+                            <ScoreSection>
+                              <VersusScore>
+                                {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' 
+                                  ? '-:-' 
+                                  : `${match.score.home}:${match.score.away}`}
+                              </VersusScore>
+                            </ScoreSection>
+                            
+                            <TeamSide align="right">
+                              <TeamLogo src={getTeamLogo(match.awayTeam.name, match.awayTeam.logo)} alt={match.awayTeam.name} />
+                              <TeamName>{match.awayTeam.name}</TeamName>
+                            </TeamSide>
+                          </MatchContent>
+
+                          {match.stadium || match.competition?.name ? (
+                            <MatchDate style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                              {match.stadium ? `Stadion: ${match.stadium}` : ''}
+                              {match.competition?.name ? `${match.stadium ? ' • ' : ''}${match.competition.name}` : ''}
+                            </MatchDate>
+                          ) : null}
+                        </MatchCard>
+                      ))}
+                    </MatchesGrid>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p>Žádná data o kolech nejsou k dispozici.</p>
+          )}
+        </section>
+      )}
     </HomeContainer>
   );
 };

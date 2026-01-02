@@ -235,12 +235,16 @@ const Icon = styled.span`
 
 const FilterContainer = styled.div`
   display: flex;
-  justify-content: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 0.25rem;
   margin-bottom: 1.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  width: 100%;
+  overflow-x: visible;
   
   @media (min-width: 768px) {
+    justify-content: center;
+    gap: 0.5rem;
     margin-bottom: 2rem;
   }
 `;
@@ -248,21 +252,25 @@ const FilterContainer = styled.div`
 const FilterButton = styled.button<{ active: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 0.75rem;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.25rem;
   border: 1px solid #e2e8f0;
-  border-radius: 9999px;
+  border-radius: 6px;
   background: ${({ active }) => (active ? '#f1f5f9' : 'white')};
   color: ${({ active }) => (active ? '#0f172a' : '#64748b')};
   font-weight: 600;
-  font-size: 0.8125rem;
+  font-size: 0.7rem;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: ${({ active }) => (active ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none')};
   border-color: ${({ active }) => (active ? '#cbd5e1' : '#e2e8f0')};
-  min-height: 48px; /* Touch target size optimization */
-  min-width: 48px;
-  justify-content: center;
+  min-height: 44px;
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
 
   @media (min-width: 768px) {
     gap: 0.5rem;
@@ -270,11 +278,24 @@ const FilterButton = styled.button<{ active: boolean }>`
     font-size: 0.875rem;
     min-height: auto;
     min-width: auto;
+    flex: 0 1 auto;
+    border-radius: 9999px;
   }
 
   &:hover {
     background: #f8fafc;
     border-color: #cbd5e1;
+  }
+  
+  /* Hide icons on very small screens if needed, but try to keep them first */
+  & > span {
+    display: none;
+    @media (min-width: 360px) {
+      display: inline;
+    }
+    @media (min-width: 768px) {
+      display: inline;
+    }
   }
 `;
 
