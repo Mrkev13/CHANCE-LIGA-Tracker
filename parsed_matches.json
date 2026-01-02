@@ -2968,5 +2968,56 @@
       { "id": "e13", "minute": 87, "team": "home", "type": "substitution", "player": { "name": "Kubr L." }, "note": "odchod: van Buren M." },
       { "id": "e14", "minute": 90, "team": "away", "type": "substitution", "player": { "name": "John S." }, "note": "odchod: Zíka J." }
     ]
+  },
+  {
+    "id": "2025-12-14-t_boh-t_kar",
+    "homeTeam": { "id": "t_boh", "name": "Bohemians Praha 1905", "logo": "" },
+    "awayTeam": { "id": "t_kar", "name": "MFK Karviná", "logo": "" },
+    "score": { "home": 0, "away": 3 },
+    "status": "finished",
+    "date": "2025-12-14T13:00:00Z",
+    "stadium": "Ďolíček",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "19",
+    "events": [
+      { "id": "e1", "minute": 59, "team": "home", "type": "substitution", "player": { "name": "Pleštil D." }, "note": "odchod: Drchal V." },
+      { "id": "e2", "minute": 59, "team": "home", "type": "substitution", "player": { "name": "Yusuf" }, "note": "odchod: Ramirez E." },
+      { "id": "e3", "minute": 70, "team": "away", "type": "goal", "player": { "name": "Singhateh E." }, "note": "Penalta" },
+      { "id": "e4", "minute": 71, "team": "away", "type": "substitution", "player": { "name": "Ezeh L." }, "note": "odchod: Singhateh E." },
+      { "id": "e5", "minute": 79, "team": "away", "type": "goal", "player": { "name": "Ezeh L." }, "assistPlayer": { "name": "Šigut S." } },
+      { "id": "e6", "minute": 81, "team": "home", "type": "substitution", "player": { "name": "Kareem P." }, "note": "odchod: Kadlec A." },
+      { "id": "e7", "minute": 81, "team": "home", "type": "substitution", "player": { "name": "Kovařík J." }, "note": "odchod: Zeman V." },
+      { "id": "e8", "minute": 81, "team": "home", "type": "substitution", "player": { "name": "Smrž V." }, "note": "odchod: Sakala B." },
+      { "id": "e9", "minute": 82, "team": "away", "type": "substitution", "player": { "name": "Conde O." }, "note": "odchod: Gning A." },
+      { "id": "e10", "minute": 87, "team": "away", "type": "goal", "player": { "name": "Ayaosi E." }, "assistPlayer": { "name": "Ezeh L." } },
+      { "id": "e11", "minute": 92, "team": "away", "type": "substitution", "player": { "name": "Valošek V." }, "note": "odchod: Samko D." },
+      { "id": "e12", "minute": 92, "team": "away", "type": "substitution", "player": { "name": "Kačor P." }, "note": "odchod: Šigut S." },
+      { "id": "e13", "minute": 92, "team": "away", "type": "substitution", "player": { "name": "Fiala J." }, "note": "odchod: Ayaosi E." }
+    ]
+  },
+  {
+    "id": "2025-12-14-t_plz-t_duk",
+    "homeTeam": { "id": "t_plz", "name": "FC Viktoria Plzeň", "logo": "" },
+    "awayTeam": { "id": "t_duk", "name": "Dukla Praha", "logo": "" },
+    "score": { "home": 2, "away": 0 },
+    "status": "finished",
+    "date": "2025-12-14T15:30:00Z",
+    "stadium": "Doosan Arena",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "19",
+    "events": [
+      { "id": "e1", "minute": 8, "team": "home", "type": "substitution", "player": { "name": "Dweh S." }, "note": "odchod: Markovič S. (Zranění)" },
+      { "id": "e2", "minute": 41, "team": "home", "type": "goal", "player": { "name": "Durosinmi R." }, "assistPlayer": { "name": "Vydra M." } },
+      { "id": "e3", "minute": 58, "team": "away", "type": "yellow_card", "player": { "name": "Svozil J." }, "note": "Hrubost" },
+      { "id": "e4", "minute": 63, "team": "away", "type": "substitution", "player": { "name": "Kozma D." }, "note": "odchod: Kroupa M." },
+      { "id": "e5", "minute": 63, "team": "away", "type": "substitution", "player": { "name": "Černák M." }, "note": "odchod: Gaszcyk P." },
+      { "id": "e6", "minute": 65, "team": "home", "type": "goal", "player": { "name": "Jemelka V." }, "assistPlayer": { "name": "Adu P." } },
+      { "id": "e7", "minute": 68, "team": "home", "type": "substitution", "player": { "name": "Zeljkovič A." }, "note": "odchod: Valenta M." },
+      { "id": "e8", "minute": 73, "team": "away", "type": "yellow_card", "player": { "name": "Hunal E." }, "note": "Faul" },
+      { "id": "e9", "minute": 78, "team": "away", "type": "substitution", "player": { "name": "Velasquez D." }, "note": "odchod: Hašek D." },
+      { "id": "e10", "minute": 78, "team": "away", "type": "substitution", "player": { "name": "Šebrle Š." }, "note": "odchod: Cisse N." },
+      { "id": "e11", "minute": 78, "team": "away", "type": "substitution", "player": { "name": "Traore M." }, "note": "odchod: Pourzitidis M." },
+      { "id": "e12", "minute": 89, "team": "home", "type": "substitution", "player": { "name": "Panoš J." }, "note": "odchod: Červ L." }
+    ]
   }
 ]
