@@ -22,20 +22,59 @@ const SectionTitle = styled.h2`
   padding-bottom: 0.5rem;
 `;
 
+const NavContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  @media (min-width: 769px) {
+    display: none;
+  }
+`;
+
+const NavButton = styled(Link)<{ $active?: boolean }>`
+  padding: 0.75rem 2rem;
+  background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : theme.colors.lightGray};
+  color: white;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 1rem;
+  transition: all 0.2s;
+  box-shadow: ${({ theme }) => theme.shadows.small};
+  border: 1px solid ${({ theme, $active }) => $active ? theme.colors.secondary : 'transparent'};
+
+  @media (max-width: 768px) {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  &:hover {
+    background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#495057'};
+    transform: translateY(-2px);
+  }
+`;
+
 const MatchesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
 `;
 
 const MatchCard = styled(Link)`
   background-color: ${({ theme }: { theme: any }) => theme.colors.lightGray};
-  border-radius: ${({ theme }: { theme: any }) => theme.borderRadius.medium};     
-  padding: 1rem;
+  border-radius: ${({ theme }: { theme: any }) => theme.borderRadius.large};     
+  padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  color: ${({ theme }: { theme: any }) => theme.colors.text};
+  color: white;
+  text-decoration: none;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
   
   &:hover {
     transform: translateY(-5px);
@@ -51,8 +90,84 @@ const MatchHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 0.5rem;
-  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
+`;
+
+const MatchContent = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+`;
+
+const TeamSide = styled.div<{ align: 'left' | 'right' }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  text-align: center;
+  gap: 0.75rem;
+
+  @media (max-width: 768px) {
+    align-items: ${({ align }) => align === 'left' ? 'flex-start' : 'flex-end'};
+    text-align: ${({ align }) => align === 'left' ? 'left' : 'right'};
+    gap: 0.5rem;
+  }
+`;
+
+const TeamLogo = styled.img`
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  transition: transform 0.2s;
+  
+  @media (max-width: 768px) {
+    width: 48px;
+    height: 48px;
+  }
+  
+  ${MatchCard}:hover & {
+    transform: scale(1.1);
+  }
+`;
+
+const TeamName = styled.h2`
+  font-weight: 600;
+  color: white;
+  font-size: 0.9rem;
+  line-height: 1.2;
+  margin: 0;
+  padding: 0;
+
+  @media (max-width: 768px) {
+    font-size: 0.85rem;
+  }
+`;
+
+const ScoreSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 60px;
+`;
+
+const VersusScore = styled.span`
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: white;
+  font-family: 'Monaco', 'Consolas', monospace;
+  letter-spacing: 2px;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
 `;
 
 const HeaderRight = styled.div`
@@ -62,15 +177,16 @@ const HeaderRight = styled.div`
 `;
 
 const MatchDate = styled.span`
-  font-size: 0.8rem;
-  color: ${({ theme }: { theme: any }) => theme.colors.gray};
+  font-size: 0.85rem;
+  color: #adb5bd;
 `;
 
 const MatchStatus = styled.span<{ status: string }>`
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: bold;
-  padding: 0.2rem 0.5rem;
-  border-radius: ${({ theme }: { theme: any }) => theme.borderRadius.small};
+  padding: 0.25rem 0.6rem;
+  border-radius: 999px;
+  text-transform: uppercase;
   background-color: ${({ status, theme }: { status: string, theme: any }) =>  
     status === 'live' 
       ? theme.colors.secondary 
@@ -80,45 +196,8 @@ const MatchStatus = styled.span<{ status: string }>`
           ? theme.colors.secondary
           : status === 'canceled' || status === 'not_played'
             ? theme.colors.danger
-            : theme.colors.gray};
+            : '#495057'};
   color: white;
-`;
-
-const CombinedScore = styled.span`
-  font-weight: bold;
-  background-color: ${({ theme }: { theme: any }) => theme.colors.gray};
-  color: white;
-  padding: 0.1rem 0.4rem;
-  border-radius: ${({ theme }: { theme: any }) => theme.borderRadius.small};
-`;
-
-const Teams = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
-
-const Team = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-`;
-
-const TeamLogo = styled.img`
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
-`;
-
-const TeamName = styled.span`
-  font-weight: 500;
-  color: #ffffff;
-`;
-
-const Score = styled.span`
-  font-weight: bold;
-  margin-left: auto;
-  color: #ffffff;
 `;
 
 // DateSelector a DateButton odstraněny (nepoužívají se)
@@ -176,8 +255,10 @@ const HomePage: React.FC = () => {
   
   return (
     <HomeContainer>
-      {/* odstraněn banner Filtrováno: FORTUNA:LIGA */}
-      
+      <NavContainer>
+        <NavButton to="/" $active={true}>Zápasy</NavButton>
+        <NavButton to="/table">Tabulka</NavButton>
+      </NavContainer>
 
       <section>
         <SectionTitle>Zápasy podle kola</SectionTitle>
@@ -200,11 +281,6 @@ const HomePage: React.FC = () => {
                         <MatchHeader>
                           <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>
                           <HeaderRight>
-                            <CombinedScore>
-                              {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' 
-                                ? '-:-' 
-                                : `${match.score.home}:${match.score.away}`}
-                            </CombinedScore>
                             <MatchStatus status={match.status}>
                               {match.status === 'live' 
                                 ? 'ŽIVĚ' 
@@ -220,24 +296,29 @@ const HomePage: React.FC = () => {
                             </MatchStatus>
                           </HeaderRight>
                         </MatchHeader>
-                        <Teams>
-                          <Team>
+                        
+                        <MatchContent>
+                          <TeamSide align="left">
                             <TeamLogo src={getTeamLogo(match.homeTeam.name, match.homeTeam.logo)} alt={match.homeTeam.name} />
                             <TeamName>{match.homeTeam.name}</TeamName>
-                            <Score>
-                              {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' ? '-' : match.score.home}
-                            </Score>
-                          </Team>
-                          <Team>
+                          </TeamSide>
+                          
+                          <ScoreSection>
+                            <VersusScore>
+                              {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' 
+                                ? '-:-' 
+                                : `${match.score.home}:${match.score.away}`}
+                            </VersusScore>
+                          </ScoreSection>
+                          
+                          <TeamSide align="right">
                             <TeamLogo src={getTeamLogo(match.awayTeam.name, match.awayTeam.logo)} alt={match.awayTeam.name} />
                             <TeamName>{match.awayTeam.name}</TeamName>
-                            <Score>
-                              {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' ? '-' : match.score.away}
-                            </Score>
-                          </Team>
-                        </Teams>
+                          </TeamSide>
+                        </MatchContent>
+
                         {match.stadium || match.competition?.name ? (
-                          <MatchDate>
+                          <MatchDate style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                             {match.stadium ? `Stadion: ${match.stadium}` : ''}
                             {match.competition?.name ? `${match.stadium ? ' • ' : ''}${match.competition.name}` : ''}
                           </MatchDate>
@@ -253,7 +334,6 @@ const HomePage: React.FC = () => {
           <p>Žádná data o kolech nejsou k dispozici.</p>
         )}
       </section>
-      {/* sekce Živé zápasy a Zápasy odstraněny */}
     </HomeContainer>
   );
 };

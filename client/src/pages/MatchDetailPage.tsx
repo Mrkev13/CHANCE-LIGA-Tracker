@@ -10,83 +10,139 @@ import { getTeamLogo } from '../utils/teamLogos.ts';
 const Container = styled.div`
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 1rem;
+  
+  @media (min-width: 768px) {
+    padding: 2rem 1rem;
+  }
 `;
 
 const Header = styled.div`
   background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
-  border-radius: 16px;
-  padding: 2rem;
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
   color: white;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+
+  @media (min-width: 768px) {
+    border-radius: 16px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+  }
 `;
 
 const MatchInfo = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
   align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  
+  @media (min-width: 768px) {
+    gap: 0;
+  }
 `;
 
-const TeamColumn = styled.div`
+const TeamColumn = styled.div<{ align?: 'left' | 'right' }>`
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
+  
+  @media (max-width: 767px) {
+    align-items: ${({ align }) => align === 'left' ? 'flex-start' : (align === 'right' ? 'flex-end' : 'center')};
+    text-align: ${({ align }) => align === 'left' ? 'left' : (align === 'right' ? 'right' : 'center')};
+  }
 `;
 
 const TeamLogo = styled.img`
-  width: 80px;
-  height: 80px;
+  width: 48px;
+  height: 48px;
   object-fit: contain;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
+  
+  @media (min-width: 768px) {
+    width: 80px;
+    height: 80px;
+    margin-bottom: 1rem;
+  }
 `;
 
 const TeamName = styled.h2`
-  font-size: 1.25rem;
+  font-size: 0.85rem;
   font-weight: 700;
-  text-align: center;
   margin: 0;
   color: white;
+  
+  @media (min-width: 768px) {
+    font-size: 1.25rem;
+    text-align: center;
+  }
 `;
 
 const ScoreColumn = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 2rem;
+  padding: 0;
+  min-width: 80px;
+  
+  @media (min-width: 768px) {
+    width: auto;
+    padding: 0 2rem;
+  }
 `;
 
 const Score = styled.div`
-  font-size: 3.5rem;
+  font-size: 1.75rem;
   font-weight: 800;
   font-family: 'Monaco', 'Consolas', monospace;
   line-height: 1;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+  
+  @media (min-width: 768px) {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+  }
 `;
 
 const MatchStatus = styled.div`
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #94a3b8;
+  
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+  }
 `;
 
 const RoundInfo = styled.div`
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: #64748b;
   margin-top: 0.25rem;
+  
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+  }
 `;
 
 const MatchDetailsText = styled.div`
-  margin-top: 1.5rem;
-  font-size: 0.85rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
   color: #cbd5e1;
   text-align: center;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.25rem;
+  
+  @media (min-width: 768px) {
+    margin-top: 1.5rem;
+    font-size: 0.85rem;
+    gap: 0.35rem;
+  }
   
   div {
     display: flex;
@@ -103,35 +159,56 @@ const MatchDetailsText = styled.div`
 const TimelineSection = styled.div`
   background: white;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  
+  @media (min-width: 768px) {
+    padding: 1.5rem;
+  }
 `;
 
 const HalfHeader = styled.h3`
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   color: #64748b;
   border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 0.75rem;
-  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  margin: 0 0 0.75rem 0;
+  
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+    padding-bottom: 0.75rem;
+    margin: 0 0 1rem 0;
+  }
 `;
 
 const EventRow = styled.div`
   display: grid;
-  grid-template-columns: 1fr 60px 1fr;
+  grid-template-columns: 1fr 40px 1fr;
   align-items: center;
-  margin-bottom: 0.75rem;
-  min-height: 32px;
+  margin-bottom: 0.5rem;
+  min-height: 28px;
+  
+  @media (min-width: 768px) {
+    grid-template-columns: 1fr 60px 1fr;
+    margin-bottom: 0.75rem;
+    min-height: 32px;
+  }
 `;
 
 const EventContent = styled.div<{ align: 'left' | 'right' }>`
   display: flex;
   align-items: center;
   justify-content: ${({ align }) => align === 'left' ? 'flex-start' : 'flex-end'};
-  gap: 0.5rem;
+  gap: 0.25rem;
   text-align: ${({ align }) => align};
-  font-size: 0.9375rem;
+  font-size: 0.8125rem;
+  
+  @media (min-width: 768px) {
+    gap: 0.5rem;
+    font-size: 0.9375rem;
+  }
 `;
 
 const EventTime = styled.div`
@@ -140,37 +217,60 @@ const EventTime = styled.div`
   align-items: center;
   font-weight: 700;
   color: #64748b;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  
+  @media (min-width: 768px) {
+    font-size: 0.875rem;
+  }
 `;
 
 const Icon = styled.span`
-  font-size: 1.1rem;
+  font-size: 0.875rem;
   line-height: 1;
+  
+  @media (min-width: 768px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const FilterContainer = styled.div`
   display: flex;
   justify-content: center;
   gap: 0.5rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   flex-wrap: wrap;
+  
+  @media (min-width: 768px) {
+    margin-bottom: 2rem;
+  }
 `;
 
 const FilterButton = styled.button<{ active: boolean }>`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.35rem;
+  padding: 0.5rem 0.75rem;
   border: 1px solid #e2e8f0;
   border-radius: 9999px;
   background: ${({ active }) => (active ? '#f1f5f9' : 'white')};
   color: ${({ active }) => (active ? '#0f172a' : '#64748b')};
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   cursor: pointer;
   transition: all 0.2s;
   box-shadow: ${({ active }) => (active ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none')};
   border-color: ${({ active }) => (active ? '#cbd5e1' : '#e2e8f0')};
+  min-height: 48px; /* Touch target size optimization */
+  min-width: 48px;
+  justify-content: center;
+
+  @media (min-width: 768px) {
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    min-height: auto;
+    min-width: auto;
+  }
 
   &:hover {
     background: #f8fafc;
@@ -234,7 +334,7 @@ const MatchDetailPage: React.FC = () => {
     <Container>
       <Header>
         <MatchInfo>
-          <TeamColumn>
+          <TeamColumn align="left">
             <TeamLogo src={getTeamLogo(currentMatch.homeTeam.name)} alt={currentMatch.homeTeam.name} />
             <TeamName>{currentMatch.homeTeam.name}</TeamName>
           </TeamColumn>
@@ -254,7 +354,7 @@ const MatchDetailPage: React.FC = () => {
             </MatchDetailsText>
           </ScoreColumn>
 
-          <TeamColumn>
+          <TeamColumn align="right">
             <TeamLogo src={getTeamLogo(currentMatch.awayTeam.name)} alt={currentMatch.awayTeam.name} />
             <TeamName>{currentMatch.awayTeam.name}</TeamName>
           </TeamColumn>
