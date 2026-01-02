@@ -148,6 +148,36 @@ const Icon = styled.span`
   line-height: 1;
 `;
 
+const FilterContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+`;
+
+const FilterButton = styled.button<{ active: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  background: ${({ active }) => (active ? '#f1f5f9' : 'white')};
+  color: ${({ active }) => (active ? '#0f172a' : '#64748b')};
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: ${({ active }) => (active ? '0 1px 2px 0 rgba(0, 0, 0, 0.05)' : 'none')};
+  border-color: ${({ active }) => (active ? '#cbd5e1' : '#e2e8f0')};
+
+  &:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+  }
+`;
+
 const MatchDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -158,6 +188,12 @@ const MatchDetailPage: React.FC = () => {
       dispatch(fetchMatchById(id));
     }
   }, [dispatch, id]);
+
+  const [activeFilter, setActiveFilter] = React.useState<string>('all');
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+  };
 
   if (loading && !currentMatch) {
     return <div>Načítám detail zápasu...</div>;
@@ -210,10 +246,10 @@ const MatchDetailPage: React.FC = () => {
             
             <MatchDetailsText>
               <div>
-                <span>📅</span> {dateStr} | {timeStr}
+                <span></span> {dateStr} | {timeStr}
               </div>
               <div>
-                <span>🏟️</span> {stadiumName}
+                <span></span> {stadiumName}
               </div>
             </MatchDetailsText>
           </ScoreColumn>
@@ -225,11 +261,44 @@ const MatchDetailPage: React.FC = () => {
         </MatchInfo>
       </Header>
 
+      <FilterContainer>
+        <FilterButton 
+          active={activeFilter === 'all'} 
+          onClick={() => handleFilterChange('all')}
+        >
+          Vše
+        </FilterButton>
+        <FilterButton 
+          active={activeFilter === 'goal'} 
+          onClick={() => handleFilterChange('goal')}
+        >
+          <span></span> Góly
+        </FilterButton>
+        <FilterButton 
+          active={activeFilter === 'yellow_card'} 
+          onClick={() => handleFilterChange('yellow_card')}
+        >
+          <span></span> Žluté karty
+        </FilterButton>
+        <FilterButton 
+          active={activeFilter === 'red_card'} 
+          onClick={() => handleFilterChange('red_card')}
+        >
+          <span></span> Červené karty
+        </FilterButton>
+        <FilterButton 
+          active={activeFilter === 'substitution'} 
+          onClick={() => handleFilterChange('substitution')}
+        >
+          <span></span> Střídání
+        </FilterButton>
+      </FilterContainer>
+
       <TimelineSection>
         {currentMatch.events && currentMatch.events.length > 0 ? (
           <div>
-            {renderHalf('1. POLOČAS', currentMatch, 'first')}
-            {renderHalf('2. POLOČAS', currentMatch, 'second')}
+            {renderHalf('1. POLOČAS', currentMatch, 'first', activeFilter)}
+            {renderHalf('2. POLOČAS', currentMatch, 'second', activeFilter)}
           </div>
         ) : (
           <p style={{ textAlign: 'center', color: '#64748b' }}>Žádné události k zobrazení.</p>
@@ -251,10 +320,11 @@ function isFirstHalf(m: number): boolean {
   return m <= 45 || (m >= 46 && m <= 54);
 }
 
-function renderHalf(title: string, match: any, half: 'first' | 'second') {
+function renderHalf(title: string, match: any, half: 'first' | 'second', activeFilter: string) {
   const events = [...match.events].sort((a: any, b: any) => a.minute - b.minute);
   const filtered = events.filter((e: any) =>
-    half === 'first' ? isFirstHalf(e.minute) : !isFirstHalf(e.minute)
+    (half === 'first' ? isFirstHalf(e.minute) : !isFirstHalf(e.minute)) &&
+    (activeFilter === 'all' || e.type === activeFilter)
   );
   
   if (filtered.length === 0) return null;
