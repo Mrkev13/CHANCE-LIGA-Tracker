@@ -8,6 +8,42 @@ exports.getAllMatches = async (_req, res) => {
   res.json(allMatches);
 };
 
+function groupRoundsSorted(matches) {
+  const map = {};
+  for (const m of matches) {
+    if (!m.round) continue;
+    const key = String(m.round);
+    (map[key] ||= []).push(m);
+  }
+  const keys = Object.keys(map);
+  const playedStatuses = new Set(['finished', 'live']);
+  const roundLastPlayedAt = {};
+  for (const rk of keys) {
+    const times = map[rk]
+      .filter((m) => playedStatuses.has(m.status))
+      .map((m) => new Date(m.date).getTime());
+    roundLastPlayedAt[rk] = times.length ? Math.max(...times) : -1;
+  }
+  const latestPlayedRound = keys
+    .filter((rk) => roundLastPlayedAt[rk] !== -1)
+    .sort((a, b) => roundLastPlayedAt[b] - roundLastPlayedAt[a])[0];
+  const remainingDesc = keys
+    .filter((rk) => rk !== latestPlayedRound)
+    .sort((a, b) => Number(b) - Number(a));
+  const ordered = latestPlayedRound ? [latestPlayedRound, ...remainingDesc] : remainingDesc;
+  const rounds = ordered.map((rk) => ({
+    round: rk,
+    played: roundLastPlayedAt[rk] !== -1,
+    lastPlayedAt: roundLastPlayedAt[rk] !== -1 ? new Date(roundLastPlayedAt[rk]).toISOString() : null,
+    matches: map[rk].sort((a, b) => new Date(a.date) - new Date(b.date)),
+  }));
+  return { rounds, order: ordered };
+}
+
+exports.getRoundsSorted = async (_req, res) => {
+  const result = groupRoundsSorted(allMatches);
+  res.json(result);
+};
 exports.getLiveMatches = async (_req, res) => {
   res.json(allMatches.filter(m => m.status === 'live'));
 };

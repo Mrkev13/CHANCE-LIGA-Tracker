@@ -139,7 +139,7 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
       goalsAgainst: t.goalsAgainst,
       goalDifference: t.goalsFor - t.goalsAgainst,
       points: t.points,
-      form: t.form.slice(-5) // posledních 5 zápasů
+      form: t.form.slice(-5).reverse()
     }))
     .sort((a, b) => {
       // 1) body

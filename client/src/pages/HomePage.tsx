@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { FaSearch, FaArrowUp } from 'react-icons/fa';
+import { FaArrowUp } from 'react-icons/fa';
 import styled from 'styled-components';
 import { fetchMatches, Match } from '../redux/slices/matchesSlice.ts';
+import { TEAM_LIST } from '../redux/teamData.ts';
 import { RootState, AppDispatch } from '../redux/store.ts';
 import { theme } from '../styles/theme.ts';
 import { getTeamLogo } from '../utils/teamLogos.ts';
@@ -230,44 +231,92 @@ const ControlsContainer = styled.div`
   }
 `;
 
-const SearchContainer = styled.div`
+const TeamSelectWrapper = styled.div`
   position: relative;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
 `;
 
-const SearchInput = styled.input`
+const TeamButton = styled.button<{ isOpen: boolean }>`
   width: 100%;
-  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  padding: 0.75rem 1.25rem;
   background-color: ${({ theme }) => theme.colors.lightGray};
   color: white;
   border: 1px solid transparent;
   border-radius: ${({ theme }) => theme.borderRadius.medium};
   font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   transition: all 0.2s;
   box-shadow: ${({ theme }) => theme.shadows.small};
+
+  &:hover {
+    background-color: #495057;
+  }
 
   &:focus {
     outline: none;
     border-color: ${({ theme }) => theme.colors.secondary};
-    background-color: #495057;
+    box-shadow: 0 0 0 2px rgba(200, 16, 46, 0.2);
   }
-  
-  &::placeholder {
-    color: #adb5bd;
+
+  &::after {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid white;
+    transition: transform 0.2s;
+    transform: ${({ isOpen }) => isOpen ? 'rotate(180deg)' : 'rotate(0)'};
   }
 `;
 
-const SearchIconWrapper = styled.div`
+const TeamMenu = styled.div<{ isOpen: boolean }>`
   position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #adb5bd;
-  pointer-events: none;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  background-color: #2c3034;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  margin-top: 0.5rem;
+  box-shadow: ${({ theme }) => theme.shadows.large};
+  opacity: ${({ isOpen }) => isOpen ? 1 : 0};
+  visibility: ${({ isOpen }) => isOpen ? 'visible' : 'hidden'};
+  transform: ${({ isOpen }) => isOpen ? 'translateY(0)' : 'translateY(-10px)'};
+  transition: all 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  z-index: 20;
+`;
+
+const TeamItem = styled.button<{ isSelected: boolean }>`
+  width: 100%;
+  padding: 0.6rem 0.9rem;
+  background-color: ${({ isSelected, theme }) => isSelected ? theme.colors.secondary : 'transparent'};
+  color: white;
+  border: none;
+  text-align: left;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.1s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   align-items: center;
-  justify-content: center;
+  gap: 0.6rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:hover {
+    background-color: ${({ isSelected, theme }) => isSelected ? theme.colors.secondary : '#3d4248'};
+  }
 `;
 
 const ScrollTopButton = styled.button<{ visible: boolean }>`
@@ -394,11 +443,13 @@ const HomePage: React.FC = () => {
     (state: RootState) => state.matches
   );
   
-  const [selectedRound, setSelectedRound] = useState<string>('all');
+  const [selectedRound, setSelectedRound] = useState<string>(() => sessionStorage.getItem('homeRound') || 'all');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTeamId, setSelectedTeamId] = useState<string>(() => sessionStorage.getItem('homeTeam') || 'all');
+  const [isTeamOpen, setIsTeamOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const teamRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     dispatch(fetchMatches());
@@ -426,17 +477,29 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
         setIsDropdownOpen(false);
+      }
+      if (teamRef.current && !teamRef.current.contains(target)) {
+        setIsTeamOpen(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [dropdownRef]);
+  }, [dropdownRef, teamRef]);
+  
+  useEffect(() => {
+    sessionStorage.setItem('homeRound', selectedRound);
+  }, [selectedRound]);
+  
+  useEffect(() => {
+    sessionStorage.setItem('homeTeam', selectedTeamId);
+  }, [selectedTeamId]);
 
-  // Seskupení podle kola (Livesport styl)
+  // Seskupení podle kola + řazení kol dle požadavku
   const { roundsMap, sortedRoundKeys } = useMemo(() => {
     const map: Record<string, Match[]> = {};
     matches.forEach((m: Match) => {
@@ -446,9 +509,37 @@ const HomePage: React.FC = () => {
         map[key].push(m);
       }
     });
-    const keys = Object.keys(map).sort((a, b) => Number(b) - Number(a));
-    return { roundsMap: map, sortedRoundKeys: keys };
+    const keys = Object.keys(map);
+    const playedStatuses: Match['status'][] = ['finished', 'live'];
+    const roundLastPlayedAt: Record<string, number> = {};
+    keys.forEach((rk) => {
+      const played = map[rk]
+        .filter((m) => playedStatuses.includes(m.status))
+        .map((m) => new Date(m.date).getTime());
+      roundLastPlayedAt[rk] = played.length ? Math.max(...played) : -1;
+    });
+    const latestPlayedRound = keys
+      .filter((rk) => roundLastPlayedAt[rk] !== -1)
+      .sort((a, b) => roundLastPlayedAt[b] - roundLastPlayedAt[a])[0];
+    const remainingDesc = keys
+      .filter((rk) => rk !== latestPlayedRound)
+      .sort((a, b) => Number(b) - Number(a));
+    const ordered = latestPlayedRound ? [latestPlayedRound, ...remainingDesc] : remainingDesc;
+    return { roundsMap: map, sortedRoundKeys: ordered };
   }, [matches]);
+  
+  useEffect(() => {
+    if (!loading) {
+      const stored = sessionStorage.getItem('homeScroll');
+      if (stored) {
+        const y = parseInt(stored, 10);
+        if (!Number.isNaN(y)) {
+          window.scrollTo(0, y);
+        }
+        sessionStorage.removeItem('homeScroll');
+      }
+    }
+  }, [loading, sortedRoundKeys.length]);
   
   const filteredRoundKeys = useMemo(() => 
     selectedRound === 'all' 
@@ -509,17 +600,44 @@ const HomePage: React.FC = () => {
               </DropdownMenu>
             </FilterContainer>
 
-            <SearchContainer>
-              <SearchIconWrapper>
-                <FaSearch />
-              </SearchIconWrapper>
-              <SearchInput 
-                type="text" 
-                placeholder="Hledat tým..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </SearchContainer>
+            <TeamSelectWrapper ref={teamRef}>
+              <TeamButton
+                onClick={() => setIsTeamOpen(!isTeamOpen)}
+                isOpen={isTeamOpen}
+                aria-haspopup="listbox"
+                aria-expanded={isTeamOpen}
+              >
+                {selectedTeamId === 'all' ? 'Všechny týmy' : TEAM_LIST.find(t => t.id === selectedTeamId)?.name || 'Tým'}
+              </TeamButton>
+              <TeamMenu isOpen={isTeamOpen} role="listbox">
+                <TeamItem
+                  isSelected={selectedTeamId === 'all'}
+                  onClick={() => {
+                    setSelectedTeamId('all');
+                    setIsTeamOpen(false);
+                  }}
+                  role="option"
+                  aria-selected={selectedTeamId === 'all'}
+                >
+                  Všechny týmy
+                </TeamItem>
+                {TEAM_LIST.map(team => (
+                  <TeamItem
+                    key={team.id}
+                    isSelected={selectedTeamId === team.id}
+                    onClick={() => {
+                      setSelectedTeamId(team.id);
+                      setIsTeamOpen(false);
+                    }}
+                    role="option"
+                    aria-selected={selectedTeamId === team.id}
+                  >
+                    <img src={getTeamLogo(team.name, team.logo)} alt={team.name} style={{ width: 22, height: 22, objectFit: 'contain' }} />
+                    {team.name}
+                  </TeamItem>
+                ))}
+              </TeamMenu>
+            </TeamSelectWrapper>
           </ControlsContainer>
 
           <SectionTitle>Zápasy podle kola</SectionTitle>
@@ -529,11 +647,9 @@ const HomePage: React.FC = () => {
                 let roundMatches = roundsMap[roundKey]
                   .sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 
-                if (searchQuery) {
-                  const lowerQuery = searchQuery.toLowerCase();
+                if (selectedTeamId !== 'all') {
                   roundMatches = roundMatches.filter((m: Match) => 
-                    m.homeTeam.name.toLowerCase().includes(lowerQuery) || 
-                    m.awayTeam.name.toLowerCase().includes(lowerQuery)
+                    m.homeTeam.id === selectedTeamId || m.awayTeam.id === selectedTeamId
                   );
                 } else if (selectedRound === 'all') {
                   roundMatches = roundMatches.slice(0, 8);
@@ -550,6 +666,7 @@ const HomePage: React.FC = () => {
                           key={match.id} 
                           to={`/match/${match.id}`}
                           className={match.status === 'live' ? 'live' : ''}
+                          onClick={() => sessionStorage.setItem('homeScroll', String(window.scrollY))}
                         >
                           <MatchHeader>
                             <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>

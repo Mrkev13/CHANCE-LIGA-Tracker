@@ -460,10 +460,15 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
           const icon =
             e.type === 'goal' ? '⚽' :
             e.type === 'yellow_card' ? '🟨' :
-            e.type === 'red_card' ? '🟥' : '🔁';
+            e.type === 'red_card' ? '🟥' :
+            e.type === 'goal_disallowed' ? '🚫' :
+            e.type === 'missed_penalty' ? '❌' : '🔁';
             
           const minuteText = formatMinute(e.minute);
-          const playerText = e.player?.name ? `${e.player.name}` : '';
+          const playerText =
+            e.type === 'substitution'
+              ? `${(e.playerIn?.name || e.player?.name || '')}${e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : ''}`
+              : (e.player?.name ? `${e.player.name}` : '');
           const assistText = e.assistPlayer?.name ? ` (${e.assistPlayer.name})` : '';
           const noteText = e.note ? ` (${e.note})` : '';
           
