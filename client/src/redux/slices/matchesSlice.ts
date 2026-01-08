@@ -26,7 +26,7 @@ export interface Match {
     type: 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'goal_disallowed' | 'missed_penalty';
     minute: number;
     team: 'home' | 'away';
-    player: {
+    player?: {
       id: string;
       name: string;
     };
@@ -2131,420 +2131,475 @@ export const MANUAL_MATCHES: Match[] = [
     "events": []
   },
   {
-    "id": "2025-10-25-t_hrk-t_tep",
-    "homeTeam": {
-      "id": "t_hrk",
-      "name": "Hradec Králové",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_tep",
-      "name": "FK Teplice",
-      "logo": ""
-    },
-    "score": {
-      "home": 0,
-      "away": 0
-    },
+    "id": "2025-10-25-sparta-bohemians",
+    "homeTeam": { "id": "t_spa", "name": "Sparta Praha", "logo": "" },
+    "awayTeam": { "id": "t_boh", "name": "Bohemians 1905", "logo": "" },
+    "score": { "home": 2, "away": 1 },
     "status": "finished",
-    "date": "2025-10-25T15:00:00Z",
+    "date": "2025-10-25T11:00:00Z",
+    "stadium": "epet ARENA",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "13",
+    "events": [
+      { "id": "e1", "minute": 9, "team": "away", "type": "goal_disallowed", "player": { "id": "p_sinyavskiy_v", "name": "Sinyavskiy V." }, "note": "Neuznaný gól - faul" },
+      { "id": "e2", "minute": 15, "team": "home", "type": "goal_disallowed", "player": { "id": "p_haraslin_l", "name": "Haraslín L." }, "note": "Neuznaný gól - ofsajd" },
+      { "id": "e3", "minute": 40, "team": "away", "type": "goal", "player": { "id": "p_drchal_v", "name": "Drchal V." }, "assistPlayer": { "id": "p_cermak_a", "name": "Čermák A." }, "scoreUpdate": "0-1" },
+      { "id": "e4", "minute": 55, "team": "home", "type": "substitution", "playerIn": { "id": "p_preciado_a", "name": "Preciado A." }, "playerOut": { "id": "p_kairinen_k", "name": "Kairinen K." } },
+      { "id": "e5", "minute": 60, "team": "away", "type": "substitution", "playerIn": { "id": "p_kovarik_j", "name": "Kovařík J." }, "playerOut": { "id": "p_kadlec_a", "name": "Kadlec A." } },
+      { "id": "e6", "minute": 61, "team": "home", "type": "goal", "player": { "id": "p_uichenna_b", "name": "Uichenna B." }, "scoreUpdate": "1-1" },
+      { "id": "e7", "minute": 71, "team": "home", "type": "substitution", "playerIn": { "id": "p_zeleny_j", "name": "Zelený J." }, "playerOut": { "id": "p_sorensen_a", "name": "Sörensen A." } },
+      { "id": "e8", "minute": 71, "team": "home", "type": "substitution", "playerIn": { "id": "p_birmančevič_v", "name": "Birmančevič V." }, "playerOut": { "id": "p_krasniqi_e", "name": "Krasniqi E." } },
+      { "id": "e9", "minute": 77, "team": "away", "type": "substitution", "playerIn": { "id": "p_vondra_j", "name": "Vondra J." }, "playerOut": { "id": "p_cermak_a", "name": "Čermák A." } },
+      { "id": "e10", "minute": 77, "team": "away", "type": "substitution", "playerIn": { "id": "p_yusuf", "name": "Yusuf" }, "playerOut": { "id": "p_drchal_v", "name": "Drchal V." } },
+      { "id": "e11", "minute": 81, "team": "away", "type": "substitution", "playerIn": { "id": "p_smrz_v", "name": "Smrž V." }, "playerOut": { "id": "p_sekala_b", "name": "Šekala B." } },
+      { "id": "e12", "minute": 82, "team": "home", "type": "goal", "player": { "id": "p_vydra_m", "name": "Vydra M." }, "assistPlayer": { "id": "p_mansaverk_s", "name": "Mansaverk S." }, "scoreUpdate": "2-1" },
+      { "id": "e13", "minute": 89, "team": "home", "type": "substitution", "playerIn": { "id": "p_sadilek_l", "name": "Sadílek L." }, "playerOut": { "id": "p_uichenna_b", "name": "Uichenna B." } },
+      { "id": "e14", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_hruby_r", "name": "Hrubý R." }, "note": "Držení" }
+    ]
+  },
+  {
+    "id": "2025-10-25-hradec-teplice",
+    "homeTeam": { "id": "t_hrk", "name": "Hradec Králové", "logo": "" },
+    "awayTeam": { "id": "t_tep", "name": "Teplice", "logo": "" },
+    "score": { "home": 0, "away": 0 },
+    "status": "finished",
+    "date": "2025-10-25T13:00:00Z",
     "stadium": "Malšovická aréna",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "13",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 23, "team": "away", "type": "goal_disallowed", "player": { "id": "p_puskac_d", "name": "Puškáč D." }, "note": "Neuznaný gól - ofsajd" },
+      { "id": "e2", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_marecek_d", "name": "Mareček D." }, "playerOut": { "id": "p_bílek_m", "name": "Bílek M." } },
+      { "id": "e3", "minute": 56, "team": "home", "type": "substitution", "playerIn": { "id": "p_griger_a", "name": "Griger A." }, "playerOut": { "id": "p_vlkanova_a", "name": "Vlkanova A." } },
+      { "id": "e4", "minute": 56, "team": "home", "type": "substitution", "playerIn": { "id": "p_dancak_s", "name": "Dancák S." }, "playerOut": { "id": "p_van_buren_m", "name": "van Buren M." } },
+      { "id": "e5", "minute": 61, "team": "away", "type": "substitution", "playerIn": { "id": "p_nyerges_k", "name": "Nyerges K." }, "playerOut": { "id": "p_kozák_m", "name": "Kozák M." } },
+      { "id": "e6", "minute": 61, "team": "away", "type": "substitution", "playerIn": { "id": "p_vachuta_f", "name": "Vachuta F." }, "playerOut": { "id": "p_trubač_d", "name": "Trubač D." } },
+      { "id": "e7", "minute": 74, "team": "away", "type": "substitution", "playerIn": { "id": "p_jukl_r", "name": "Jukl R." }, "playerOut": { "id": "p_trubač_d", "name": "Trubač D." } },
+      { "id": "e8", "minute": 74, "team": "home", "type": "substitution", "playerIn": { "id": "p_pilař_v", "name": "Pilař V." }, "playerOut": { "id": "p_horak_d", "name": "Horák D." } },
+      { "id": "e9", "minute": 82, "team": "away", "type": "substitution", "playerIn": { "id": "p_puskac_d", "name": "Puškáč D." }, "playerOut": { "id": "p_krejčí_l", "name": "Krejčí L." } },
+      { "id": "e10", "minute": 83, "team": "away", "type": "substitution", "playerIn": { "id": "p_kasprzak_m", "name": "Kasprzak M." }, "playerOut": { "id": "p_mareček_d", "name": "Mareček D." } },
+      { "id": "e11", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_svanda_j", "name": "Švanda J." }, "note": "Podražení" }
+    ]
   },
   {
-    "id": "2025-10-25-t_mbo-t_kar",
-    "homeTeam": {
-      "id": "t_mbo",
-      "name": "FK Mladá Boleslav",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_kar",
-      "name": "MFK Karviná",
-      "logo": ""
-    },
-    "score": {
-      "home": 2,
-      "away": 4
-    },
+    "id": "2025-10-25-liberec-jablonec",
+    "homeTeam": { "id": "t_lib", "name": "Slovan Liberec", "logo": "" },
+    "awayTeam": { "id": "t_jab", "name": "Jablonec", "logo": "" },
+    "score": { "home": 0, "away": 2 },
     "status": "finished",
-    "date": "2025-10-25T15:00:00Z",
-    "stadium": "Městský stadion Mladá Boleslav",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "date": "2025-10-25T14:00:00Z",
+    "stadium": "Stadion u Nisy",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "13",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 22, "team": "home", "type": "yellow_card", "player": { "id": "p_hlavaty_m", "name": "Hlavatý M." }, "note": "Hrubost, Stop na další zápas" },
+      { "id": "e2", "minute": 29, "team": "away", "type": "yellow_card", "player": { "id": "p_souček_d", "name": "Souček D." }, "note": "Držení" },
+      { "id": "e3", "minute": 29, "team": "away", "type": "yellow_card", "player": { "id": "p_polidar_m", "name": "Polidar M." }, "note": "Nesportovní chování" },
+      { "id": "e4", "minute": 39, "team": "home", "type": "yellow_card", "player": { "id": "p_hodek_d", "name": "Hodek D." }, "note": "Nesportovní chování" },
+      { "id": "e5", "minute": 39, "team": "home", "type": "yellow_card", "player": { "id": "p_mikula_j", "name": "Mikula J." }, "note": "Faul" },
+      { "id": "e6", "minute": 44, "team": "away", "type": "yellow_card", "player": { "id": "p_zafeiris_c", "name": "Zafeiris C." }, "note": "Nesmýkavý pád" },
+      { "id": "e7", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_spatenka_a", "name": "Špatenka A." }, "playerOut": { "id": "p_sula_a", "name": "Šula A." } },
+      { "id": "e8", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_kosek_d", "name": "Kosek D." }, "playerOut": { "id": "p_jukl_r", "name": "Jukl R." } },
+      { "id": "e9", "minute": 55, "team": "home", "type": "substitution", "playerIn": { "id": "p_hruby_r", "name": "Hrubý R." }, "playerOut": { "id": "p_malovanyi_v", "name": "Malovanyi V." } },
+      { "id": "e10", "minute": 55, "team": "home", "type": "substitution", "playerIn": { "id": "p_vondra_j", "name": "Vondra J." }, "playerOut": { "id": "p_mikula_j", "name": "Mikula J." } },
+      { "id": "e11", "minute": 60, "team": "away", "type": "goal", "player": { "id": "p_chanturishvili_v", "name": "Chanturishvili V." }, "assistPlayer": { "id": "p_zmrhal_j", "name": "Zmrhal J." }, "scoreUpdate": "0-1" },
+      { "id": "e12", "minute": 62, "team": "away", "type": "goal", "player": { "id": "p_javurek_l", "name": "Javůrek L." }, "assistPlayer": { "id": "p_polidar_m", "name": "Polidar M." }, "scoreUpdate": "0-2" },
+      { "id": "e13", "minute": 65, "team": "away", "type": "substitution", "playerIn": { "id": "p_alegue_a", "name": "Alegue A." }, "playerOut": { "id": "p_chanturishvili_v", "name": "Chanturishvili V." } },
+      { "id": "e14", "minute": 69, "team": "away", "type": "substitution", "playerIn": { "id": "p_rízek_a", "name": "Řízek A." }, "playerOut": { "id": "p_zmrhal_j", "name": "Zmrhal J." } },
+      { "id": "e15", "minute": 74, "team": "home", "type": "substitution", "playerIn": { "id": "p_ndoce_g", "name": "Ndoce G." }, "playerOut": { "id": "p_krollis_r", "name": "Krollis R." } },
+      { "id": "e16", "minute": 74, "team": "home", "type": "substitution", "playerIn": { "id": "p_ndoce_g", "name": "Ndoce G." }, "playerOut": { "id": "p_ndoce_g", "name": "Ndoce G." } },
+      { "id": "e17", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_pulkrab_m", "name": "Pulkrab M." }, "playerOut": { "id": "p_zmrhal_j", "name": "Zmrhal J." } },
+      { "id": "e18", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_stojanek_p", "name": "Štěpánek P." }, "playerOut": { "id": "p_souček_d", "name": "Souček D." } },
+      { "id": "e19", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_mervic_d", "name": "Mervič D." }, "playerOut": { "id": "p_polidar_m", "name": "Polidar M." } }
+    ]
   },
   {
-    "id": "2025-10-25-t_duk-t_slo",
-    "homeTeam": {
-      "id": "t_duk",
-      "name": "Dukla Praha",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_slo",
-      "name": "1. FC Slovácko",
-      "logo": ""
-    },
-    "score": {
-      "home": 1,
-      "away": 0
-    },
+    "id": "2025-10-26-dukla-slovacko",
+    "homeTeam": { "id": "t_duk", "name": "Dukla Praha", "logo": "" },
+    "awayTeam": { "id": "t_slo", "name": "Slovácko", "logo": "" },
+    "score": { "home": 1, "away": 0 },
     "status": "finished",
-    "date": "2025-10-25T15:00:00Z",
+    "date": "2025-10-26T14:30:00Z",
     "stadium": "Juliska",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "13",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 14, "team": "home", "type": "goal", "player": { "id": "p_čermák_m", "name": "Čermák M." }, "assistPlayer": { "id": "p_kroupa_m", "name": "Kroupa M." }, "scoreUpdate": "1-0" },
+      { "id": "e2", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_juricka_p", "name": "Jurička P." }, "playerOut": { "id": "p_kosiolik_m", "name": "Kosiolik M." } },
+      { "id": "e3", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_havlik_m", "name": "Havlík M." }, "playerOut": { "id": "p_marinelli_a", "name": "Marinelli A." } },
+      { "id": "e4", "minute": 46, "team": "away", "type": "yellow_card", "player": { "id": "p_hamza_j", "name": "Hamza J." }, "note": "Podražení" },
+      { "id": "e5", "minute": 62, "team": "home", "type": "substitution", "playerIn": { "id": "p_velasquez_j", "name": "Velasquez J." }, "playerOut": { "id": "p_polak_v", "name": "Polák V." } },
+      { "id": "e6", "minute": 62, "team": "home", "type": "substitution", "playerIn": { "id": "p_kroupa_m", "name": "Kroupa M." }, "playerOut": { "id": "p_jedlička_t", "name": "Jedlička T." } },
+      { "id": "e7", "minute": 72, "team": "away", "type": "substitution", "playerIn": { "id": "p_kvasina_m", "name": "Kvasina M." }, "playerOut": { "id": "p_stojcevski_a", "name": "Stojcevski A." } },
+      { "id": "e8", "minute": 72, "team": "away", "type": "substitution", "playerIn": { "id": "p_petrzela_m", "name": "Petržela M." }, "playerOut": { "id": "p_ndefe_g", "name": "Ndefe G." } },
+      { "id": "e9", "minute": 80, "team": "home", "type": "substitution", "playerIn": { "id": "p_kozák_m", "name": "Kozák M." }, "playerOut": { "id": "p_zlatnik_m", "name": "Zlatník M." } },
+      { "id": "e10", "minute": 80, "team": "home", "type": "substitution", "playerIn": { "id": "p_čermák_m", "name": "Čermák M." }, "playerOut": { "id": "p_sebrle_š", "name": "Šebrle Š." } },
+      { "id": "e11", "minute": 83, "team": "away", "type": "substitution", "playerIn": { "id": "p_krmančík_m", "name": "Krmančík M." }, "playerOut": { "id": "p_trávník_m", "name": "Trávník M." } },
+      { "id": "e12", "minute": 87, "team": "home", "type": "substitution", "playerIn": { "id": "p_čermák_m", "name": "Čermák M." }, "playerOut": { "id": "p_domanyik_r", "name": "Domanyik R." } },
+      { "id": "e13", "minute": 90, "team": "home", "type": "yellow_card", "player": { "id": "p_hrubost", "name": "Hrubost" }, "note": "Malovanyi V." }
+    ]
   },
   {
-    "id": "2025-10-25-t_zli-t_par",
-    "homeTeam": {
-      "id": "t_zli",
-      "name": "FC Zlín",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_par",
-      "name": "FK Pardubice",
-      "logo": ""
-    },
-    "score": {
-      "home": 2,
-      "away": 2
-    },
+    "id": "2025-10-26-plzen-ostrava",
+    "homeTeam": { "id": "t_plz", "name": "Viktoria Plzeň", "logo": "" },
+    "awayTeam": { "id": "t_ban", "name": "Baník Ostrava", "logo": "" },
+    "score": { "home": 2, "away": 0 },
     "status": "finished",
-    "date": "2025-10-25T15:00:00Z",
-    "stadium": "Stadion Letná Zlín",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
-    "round": "13",
-    "events": []
-  },
-  {
-    "id": "2025-10-25-t_lib-t_jab",
-    "homeTeam": {
-      "id": "t_lib",
-      "name": "Slovan Liberec",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_jab",
-      "name": "FK Jablonec",
-      "logo": ""
-    },
-    "score": {
-      "home": 0,
-      "away": 2
-    },
-    "status": "finished",
-    "date": "2025-10-25T15:00:00Z",
-    "stadium": "Stadion U Nisy",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
-    "round": "13",
-    "events": []
-  },
-  {
-    "id": "2025-10-26-t_olo-t_sla",
-    "homeTeam": {
-      "id": "t_olo",
-      "name": "SK Sigma Olomouc",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_sla",
-      "name": "Slavia Praha",
-      "logo": ""
-    },
-    "score": {
-      "home": 0,
-      "away": 0
-    },
-    "status": "finished",
-    "date": "2025-10-26T15:00:00Z",
-    "stadium": "Andrův stadion",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
-    "round": "13",
-    "events": []
-  },
-  {
-    "id": "2025-10-26-t_plz-t_ban",
-    "homeTeam": {
-      "id": "t_plz",
-      "name": "FC Viktoria Plzeň",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_ban",
-      "name": "FC Baník Ostrava",
-      "logo": ""
-    },
-    "score": {
-      "home": 2,
-      "away": 0
-    },
-    "status": "finished",
-    "date": "2025-10-26T15:00:00Z",
+    "date": "2025-10-26T14:30:00Z",
     "stadium": "Doosan Arena",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "13",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 8, "team": "home", "type": "yellow_card", "player": { "id": "p_kalvach_l", "name": "Kalvach L." }, "note": "Hrubost" },
+      { "id": "e2", "minute": 10, "team": "home", "type": "goal", "player": { "id": "p_adu_p", "name": "Adu P." }, "assistPlayer": { "id": "p_zeljkovic_a", "name": "Zeljkovič A." }, "scoreUpdate": "1-0" },
+      { "id": "e3", "minute": 23, "team": "home", "type": "yellow_card", "player": { "id": "p_zeljkovic_a", "name": "Zeljkovič A." }, "note": "Držení" },
+      { "id": "e4", "minute": 32, "team": "away", "type": "yellow_card", "player": { "id": "p_pojezny_k", "name": "Pojezný K." }, "note": "Faul" },
+      { "id": "e5", "minute": 41, "team": "home", "type": "yellow_card", "player": { "id": "p_adu_p", "name": "Adu P." }, "note": "Nesportovní chování" },
+      { "id": "e6", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_kalvach_l", "name": "Kalvach L." }, "playerOut": { "id": "p_cerv_l", "name": "Červ L." } },
+      { "id": "e7", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_zeljkovic_a", "name": "Zeljkovič A." }, "playerOut": { "id": "p_spacil_k", "name": "Spáčil K." } },
+      { "id": "e8", "minute": 58, "team": "away", "type": "substitution", "playerIn": { "id": "p_rine_m", "name": "Rine M." }, "playerOut": { "id": "p_abeid_e", "name": "Abeid E." } },
+      { "id": "e9", "minute": 65, "team": "away", "type": "substitution", "playerIn": { "id": "p_rusnak_m", "name": "Rusnák M." }, "playerOut": { "id": "p_owusu_d", "name": "Owusu D." } },
+      { "id": "e10", "minute": 65, "team": "away", "type": "substitution", "playerIn": { "id": "p_juroska_p", "name": "Juroška P." }, "playerOut": { "id": "p_frydrych_m", "name": "Frydrych M." } },
+      { "id": "e11", "minute": 65, "team": "away", "type": "substitution", "playerIn": { "id": "p_kubala_f", "name": "Kubala F." }, "playerOut": { "id": "p_prekop_e", "name": "Prekop E." } },
+      { "id": "e12", "minute": 77, "team": "home", "type": "substitution", "playerIn": { "id": "p_cerv_l", "name": "Červ L." }, "playerOut": { "id": "p_valenta_m", "name": "Valenta M." } },
+      { "id": "e13", "minute": 77, "team": "home", "type": "substitution", "playerIn": { "id": "p_ladra_t", "name": "Ladra T." }, "playerOut": { "id": "p_souare_c", "name": "Souaré C." } },
+      { "id": "e14", "minute": 79, "team": "away", "type": "substitution", "playerIn": { "id": "p_sinácký_p", "name": "Šinácký P." }, "playerOut": { "id": "p_boula_f.", "name": "Boula F." } },
+      { "id": "e15", "minute": 79, "team": "away", "type": "substitution", "playerIn": { "id": "p_zlatihlavek_f", "name": "Zlatohlávek F." }, "playerOut": { "id": "p_chaluš_m.", "name": "Chaluš M." } },
+      { "id": "e16", "minute": 84, "team": "home", "type": "substitution", "playerIn": { "id": "p_havel_m", "name": "Havel M." }, "playerOut": { "id": "p_durosinmi_r", "name": "Durosinmi R." } },
+      { "id": "e17", "minute": 90, "team": "home", "type": "goal", "player": { "id": "p_musil_a", "name": "Musil A." }, "assistPlayer": { "id": "p_souare_c", "name": "Souaré C." }, "scoreUpdate": "2-0" },
+      { "id": "e18", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_kubala_f", "name": "Kubala F." }, "note": "Nesportovní chování" }
+    ]
   },
   {
-    "id": "2025-10-28-t_spa-t_boh",
-    "homeTeam": {
-      "id": "t_spa",
-      "name": "Sparta Praha",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_boh",
-      "name": "Bohemians Praha 1905",
-      "logo": ""
-    },
-    "score": {
-      "home": 2,
-      "away": 1
-    },
+    "id": "2025-10-26-mlada-boleslav-karvina",
+    "homeTeam": { "id": "t_mbo", "name": "Mladá Boleslav", "logo": "" },
+    "awayTeam": { "id": "t_kar", "name": "Karviná", "logo": "" },
+    "score": { "home": 2, "away": 4 },
     "status": "finished",
-    "date": "2025-10-28T15:00:00Z",
+    "date": "2025-10-26T14:30:00Z",
+    "stadium": "Lokotrans Aréna",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "13",
+    "events": [
+      { "id": "e1", "minute": 10, "team": "away", "type": "goal", "player": { "id": "p_gring_a", "name": "Gring A." }, "scoreUpdate": "0-1" },
+      { "id": "e2", "minute": 24, "team": "away", "type": "yellow_card", "player": { "id": "p_ayaosi_c", "name": "Ayaosi C." }, "note": "Podražení" },
+      { "id": "e3", "minute": 45, "team": "home", "type": "goal", "player": { "id": "p_zitka_j", "name": "Žitka J." }, "assistPlayer": { "id": "p_vokrinek_t", "name": "Vokřínek T." }, "scoreUpdate": "1-1" },
+      { "id": "e4", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_kostka_d", "name": "Kostka D." }, "playerOut": { "id": "p_kabat_m", "name": "Kabát M." } },
+      { "id": "e5", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_strmiska_m", "name": "Strmiska M." }, "playerOut": { "id": "p_kremesa_m", "name": "Křemeša M." } },
+      { "id": "e6", "minute": 47, "team": "away", "type": "goal", "player": { "id": "p_samko_d", "name": "Samko D." }, "assistPlayer": { "id": "p_gring_a", "name": "Gring A." }, "scoreUpdate": "1-2" },
+      { "id": "e7", "minute": 51, "team": "away", "type": "goal", "player": { "id": "p_storman_r", "name": "Štorman R." }, "assistPlayer": { "id": "p_gring_a", "name": "Gring A." }, "scoreUpdate": "1-3" },
+      { "id": "e8", "minute": 58, "team": "away", "type": "goal", "player": { "id": "p_ayaosi_c", "name": "Ayaosi C." }, "assistPlayer": { "id": "p_storman_r", "name": "Štorman R." }, "scoreUpdate": "1-4" },
+      { "id": "e9", "minute": 58, "team": "away", "type": "substitution", "playerIn": { "id": "p_griger_a", "name": "Griger A." }, "playerOut": { "id": "p_singhateh_m", "name": "Singhateh M." } },
+      { "id": "e10", "minute": 58, "team": "away", "type": "substitution", "playerIn": { "id": "p_conde_o", "name": "Conde O." }, "playerOut": { "id": "p_ayaosi_c", "name": "Ayaosi C." } },
+      { "id": "e11", "minute": 62, "team": "home", "type": "substitution", "playerIn": { "id": "p_vojta_m", "name": "Vojta M." }, "playerOut": { "id": "p_klima_j", "name": "Klíma J." } },
+      { "id": "e12", "minute": 62, "team": "home", "type": "yellow_card", "player": { "id": "p_puskac_d", "name": "Puškáč D." }, "note": "Kusal D." },
+      { "id": "e13", "minute": 67, "team": "home", "type": "yellow_card", "player": { "id": "p_zika_j", "name": "Žitka J." }, "note": "Strmiska M." },
+      { "id": "e14", "minute": 70, "team": "away", "type": "substitution", "playerIn": { "id": "p_berman_v", "name": "Berman V." }, "playerOut": { "id": "p_gring_a", "name": "Gring A." } },
+      { "id": "e15", "minute": 70, "team": "away", "type": "substitution", "playerIn": { "id": "p_fiala_j", "name": "Fiala J." }, "playerOut": { "id": "p_samko_d", "name": "Samko D." } },
+      { "id": "e16", "minute": 73, "team": "home", "type": "goal", "player": { "id": "p_lehky_f", "name": "Lehký F." }, "scoreUpdate": "2-4" },
+      { "id": "e17", "minute": 78, "team": "away", "type": "substitution", "playerIn": { "id": "p_boháč_s", "name": "Boháč S." }, "playerOut": { "id": "p_ezah_l", "name": "Ezah L." } },
+      { "id": "e18", "minute": 84, "team": "home", "type": "substitution", "playerIn": { "id": "p_porub_d", "name": "Porub D." }, "playerOut": { "id": "p_dohnál_d", "name": "Dohnál D." } },
+      { "id": "e19", "minute": 90, "team": "home", "type": "goal", "player": { "id": "p_klima_j", "name": "Klíma J." }, "note": "Neproměněná penalta" }
+    ]
+  },
+  {
+    "id": "2025-10-26-zlin-pardubice",
+    "homeTeam": { "id": "t_zli", "name": "FC Zlín", "logo": "" },
+    "awayTeam": { "id": "t_par", "name": "Pardubice", "logo": "" },
+    "score": { "home": 2, "away": 2 },
+    "status": "finished",
+    "date": "2025-10-26T14:30:00Z",
     "stadium": "Letná",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "13",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 23, "team": "away", "type": "goal_disallowed", "player": { "id": "p_solil_t", "name": "Solil T." }, "note": "Neuznaný gól - faul" },
+      { "id": "e2", "minute": 44, "team": "home", "type": "yellow_card", "player": { "id": "p_didiba_j", "name": "Didiba J." }, "note": "Podražení" },
+      { "id": "e3", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_bartosák_l", "name": "Bartošák L." }, "playerOut": { "id": "p_koubek_m", "name": "Koubek M." } },
+      { "id": "e4", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_klepka_a", "name": "Klepka A." }, "playerOut": { "id": "p_poznar_t", "name": "Poznar T." } },
+      { "id": "e5", "minute": 54, "team": "home", "type": "goal", "player": { "id": "p_didiba_j", "name": "Didiba J." }, "assistPlayer": { "id": "p_kozhushko_m", "name": "Kozhushko M." }, "scoreUpdate": "1-0" },
+      { "id": "e6", "minute": 55, "team": "away", "type": "goal", "player": { "id": "p_vanko_a", "name": "Vanko A." }, "assistPlayer": { "id": "p_dancák_s", "name": "Dancák S." }, "scoreUpdate": "1-1" },
+      { "id": "e7", "minute": 62, "team": "home", "type": "goal", "player": { "id": "p_kozhushko_m", "name": "Kozhushko M." }, "assistPlayer": { "id": "p_pilař_m", "name": "Pilař M." }, "scoreUpdate": "2-1" },
+      { "id": "e8", "minute": 63, "team": "away", "type": "substitution", "playerIn": { "id": "p_krobot_l", "name": "Krobot L." }, "playerOut": { "id": "p_vachuta_f", "name": "Vachuta F." } },
+      { "id": "e9", "minute": 71, "team": "away", "type": "goal", "player": { "id": "p_petruta_s", "name": "Petruta S." }, "assistPlayer": { "id": "p_panák_f.", "name": "Panák F." }, "scoreUpdate": "2-2" },
+      { "id": "e10", "minute": 76, "team": "away", "type": "substitution", "playerIn": { "id": "p_lavíčka_v.", "name": "Lavíčka V." }, "playerOut": { "id": "p_mansaverk_s", "name": "Mansaverk S." } },
+      { "id": "e11", "minute": 79, "team": "home", "type": "substitution", "playerIn": { "id": "p_poznar_t.", "name": "Poznar T." }, "playerOut": { "id": "p_kanu_s.", "name": "Kanu S." } },
+      { "id": "e12", "minute": 84, "team": "away", "type": "substitution", "playerIn": { "id": "p_valenta_m.", "name": "Valenta M." }, "playerOut": { "id": "p_ranel_p.", "name": "Ranel P." } },
+      { "id": "e13", "minute": 84, "team": "away", "type": "substitution", "playerIn": { "id": "p_solil_t.", "name": "Solil T." }, "playerOut": { "id": "p_botos_g.", "name": "Botoš G." } },
+      { "id": "e14", "minute": 86, "team": "home", "type": "substitution", "playerIn": { "id": "p_sojka_a.", "name": "Sojka A." }, "playerOut": { "id": "p_ulrich_t.", "name": "Ulrich T." } },
+      { "id": "e15", "minute": 86, "team": "away", "type": "yellow_card", "player": { "id": "p_sychra_v.", "name": "Sychra V." }, "note": "Hrubost" },
+      { "id": "e16", "minute": 90, "team": "home", "type": "substitution", "playerIn": { "id": "p_cupak_m.", "name": "Cupák M." }, "playerOut": { "id": "p_kalabiska_j.", "name": "Kalabiška J." } },
+      { "id": "e17", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_smihalik_o.", "name": "Šmihalík O." }, "playerOut": { "id": "p_vanko_a.", "name": "Vanko A." } },
+      { "id": "e18", "minute": 90, "team": "home", "type": "yellow_card", "player": { "id": "p_hombek_d.", "name": "Hombek D." }, "note": "Držení" }
+    ]
   },
   {
-    "id": "2025-11-01-t_slo-t_lib",
-    "homeTeam": {
-      "id": "t_slo",
-      "name": "1. FC Slovácko",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_lib",
-      "name": "Slovan Liberec",
-      "logo": ""
-    },
-    "score": {
-      "home": 0,
-      "away": 3
-    },
+    "id": "2025-10-26-olomouc-slavia",
+    "homeTeam": { "id": "t_olo", "name": "Sigma Olomouc", "logo": "" },
+    "awayTeam": { "id": "t_sla", "name": "Slavia Praha", "logo": "" },
+    "score": { "home": 0, "away": 0 },
     "status": "finished",
-    "date": "2025-11-01T15:00:00Z",
-    "stadium": "Městský stadion Miroslava Valenty",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
-    "round": "14",
-    "events": []
+    "date": "2025-10-26T17:30:00Z",
+    "stadium": "Andrův stadion",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "13",
+    "events": [
+      { "id": "e1", "minute": 32, "team": "home", "type": "yellow_card", "player": { "id": "p_slama_j.", "name": "Sláma J." }, "note": "Nesportovní chování" },
+      { "id": "e2", "minute": 33, "team": "away", "type": "yellow_card", "player": { "id": "p_kadlec_m.", "name": "Kadlec M." }, "note": "Nesportovní chování" },
+      { "id": "e3", "minute": 45, "team": "home", "type": "yellow_card", "player": { "id": "p_muritala_y.", "name": "Muritala Y." }, "note": "Nesportovní chování" },
+      { "id": "e4", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_slama_j.", "name": "Sláma J." }, "playerOut": { "id": "p_haly_t.", "name": "Haly T." }, "note": "Zranění" },
+      { "id": "e5", "minute": 57, "team": "home", "type": "substitution", "playerIn": { "id": "p_dancak_a.", "name": "Dancák A." }, "playerOut": { "id": "p_sip_j.", "name": "Šíp J." } },
+      { "id": "e6", "minute": 58, "team": "away", "type": "yellow_card", "player": { "id": "p_vokrinek_t.", "name": "Vokřínek T." }, "note": "Hrubost" },
+      { "id": "e7", "minute": 72, "team": "home", "type": "substitution", "playerIn": { "id": "p_grull_m.", "name": "Grull M." }, "playerOut": { "id": "p_mikulenka_m.", "name": "Mikulenka M." } },
+      { "id": "e8", "minute": 72, "team": "home", "type": "substitution", "playerIn": { "id": "p_vodhanel_j.", "name": "Vodháněl J." }, "playerOut": { "id": "p_langer_a.", "name": "Langer A." } },
+      { "id": "e9", "minute": 80, "team": "away", "type": "substitution", "playerIn": { "id": "p_sevcik_p.", "name": "Ševčík P." }, "playerOut": { "id": "p_zafeiris_c.", "name": "Zafeiris C." } },
+      { "id": "e10", "minute": 80, "team": "away", "type": "substitution", "playerIn": { "id": "p_chytil_m.", "name": "Chytil M." }, "playerOut": { "id": "p_zmrhal_j.", "name": "Zmrhal J." } },
+      { "id": "e11", "minute": 80, "team": "away", "type": "substitution", "playerIn": { "id": "p_chaloupek_š.", "name": "Chaloupek Š." }, "playerOut": { "id": "p_buďa_f.", "name": "Buďa F." } },
+      { "id": "e12", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_sip_j.", "name": "Šíp J." }, "note": "Nesportovní pád" },
+      { "id": "e13", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_prekop_e.", "name": "Prekop E." }, "playerOut": { "id": "p_masa_d.", "name": "Maša D." } },
+      { "id": "e14", "minute": 90, "team": "home", "type": "yellow_card", "player": { "id": "p_javorina_t.", "name": "Javořina T." }, "note": "Držení míče" }
+    ]
   },
-  {
-    "id": "2025-11-01-t_jab-t_zli",
-    "homeTeam": {
-      "id": "t_jab",
-      "name": "FK Jablonec",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_zli",
-      "name": "FC Zlín",
-      "logo": ""
-    },
-    "score": {
-      "home": 1,
-      "away": 3
-    },
+{
+    "id": "2025-11-02-bohemians-hradec",
+    "homeTeam": { "id": "t_boh", "name": "Bohemians 1905", "logo": "" },
+    "awayTeam": { "id": "t_hrk", "name": "Hradec Králové", "logo": "" },
+    "score": { "home": 1, "away": 2 },
     "status": "finished",
-    "date": "2025-11-01T15:00:00Z",
-    "stadium": "Stadion Střelnice",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "date": "2025-11-02T15:30:00Z",
+    "stadium": "Ďolíček",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "14",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 9, "team": "home", "type": "goal_disallowed", "player": { "id": "p_hulka_l", "name": "Hůlka L." }, "note": "Ofsajd" },
+      { "id": "e2", "minute": 55, "team": "home", "type": "goal", "player": { "id": "p_okeke_n", "name": "Okeke N." }, "assistPlayer": { "id": "p_sinyavskiy_v", "name": "Sinyavskiy V." }, "scoreUpdate": "1-0" },
+      { "id": "e3", "minute": 57, "team": "away", "type": "substitution", "playerIn": { "id": "p_vlkanova_a", "name": "Vlkanova A." }, "playerOut": { "id": "p_sloncik_t", "name": "Slončík T." } },
+      { "id": "e4", "minute": 59, "team": "away", "type": "goal", "player": { "id": "p_vlkanova_a", "name": "Vlkanova A." }, "assistPlayer": { "id": "p_kucera_j", "name": "Kučera J." }, "scoreUpdate": "1-1" },
+      { "id": "e5", "minute": 65, "team": "home", "type": "substitution", "playerIn": { "id": "p_smrz_v", "name": "Smrž V." }, "playerOut": { "id": "p_ristovski_m", "name": "Ristovski M." } },
+      { "id": "e6", "minute": 65, "team": "home", "type": "substitution", "playerIn": { "id": "p_yusuf", "name": "Yusuf" }, "playerOut": { "id": "p_drahal_v", "name": "Drchal V." } },
+      { "id": "e7", "minute": 66, "team": "away", "type": "goal", "player": { "id": "p_darida_v", "name": "Darida V." }, "scoreUpdate": "1-2" },
+      { "id": "e8", "minute": 70, "team": "away", "type": "substitution", "playerIn": { "id": "p_mihalik_o", "name": "Mihálik O." }, "playerOut": { "id": "p_van_buren_m", "name": "van Buren M." } },
+      { "id": "e9", "minute": 70, "team": "away", "type": "substitution", "playerIn": { "id": "p_sojka_a", "name": "Sojka A." }, "playerOut": { "id": "p_pilar_v", "name": "Pilař V." } },
+      { "id": "e10", "minute": 80, "team": "home", "type": "substitution", "playerIn": { "id": "p_kosek_d", "name": "Kosek D." }, "playerOut": { "id": "p_kadlec_a", "name": "Kadlec A." } },
+      { "id": "e11", "minute": 90, "team": "home", "type": "missed_penalty", "player": { "id": "p_ramirez_e", "name": "Ramirez E." } },
+      { "id": "e12", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_horak_d", "name": "Horák D." }, "note": "Držení" },
+      { "id": "e13", "minute": 90, "team": "home", "type": "substitution", "playerIn": { "id": "p_kovarik_j", "name": "Kovařík J." }, "playerOut": { "id": "p_hruby_r", "name": "Hrubý R." } },
+      { "id": "e14", "minute": 90, "team": "home", "type": "substitution", "playerIn": { "id": "p_vondra_j", "name": "Vondra J." }, "playerOut": { "id": "p_hybs_m", "name": "Hybš M." } },
+      { "id": "e15", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_griger_a", "name": "Griger A." }, "playerOut": { "id": "p_dancak_s", "name": "Dancák S." } }
+    ]
   },
   {
-    "id": "2025-11-01-t_par-t_duk",
-    "homeTeam": {
-      "id": "t_par",
-      "name": "FK Pardubice",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_duk",
-      "name": "Dukla Praha",
-      "logo": ""
-    },
-    "score": {
-      "home": 1,
-      "away": 1
-    },
+    "id": "2025-11-02-teplice-plzen",
+    "homeTeam": { "id": "t_tep", "name": "Teplice", "logo": "" },
+    "awayTeam": { "id": "t_plz", "name": "Viktoria Plzeň", "logo": "" },
+    "score": { "home": 1, "away": 2 },
     "status": "finished",
-    "date": "2025-11-01T15:00:00Z",
-    "stadium": "CFIG Aréna",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "date": "2025-11-02T18:30:00Z",
+    "stadium": "Na Stínadlech",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "14",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 34, "team": "home", "type": "goal", "player": { "id": "p_juta_j", "name": "Juta J." }, "scoreUpdate": "1-0" },
+      { "id": "e2", "minute": 56, "team": "away", "type": "yellow_card", "player": { "id": "p_dweh_m", "name": "Dweh M." }, "note": "Hrubost" },
+      { "id": "e3", "minute": 62, "team": "away", "type": "yellow_card", "player": { "id": "p_durosinmi_r", "name": "Durosinmi R." }, "note": "Hrubost" },
+      { "id": "e4", "minute": 62, "team": "away", "type": "yellow_card", "player": { "id": "p_ladra_t", "name": "Ladra T." }, "note": "Doski M." },
+      { "id": "e5", "minute": 63, "team": "away", "type": "goal", "player": { "id": "p_adu_p", "name": "Adu P." }, "assistPlayer": { "id": "p_souare_c", "name": "Souaré C." }, "scoreUpdate": "1-1" },
+      { "id": "e6", "minute": 75, "team": "home", "type": "substitution", "playerIn": { "id": "p_marecek_d", "name": "Mareček D." }, "playerOut": { "id": "p_jukl_r", "name": "Jukl R." } },
+      { "id": "e7", "minute": 75, "team": "home", "type": "substitution", "playerIn": { "id": "p_juta_j", "name": "Juta J." }, "playerOut": { "id": "p_svanda_j", "name": "Švanda J." } },
+      { "id": "e8", "minute": 75, "team": "home", "type": "substitution", "playerIn": { "id": "p_kozák_m", "name": "Kozák M." }, "playerOut": { "id": "p_puskac_d", "name": "Puškáč D." } },
+      { "id": "e9", "minute": 81, "team": "away", "type": "substitution", "playerIn": { "id": "p_havel_m", "name": "Havel M." }, "playerOut": { "id": "p_durosinmi_r", "name": "Durosinmi R." } },
+      { "id": "e10", "minute": 86, "team": "away", "type": "substitution", "playerIn": { "id": "p_adu_p", "name": "Adu P." }, "playerOut": { "id": "p_hrubost", "name": "Stop na další zápas" } },
+      { "id": "e11", "minute": 86, "team": "away", "type": "substitution", "playerIn": { "id": "p_zeljkovic_a", "name": "Zeljkovič A." }, "playerOut": { "id": "p_spacil_k", "name": "Spáčil K." } },
+      { "id": "e12", "minute": 90, "team": "home", "type": "substitution", "playerIn": { "id": "p_marecek_l", "name": "Mareček L." }, "playerOut": { "id": "p_takacs_l", "name": "Takács L." } },
+      { "id": "e13", "minute": 90, "team": "home", "type": "substitution", "playerIn": { "id": "p_radosta_m", "name": "Radosta M." }, "playerOut": { "id": "p_bilak_m", "name": "Bilak M." } },
+      { "id": "e14", "minute": 90, "team": "away", "type": "goal", "player": { "id": "p_jemelka_v", "name": "Jemelka V." }, "assistPlayer": { "id": "p_souare_c", "name": "Souaré C." }, "scoreUpdate": "1-2" },
+      { "id": "e15", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_paluska_j", "name": "Paluska J." }, "note": "Zdržování hry" }
+    ]
   },
   {
-    "id": "2025-11-01-t_sla-t_ban",
-    "homeTeam": {
-      "id": "t_sla",
-      "name": "Slavia Praha",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_ban",
-      "name": "FC Baník Ostrava",
-      "logo": ""
-    },
-    "score": {
-      "home": 2,
-      "away": 0
-    },
+    "id": "2025-11-02-karvina-sparta",
+    "homeTeam": { "id": "t_kar", "name": "Karviná", "logo": "" },
+    "awayTeam": { "id": "t_spa", "name": "Sparta Praha", "logo": "" },
+    "score": { "home": 2, "away": 1 },
+    "status": "finished",
+    "date": "2025-11-02T15:30:00Z",
+    "stadium": "Městský stadion Karviná",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "14",
+    "events": [
+      { "id": "e1", "minute": 8, "team": "away", "type": "yellow_card", "player": { "id": "p_uichenna_b", "name": "Uichenna B." }, "note": "Hrubost" },
+      { "id": "e2", "minute": 23, "team": "home", "type": "yellow_card", "player": { "id": "p_holman_p", "name": "Holman P." }, "note": "Hrubost" },
+      { "id": "e3", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_zeleny_j", "name": "Zelený J." }, "playerOut": { "id": "p_uichenna_c", "name": "Uichenna C." } },
+      { "id": "e4", "minute": 49, "team": "away", "type": "yellow_card", "player": { "id": "p_marreverk_s", "name": "Marreverk S." }, "note": "Hrubost" },
+      { "id": "e5", "minute": 62, "team": "away", "type": "substitution", "playerIn": { "id": "p_vydra_m", "name": "Vydra M." }, "playerOut": { "id": "p_marreverk_s", "name": "Marreverk S." } },
+      { "id": "e6", "minute": 62, "team": "away", "type": "substitution", "playerIn": { "id": "p_rrahmani_a", "name": "Rrahmani A." }, "playerOut": { "id": "p_kuchta_j", "name": "Kuchta J." } },
+      { "id": "e7", "minute": 63, "team": "home", "type": "goal", "player": { "id": "p_traore_a", "name": "Traore A." }, "assistPlayer": { "id": "p_krčík_d", "name": "Krčík D." }, "scoreUpdate": "1-0" },
+      { "id": "e8", "minute": 72, "team": "home", "type": "substitution", "playerIn": { "id": "p_samko_d", "name": "Samko D." }, "playerOut": { "id": "p_storman_r", "name": "Štorman R." } },
+      { "id": "e9", "minute": 72, "team": "away", "type": "goal", "player": { "id": "p_mercado_j", "name": "Mercado J." }, "assistPlayer": { "id": "p_dimancevski_v", "name": "Dimancevski V." }, "scoreUpdate": "1-1" },
+      { "id": "e10", "minute": 76, "team": "away", "type": "yellow_card", "player": { "id": "p_haraslin_l", "name": "Haraslín L." }, "note": "Ryneš M." },
+      { "id": "e11", "minute": 78, "team": "home", "type": "goal", "player": { "id": "p_gring_a", "name": "Gring A." }, "assistPlayer": { "id": "p_labík_a", "name": "Labík A." }, "scoreUpdate": "2-1" },
+      { "id": "e12", "minute": 80, "team": "home", "type": "substitution", "playerIn": { "id": "p_sigut_s", "name": "Sigut S." }, "playerOut": { "id": "p_conde_o", "name": "Conde O." } },
+      { "id": "e13", "minute": 84, "team": "home", "type": "yellow_card", "player": { "id": "p_ayaosi_c", "name": "Ayaosi C." }, "note": "Hrubost" },
+      { "id": "e14", "minute": 84, "team": "away", "type": "yellow_card", "player": { "id": "p_eneme_s", "name": "Eneme S." }, "note": "Panák F." },
+      { "id": "e15", "minute": 89, "team": "home", "type": "substitution", "playerIn": { "id": "p_labik_a", "name": "Labík A." }, "playerOut": { "id": "p_boháč_s", "name": "Boháč S." } },
+      { "id": "e16", "minute": 89, "team": "home", "type": "substitution", "playerIn": { "id": "p_gring_a", "name": "Gring A." }, "playerOut": { "id": "p_ezah_l", "name": "Ezah L." }, "note": "Zranění" }
+    ]
+  },
+  {
+    "id": "2025-11-03-mlada-boleslav-olomouc",
+    "homeTeam": { "id": "t_mbo", "name": "Mladá Boleslav", "logo": "" },
+    "awayTeam": { "id": "t_olo", "name": "Sigma Olomouc", "logo": "" },
+    "score": { "home": 1, "away": 4 },
+    "status": "finished",
+    "date": "2025-11-03T13:00:00Z",
+    "stadium": "Lokotrans Aréna",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
+    "round": "14",
+    "events": [
+      { "id": "e1", "minute": 9, "team": "away", "type": "goal", "player": { "id": "p_sip_j", "name": "Šíp J." }, "assistPlayer": { "id": "p_muritala_y", "name": "Muritala Y." }, "scoreUpdate": "0-1" },
+      { "id": "e2", "minute": 34, "team": "away", "type": "yellow_card", "player": { "id": "p_spacil_l", "name": "Spáčil L." }, "note": "Hrubost" },
+      { "id": "e3", "minute": 37, "team": "away", "type": "yellow_card", "player": { "id": "p_sip_j", "name": "Šíp J." }, "note": "Vokřínek T." },
+      { "id": "e4", "minute": 45, "team": "away", "type": "goal", "player": { "id": "p_vašulín_d", "name": "Vašulín D." }, "assistPlayer": { "id": "p_muritala_y", "name": "Muritala Y." }, "scoreUpdate": "0-2" },
+      { "id": "e5", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_haly_t", "name": "Haly T." }, "playerOut": { "id": "p_slama_j", "name": "Sláma J." } },
+      { "id": "e6", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_langer_a", "name": "Langer A." }, "playerOut": { "id": "p_kvetoslav_t", "name": "Květoslav T." } },
+      { "id": "e7", "minute": 62, "team": "home", "type": "yellow_card", "player": { "id": "p_zika_j", "name": "Žitka J." }, "note": "Podražení" },
+      { "id": "e8", "minute": 64, "team": "home", "type": "substitution", "playerIn": { "id": "p_kostka_d", "name": "Kostka D." }, "playerOut": { "id": "p_vojta_m", "name": "Vojta M." }, "note": "Zranění" },
+      { "id": "e9", "minute": 66, "team": "away", "type": "substitution", "playerIn": { "id": "p_navrátil_j", "name": "Navrátil J." }, "playerOut": { "id": "p_chvátal_j", "name": "Chvátal J." } },
+      { "id": "e10", "minute": 66, "team": "away", "type": "substitution", "playerIn": { "id": "p_ambrose_a", "name": "Ambrose A." }, "playerOut": { "id": "p_sip_j", "name": "Šíp J." } },
+      { "id": "e11", "minute": 72, "team": "home", "type": "substitution", "playerIn": { "id": "p_stransky_m", "name": "Stránský M." }, "playerOut": { "id": "p_john_s", "name": "John S." } },
+      { "id": "e12", "minute": 72, "team": "home", "type": "substitution", "playerIn": { "id": "p_kremesa_m", "name": "Křemeša M." }, "playerOut": { "id": "p_ladra_t", "name": "Ladra T." } },
+      { "id": "e13", "minute": 74, "team": "away", "type": "goal", "player": { "id": "p_langer_a", "name": "Langer A." }, "assistPlayer": { "id": "p_vodháněl_j", "name": "Vodháněl J." }, "scoreUpdate": "0-3" },
+      { "id": "e14", "minute": 83, "team": "home", "type": "goal", "player": { "id": "p_kostka_d", "name": "Kostka D." }, "assistPlayer": { "id": "p_stransky_m", "name": "Stránský M." }, "scoreUpdate": "1-3" },
+      { "id": "e15", "minute": 83, "team": "home", "type": "substitution", "playerIn": { "id": "p_zika_j", "name": "Žitka J." }, "playerOut": { "id": "p_macek_r", "name": "Macek R." } },
+      { "id": "e16", "minute": 83, "team": "home", "type": "substitution", "playerIn": { "id": "p_langhamer_d", "name": "Langhamer D." }, "playerOut": { "id": "p_lehky_f", "name": "Lehký F." } },
+      { "id": "e17", "minute": 87, "team": "away", "type": "goal", "player": { "id": "p_vašulín_d", "name": "Vašulín D." }, "scoreUpdate": "1-4" },
+      { "id": "e18", "minute": 87, "team": "away", "type": "substitution", "playerIn": { "id": "p_fiala_m", "name": "Fiala M." }, "playerOut": { "id": "p_vašulín_d", "name": "Vašulín D." } }
+    ]
+  },
+  {
+    "id": "2025-11-01-slavia-ostrava",
+    "homeTeam": { "id": "t_sla", "name": "Slavia Praha", "logo": "" },
+    "awayTeam": { "id": "t_ban", "name": "Baník Ostrava", "logo": "" },
+    "score": { "home": 2, "away": 0 },
     "status": "finished",
     "date": "2025-11-01T15:00:00Z",
     "stadium": "Eden Aréna",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "14",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 20, "team": "away", "type": "yellow_card", "player": { "id": "p_owusu_d", "name": "Owusu D." }, "note": "Protesty" },
+      { "id": "e2", "minute": 33, "team": "home", "type": "goal_disallowed", "player": { "id": "p_dorley_o", "name": "Dorley O." }, "note": "Neuznaný gól - ruka" },
+      { "id": "e3", "minute": 45, "team": "away", "type": "yellow_card", "player": { "id": "p_pojezny_k", "name": "Pojezný K." }, "note": "Držení" },
+      { "id": "e4", "minute": 53, "team": "away", "type": "yellow_card", "player": { "id": "p_rusnak_m", "name": "Rusnák M." }, "note": "Dweh D." },
+      { "id": "e5", "minute": 53, "team": "away", "type": "yellow_card", "player": { "id": "p_boula_f", "name": "Boula F." }, "note": "Protesty" },
+      { "id": "e6", "minute": 58, "team": "home", "type": "goal", "player": { "id": "p_vlcek_t", "name": "Vlček T." }, "assistPlayer": { "id": "p_diouf_e", "name": "Diouf E." }, "scoreUpdate": "1-0" },
+      { "id": "e7", "minute": 61, "team": "away", "type": "yellow_card", "player": { "id": "p_prekop_e", "name": "Prekop E." }, "note": "Abeid E." },
+      { "id": "e8", "minute": 62, "team": "home", "type": "goal", "player": { "id": "p_chytil_m", "name": "Chytil M." }, "assistPlayer": { "id": "p_sevcik_p", "name": "Ševčík P." }, "scoreUpdate": "2-0" },
+      { "id": "e9", "minute": 65, "team": "home", "type": "substitution", "playerIn": { "id": "p_doudera_d", "name": "Doudera D." }, "playerOut": { "id": "p_zafeiris_c", "name": "Zafeiris C." } },
+      { "id": "e10", "minute": 65, "team": "home", "type": "substitution", "playerIn": { "id": "p_sevcik_p", "name": "Ševčík P." }, "playerOut": { "id": "p_prekop_e", "name": "Prekop E." } },
+      { "id": "e11", "minute": 65, "team": "home", "type": "substitution", "playerIn": { "id": "p_provod_l", "name": "Provod L." }, "playerOut": { "id": "p_kadlec_m", "name": "Kadlec M." } },
+      { "id": "e12", "minute": 68, "team": "away", "type": "substitution", "playerIn": { "id": "p_musil_m", "name": "Musil M." }, "playerOut": { "id": "p_frydrych_m", "name": "Frydrych M." } },
+      { "id": "e13", "minute": 68, "team": "away", "type": "substitution", "playerIn": { "id": "p_kvasina_m", "name": "Kvasina M." }, "playerOut": { "id": "p_kubala_f", "name": "Kubala F." } },
+      { "id": "e14", "minute": 75, "team": "home", "type": "substitution", "playerIn": { "id": "p_chytil_m", "name": "Chytil M." }, "playerOut": { "id": "p_zafeiris_c", "name": "Zafeiris C." } },
+      { "id": "e15", "minute": 79, "team": "away", "type": "substitution", "playerIn": { "id": "p_lischka_d", "name": "Lischka D." }, "playerOut": { "id": "p_pojezny_k", "name": "Pojezný K." } },
+      { "id": "e16", "minute": 83, "team": "home", "type": "substitution", "playerIn": { "id": "p_mervic_d", "name": "Mervič D." }, "playerOut": { "id": "p_doudera_d", "name": "Doudera D." } },
+      { "id": "e17", "minute": 90, "team": "away", "type": "yellow_card", "player": { "id": "p_chaluš_m", "name": "Chaluš M." }, "note": "Podražení" }
+    ]
   },
   {
-    "id": "2025-11-02-t_mbo-t_olo",
-    "homeTeam": {
-      "id": "t_mbo",
-      "name": "FK Mladá Boleslav",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_olo",
-      "name": "SK Sigma Olomouc",
-      "logo": ""
-    },
-    "score": {
-      "home": 1,
-      "away": 4
-    },
+    "id": "2025-11-01-jablonec-zlin",
+    "homeTeam": { "id": "t_jab", "name": "Jablonec", "logo": "" },
+    "awayTeam": { "id": "t_zli", "name": "FC Zlín", "logo": "" },
+    "score": { "home": 1, "away": 3 },
     "status": "finished",
-    "date": "2025-11-02T15:00:00Z",
-    "stadium": "Městský stadion Mladá Boleslav",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "date": "2025-11-01T15:00:00Z",
+    "stadium": "Střelnice",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "14",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 5, "team": "away", "type": "goal", "player": { "id": "p_kanu_s", "name": "Kanu S." }, "assistPlayer": { "id": "p_didiba_j", "name": "Didiba J." }, "scoreUpdate": "0-1" },
+      { "id": "e2", "minute": 34, "team": "away", "type": "yellow_card", "player": { "id": "p_ulrich_t", "name": "Ulrich T." }, "note": "Zranění - Didiba J." },
+      { "id": "e3", "minute": 43, "team": "away", "type": "goal", "player": { "id": "p_bartosák_l", "name": "Bartošák L." }, "scoreUpdate": "0-2" },
+      { "id": "e4", "minute": 45, "team": "away", "type": "goal", "player": { "id": "p_kanu_s", "name": "Kanu S." }, "assistPlayer": { "id": "p_ulrich_t", "name": "Ulrich T." }, "scoreUpdate": "0-3" },
+      { "id": "e5", "minute": 45, "team": "away", "type": "yellow_card", "player": { "id": "p_bartosak_l", "name": "Bartošák L." }, "note": "Simulování" },
+      { "id": "e6", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_chanturishvili_v", "name": "Chanturishvili V." }, "playerOut": { "id": "p_řízek_a", "name": "Řízek A." } },
+      { "id": "e7", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_alegue_a", "name": "Alegue A." }, "playerOut": { "id": "p_polidar_m", "name": "Polidar M." } },
+      { "id": "e8", "minute": 49, "team": "away", "type": "yellow_card", "player": { "id": "p_kozhushko_m", "name": "Kozhushko M." }, "note": "Kanu S." },
+      { "id": "e9", "minute": 57, "team": "home", "type": "yellow_card", "player": { "id": "p_chanturishvili_v", "name": "Chanturishvili V." }, "note": "Hra rukou. Stop na další zápas" },
+      { "id": "e10", "minute": 62, "team": "away", "type": "yellow_card", "player": { "id": "p_cupak_m", "name": "Cupák M." }, "note": "Podražení" },
+      { "id": "e11", "minute": 63, "team": "home", "type": "substitution", "playerIn": { "id": "p_kruták_d", "name": "Kruták D." }, "playerOut": { "id": "p_havlíček_d", "name": "Havlíček D." } },
+      { "id": "e12", "minute": 63, "team": "home", "type": "substitution", "playerIn": { "id": "p_zmrhal_j", "name": "Zmrhal J." }, "playerOut": { "id": "p_machan_j", "name": "Machan J." } },
+      { "id": "e13", "minute": 65, "team": "away", "type": "yellow_card", "player": { "id": "p_hombek_d", "name": "Hombek D." }, "note": "Stop na další zápas" },
+      { "id": "e14", "minute": 72, "team": "home", "type": "substitution", "playerIn": { "id": "p_javurek_l", "name": "Javůrek L." }, "playerOut": { "id": "p_malinsky_p", "name": "Malínský P." } },
+      { "id": "e15", "minute": 74, "team": "away", "type": "yellow_card", "player": { "id": "p_kalabiska_j", "name": "Kalabiška J." }, "note": "Bartošák L." },
+      { "id": "e16", "minute": 79, "team": "home", "type": "goal", "player": { "id": "p_pulkrab_m", "name": "Pulkrab M." }, "assistPlayer": { "id": "p_sedláček_r", "name": "Sedláček R." }, "scoreUpdate": "1-3" },
+      { "id": "e17", "minute": 87, "team": "home", "type": "yellow_card", "player": { "id": "p_polidar_m", "name": "Polidar M." }, "note": "Puškač D." },
+      { "id": "e18", "minute": 88, "team": "away", "type": "substitution", "playerIn": { "id": "p_klepka_a", "name": "Klepka A." }, "playerOut": { "id": "p_kozhushko_m", "name": "Kozhushko M." } },
+      { "id": "e19", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_poznar_t", "name": "Poznar T." }, "playerOut": { "id": "p_ulrich_t", "name": "Ulrich T." } },
+      { "id": "e20", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_petruta_s", "name": "Petruta S." }, "playerOut": { "id": "p_pilař_m", "name": "Pilař M." } }
+    ]
   },
   {
-    "id": "2025-11-02-t_boh-t_hrk",
-    "homeTeam": {
-      "id": "t_boh",
-      "name": "Bohemians Praha 1905",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_hrk",
-      "name": "Hradec Králové",
-      "logo": ""
-    },
-    "score": {
-      "home": 1,
-      "away": 2
-    },
+    "id": "2025-11-01-pardubice-dukla",
+    "homeTeam": { "id": "t_par", "name": "Pardubice", "logo": "" },
+    "awayTeam": { "id": "t_duk", "name": "Dukla Praha", "logo": "" },
+    "score": { "home": 1, "away": 1 },
     "status": "finished",
-    "date": "2025-11-02T15:00:00Z",
-    "stadium": "Ďolíček",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "date": "2025-11-01T15:00:00Z",
+    "stadium": "CFIG Arena",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "14",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 24, "team": "away", "type": "yellow_card", "player": { "id": "p_hašek_f", "name": "Hašek F." }, "note": "Podražení" },
+      { "id": "e2", "minute": 34, "team": "home", "type": "goal", "player": { "id": "p_krobot_l", "name": "Krobot L." }, "assistPlayer": { "id": "p_vanko_a", "name": "Vanko A." }, "scoreUpdate": "1-0" },
+      { "id": "e3", "minute": 60, "team": "away", "type": "goal", "player": { "id": "p_krob_j", "name": "Krob J." }, "note": "Vlastní gól - Rommens P.", "scoreUpdate": "1-1" },
+      { "id": "e4", "minute": 61, "team": "home", "type": "substitution", "playerIn": { "id": "p_sychra_v", "name": "Sychra V." }, "playerOut": { "id": "p_botos_g", "name": "Botoš G." } },
+      { "id": "e5", "minute": 61, "team": "home", "type": "substitution", "playerIn": { "id": "p_krobot_l", "name": "Krobot L." }, "playerOut": { "id": "p_vachuta_f", "name": "Vachuta F." } },
+      { "id": "e6", "minute": 70, "team": "home", "type": "substitution", "playerIn": { "id": "p_zeman_v", "name": "Zeman V." }, "playerOut": { "id": "p_barros_m", "name": "Barros M." } },
+      { "id": "e7", "minute": 70, "team": "home", "type": "substitution", "playerIn": { "id": "p_polak_v", "name": "Polák V." }, "playerOut": { "id": "p_ranel_p", "name": "Ranel P." } },
+      { "id": "e8", "minute": 70, "team": "away", "type": "substitution", "playerIn": { "id": "p_jedlicka_t", "name": "Jedlička T." }, "playerOut": { "id": "p_kroupa_m", "name": "Kroupa M." } },
+      { "id": "e9", "minute": 72, "team": "home", "type": "yellow_card", "player": { "id": "p_surzyn_m", "name": "Surzyn M." }, "note": "Podražení" },
+      { "id": "e10", "minute": 84, "team": "away", "type": "substitution", "playerIn": { "id": "p_donszezyk_p", "name": "Donszezyk P." }, "playerOut": { "id": "p_kadlec_j", "name": "Kadlec J." } },
+      { "id": "e11", "minute": 84, "team": "away", "type": "substitution", "playerIn": { "id": "p_velesquaz_d", "name": "Velesquaz D." }, "playerOut": { "id": "p_čermák_m", "name": "Čermák M." } },
+      { "id": "e12", "minute": 84, "team": "away", "type": "substitution", "playerIn": { "id": "p_peterka_j", "name": "Peterka J." }, "playerOut": { "id": "p_čermák_m", "name": "Čermák M." } },
+      { "id": "e13", "minute": 85, "team": "home", "type": "yellow_card", "player": { "id": "p_solil_t", "name": "Solil T." }, "note": "Řezníček J." },
+      { "id": "e14", "minute": 90, "team": "home", "type": "yellow_card", "player": { "id": "p_surzyn_m", "name": "Surzyn M." }, "note": "Hrubost" },
+      { "id": "e15", "minute": 90, "team": "away", "type": "substitution", "playerIn": { "id": "p_kozma_d", "name": "Kozma D." }, "playerOut": { "id": "p_laco_s", "name": "Laco S." } }
+    ]
   },
   {
-    "id": "2025-11-02-t_kar-t_spa",
-    "homeTeam": {
-      "id": "t_kar",
-      "name": "MFK Karviná",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_spa",
-      "name": "Sparta Praha",
-      "logo": ""
-    },
-    "score": {
-      "home": 2,
-      "away": 1
-    },
+    "id": "2025-11-01-slovacko-liberec",
+    "homeTeam": { "id": "t_slo", "name": "Slovácko", "logo": "" },
+    "awayTeam": { "id": "t_lib", "name": "Slovan Liberec", "logo": "" },
+    "score": { "home": 0, "away": 3 },
     "status": "finished",
-    "date": "2025-11-02T15:00:00Z",
-    "stadium": "Městský stadion Karviná",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
+    "date": "2025-11-01T16:00:00Z",
+    "stadium": "Městský fotbalový stadion Miroslava Valenty",
+    "competition": { "id": "chance", "name": "Chance Liga 2025/26" },
     "round": "14",
-    "events": []
-  },
-  {
-    "id": "2025-11-02-t_tep-t_plz",
-    "homeTeam": {
-      "id": "t_tep",
-      "name": "FK Teplice",
-      "logo": ""
-    },
-    "awayTeam": {
-      "id": "t_plz",
-      "name": "FC Viktoria Plzeň",
-      "logo": ""
-    },
-    "score": {
-      "home": 1,
-      "away": 2
-    },
-    "status": "finished",
-    "date": "2025-11-02T15:00:00Z",
-    "stadium": "Stadion Na Stínadlech",
-    "competition": {
-      "id": "chance",
-      "name": "Chance Liga 2025/26"
-    },
-    "round": "14",
-    "events": []
+    "events": [
+      { "id": "e1", "minute": 2, "team": "away", "type": "yellow_card", "player": { "id": "p_halinsky_d", "name": "Halinský D." }, "note": "Podražení" },
+      { "id": "e2", "minute": 8, "team": "home", "type": "yellow_card", "player": { "id": "p_ndefe_g", "name": "Ndefe G." }, "note": "Brnění (zranění)" },
+      { "id": "e3", "minute": 13, "team": "away", "type": "goal", "player": { "id": "p_krollis_r", "name": "Krollis R." }, "assistPlayer": { "id": "p_godavsky_v", "name": "Godavský V." }, "scoreUpdate": "0-1" },
+      { "id": "e4", "minute": 20, "team": "away", "type": "yellow_card", "player": { "id": "p_kayondo_a", "name": "Kayondo A." }, "note": "Zdržování" },
+      { "id": "e5", "minute": 28, "team": "home", "type": "yellow_card", "player": { "id": "p_marinelli_a", "name": "Marinelli A." }, "note": "Zranění (zranění)" },
+      { "id": "e6", "minute": 46, "team": "home", "type": "substitution", "playerIn": { "id": "p_mulder_j", "name": "Mulder J." }, "playerOut": { "id": "p_reinberk_p", "name": "Reinberk P." } },
+      { "id": "e7", "minute": 46, "team": "away", "type": "substitution", "playerIn": { "id": "p_dlask_f", "name": "Dlask F." }, "playerOut": { "id": "p_malovanyi_v", "name": "Malovanyi V." } },
+      { "id": "e8", "minute": 52, "team": "home", "type": "yellow_card", "player": { "id": "p_stojcevski_a", "name": "Stojcevski A." }, "note": "Držení" },
+      { "id": "e9", "minute": 58, "team": "away", "type": "yellow_card", "player": { "id": "p_mikaelsson_a", "name": "Mikaelsson A." }, "note": "Odp. kování" },
+      { "id": "e10", "minute": 59, "team": "away", "type": "yellow_card", "player": { "id": "p_masek_l", "name": "Mašek L." }, "note": "Celik J." },
+      { "id": "e11", "minute": 59, "team": "away", "type": "yellow_card", "player": { "id": "p_hodes_p", "name": "Hodeš P." }, "note": "Dulaj P." },
+      { "id": "e12", "minute": 66, "team": "home", "type": "substitution", "playerIn": { "id": "p_hamza_j", "name": "Hamza J." }, "playerOut": { "id": "p_kvasina_m", "name": "Kvasina M." } },
+      { "id": "e13", "minute": 66, "team": "home", "type": "substitution", "playerIn": { "id": "p_svatusek_m", "name": "Svatůšek M." }, "playerOut": { "id": "p_petrzela_m", "name": "Petržela M." } },
+      { "id": "e14", "minute": 69, "team": "away", "type": "substitution", "playerIn": { "id": "p_masek_l", "name": "Mašek L." }, "playerOut": { "id": "p_celik_j", "name": "Celik J." } },
+      { "id": "e15", "minute": 70, "team": "away", "type": "substitution", "playerIn": { "id": "p_latansay_l", "name": "Latansay L." }, "playerOut": { "id": "p_mikaelsson_a", "name": "Mikaelsson A." } },
+      { "id": "e16", "minute": 74, "team": "away", "type": "goal", "player": { "id": "p_dlask_f", "name": "Dlask F." }, "assistPlayer": { "id": "p_krollis_r", "name": "Krollis R." }, "scoreUpdate": "0-2" },
+      { "id": "e17", "minute": 77, "team": "away", "type": "substitution", "playerIn": { "id": "p_latansay_l", "name": "Latansay L." }, "playerOut": { "id": "p_hodes_p", "name": "Hodeš P." } },
+      { "id": "e18", "minute": 79, "team": "away", "type": "substitution", "playerIn": { "id": "p_jurs_p", "name": "Jurs P." }, "playerOut": { "id": "p_krollis_r", "name": "Krollis R." } },
+      { "id": "e19", "minute": 86, "team": "home", "type": "yellow_card", "player": { "id": "p_podrazky_m", "name": "Podrázký M." }, "note": "Mervič D." },
+      { "id": "e20", "minute": 90, "team": "home", "type": "yellow_card", "player": { "id": "p_podrazky_m", "name": "Podrázký M." }, "note": "Zranění (zranění)" },
+      { "id": "e21", "minute": 90, "team": "away", "type": "goal", "player": { "id": "p_masek_l", "name": "Mašek L." }, "scoreUpdate": "0-3" }
+    ]
   },
 {
     "id": "2025-11-08-t_duk-t_mbo",

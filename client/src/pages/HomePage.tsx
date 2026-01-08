@@ -8,6 +8,7 @@ import { TEAM_LIST } from '../redux/teamData.ts';
 import { RootState, AppDispatch } from '../redux/store.ts';
 import { theme } from '../styles/theme.ts';
 import { getTeamLogo } from '../utils/teamLogos.ts';
+import Navigation from '../components/Navigation.tsx';
 
 const HomeContainer = styled.div`
   padding: 2rem 1rem;
@@ -21,38 +22,6 @@ const SectionTitle = styled.h2`
   margin-bottom: 1rem;
   border-bottom: 2px solid ${({ theme }: { theme: any }) => theme.colors.secondary};
   padding-bottom: 0.5rem;
-`;
-
-const NavContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-
-  @media (min-width: 769px) {
-    display: none;
-  }
-`;
-
-const NavButton = styled(Link)<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.25rem;
-  background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : theme.colors.lightGray};
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 1rem;
-  transition: all 0.2s;
-  box-shadow: ${({ theme }) => theme.shadows.small};
-  border: 1px solid ${({ theme, $active }) => $active ? theme.colors.secondary : 'transparent'};
-
-  &:hover {
-    background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#495057'};
-    transform: translateY(-2px);
-  }
 `;
 
 const MatchesGrid = styled.div`
@@ -550,10 +519,7 @@ const HomePage: React.FC = () => {
 
   return (
     <HomeContainer>
-      <NavContainer>
-        <NavButton to="/" $active={true}>Zápasy</NavButton>
-        <NavButton to="/table">Tabulka</NavButton>
-      </NavContainer>
+      <Navigation />
 
       {loading && matches.length === 0 ? (
         <LoadingMessage theme={theme}>Načítání zápasů...</LoadingMessage>

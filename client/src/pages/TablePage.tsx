@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { RootState, AppDispatch } from '../redux/store.ts';
 import { fetchTable } from '../redux/slices/tableSlice.ts';
 import { getTeamLogo } from '../utils/teamLogos.ts';
+import Navigation from '../components/Navigation.tsx';
 
 const PageContainer = styled.div`
   padding: 2rem 1rem;
@@ -13,38 +14,6 @@ const PageContainer = styled.div`
   background-color: #00141e; /* Dark background matching the screenshot */
   min-height: 100vh;
   color: #ffffff;
-`;
-
-const NavContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-
-  @media (min-width: 769px) {
-    display: none;
-  }
-`;
-
-const NavButton = styled(Link)<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.75rem 1.25rem;
-  background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#1f3b4d'};
-  color: white;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 1rem;
-  transition: all 0.2s;
-  box-shadow: ${({ theme }) => theme.shadows.small};
-  border: 1px solid ${({ theme, $active }) => $active ? theme.colors.secondary : 'transparent'};
-
-  &:hover {
-    background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#2c4a5f'};
-    transform: translateY(-2px);
-  }
 `;
 
 const Title = styled.h1`
@@ -246,10 +215,7 @@ const TablePage: React.FC = () => {
 
   return (
     <PageContainer>
-      <NavContainer>
-        <NavButton to="/">Zápasy</NavButton>
-        <NavButton to="/table" $active={true}>Tabulka</NavButton>
-      </NavContainer>
+      <Navigation />
       <Title>Tabulka</Title>
       <TableWrapper>
         <StyledTable>

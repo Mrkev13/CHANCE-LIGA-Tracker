@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 const HeaderContainer = styled.header`
@@ -33,26 +33,27 @@ const NavLinks = styled.div`
   display: flex;
   gap: 1.5rem;
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.tablet}) {
+  @media (max-width: 768px) {
     display: none;
   }
 `;
 
-const NavLink = styled(Link)`
-  color: white;
-  font-weight: 500;
-  transition: color 0.3s ease;
+const NavLink = styled(Link)<{ $active?: boolean }>`
+  color: ${({ theme, $active }) => $active ? theme.colors.secondary : 'rgba(255, 255, 255, 0.8)'};
+  text-decoration: none;
+  font-weight: ${({ $active }) => $active ? 'bold' : 'normal'};
+  font-size: 1.1rem;
+  transition: color 0.2s;
   
   &:hover {
-    color: ${({ theme }) => theme.colors.secondary};
-  }
-  
-  &.active {
     color: ${({ theme }) => theme.colors.secondary};
   }
 `;
 
 const Header: React.FC = () => {
+  const location = useLocation();
+  const path = location.pathname;
+
   return (
     <HeaderContainer>
       <Nav>
@@ -60,8 +61,9 @@ const Header: React.FC = () => {
           CHANCE:<span>LIGA</span> Tracker
         </Logo>
         <NavLinks>
-          <NavLink to="/">Zápasy</NavLink>
-          <NavLink to="/table">Tabulka</NavLink>
+          <NavLink to="/" $active={path === '/'}>Zápasy</NavLink>
+          <NavLink to="/table" $active={path === '/table'}>Tabulka</NavLink>
+          <NavLink to="/stats" $active={path === '/stats'}>Statistiky</NavLink>
         </NavLinks>
       </Nav>
     </HeaderContainer>

@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage.tsx';
 import MatchDetailPage from './pages/MatchDetailPage.tsx';
 import TeamPage from './pages/TeamPage.tsx';
 import TablePage from './pages/TablePage.tsx';
+import StatsPage from './pages/StatsPage.tsx';
 
 const App: React.FC = () => {
   return (
@@ -24,6 +25,7 @@ const App: React.FC = () => {
             <Route path="/match/:id" element={<MatchDetailPage />} />
             <Route path="/team/:id" element={<TeamPage />} />
             <Route path="/table" element={<TablePage />} />
+            <Route path="/stats" element={<StatsPage />} />
           </Routes>
         </main>
         <Footer />
