@@ -52,6 +52,9 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
   };
 
   const teamsMap = new Map<string, Agg>();
+  const seen = new Set<string>();
+  const WIN_POINTS = 3;
+  const DRAW_POINTS = 1;
 
   const ensureTeam = (teamId: string, name: string, logo: string): Agg => {
     if (!teamsMap.has(teamId)) {
@@ -84,11 +87,17 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
 
   // Pro každý zápas aktualizujeme statistiky obou týmů
   finishedMatches.forEach(match => {
+    const key = match.id ?? `${match.homeTeam?.id ?? ''}-${match.awayTeam?.id ?? ''}-${match.date ?? ''}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+
     const home = ensureTeam(match.homeTeam.id, match.homeTeam.name, match.homeTeam.logo);
     const away = ensureTeam(match.awayTeam.id, match.awayTeam.name, match.awayTeam.logo);
 
-    const homeGoals = match.score.home;
-    const awayGoals = match.score.away;
+    const homeGoals = Number(match.score?.home);
+    const awayGoals = Number(match.score?.away);
+    const validScores = Number.isFinite(homeGoals) && Number.isFinite(awayGoals);
+    if (!validScores) return;
 
     home.played += 1;
     away.played += 1;
@@ -100,14 +109,14 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
     if (homeGoals > awayGoals) {
       // výhra domácích
       home.won += 1;
-      home.points += 3;
+      home.points += WIN_POINTS;
       away.lost += 1;
       home.form.push('W');
       away.form.push('L');
     } else if (homeGoals < awayGoals) {
       // výhra hostů
       away.won += 1;
-      away.points += 3;
+      away.points += WIN_POINTS;
       home.lost += 1;
       home.form.push('L');
       away.form.push('W');
@@ -115,8 +124,8 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
       // remíza
       home.drawn += 1;
       away.drawn += 1;
-      home.points += 1;
-      away.points += 1;
+      home.points += DRAW_POINTS;
+      away.points += DRAW_POINTS;
       home.form.push('D');
       away.form.push('D');
     }

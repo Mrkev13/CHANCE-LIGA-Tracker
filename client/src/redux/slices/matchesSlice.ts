@@ -2547,9 +2547,9 @@ export const MANUAL_MATCHES: Match[] = [
     "events": []
   },
 {
-    "id": "2025-11-08-t_duk-t_bol",
+    "id": "2025-11-08-t_duk-t_mbo",
     "homeTeam": { "id": "t_duk", "name": "Dukla Praha", "logo": "" },
-    "awayTeam": { "id": "t_bol", "name": "Mladá Boleslav", "logo": "" },
+    "awayTeam": { "id": "t_mbo", "name": "Mladá Boleslav", "logo": "" },
     "score": { "home": 0, "away": 1 },
     "status": "finished",
     "date": "2025-11-08T15:00:00Z",
@@ -2616,7 +2616,7 @@ export const MANUAL_MATCHES: Match[] = [
   },
   {
     "id": "2025-11-08-t_hra-t_slo",
-    "homeTeam": { "id": "t_hra", "name": "Hradec Králové", "logo": "" },
+    "homeTeam": { "id": "t_hrk", "name": "Hradec Králové", "logo": "" },
     "awayTeam": { "id": "t_slo", "name": "Slovácko", "logo": "" },
     "score": { "home": 4, "away": 0 },
     "status": "finished",

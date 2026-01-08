@@ -9,6 +9,9 @@ const teams = JSON.parse(
 
 function computeTableFromMatches(ms) {
   const map = new Map();
+  const seen = new Set();
+  const WIN_POINTS = 3;
+  const DRAW_POINTS = 1;
   const ensure = (id, name, logo) => {
     if (!map.has(id)) {
       map.set(id, {
@@ -29,10 +32,15 @@ function computeTableFromMatches(ms) {
   };
   teams.forEach(t => ensure(t.id, t.name, t.logo));
   ms.filter(m => m.status === 'finished' || m.status === 'awarded').forEach(m => {
+    const key = m.id ?? `${m.homeTeam?.id ?? ''}-${m.awayTeam?.id ?? ''}-${m.date ?? ''}`;
+    if (seen.has(key)) return;
+    seen.add(key);
     const home = ensure(m.homeTeam.id, m.homeTeam.name, m.homeTeam.logo);
     const away = ensure(m.awayTeam.id, m.awayTeam.name, m.awayTeam.logo);
-    const hg = m.score.home;
-    const ag = m.score.away;
+    const hg = Number(m.score?.home);
+    const ag = Number(m.score?.away);
+    const validScores = Number.isFinite(hg) && Number.isFinite(ag);
+    if (!validScores) return;
     home.played += 1;
     away.played += 1;
     home.goalsFor += hg;
@@ -41,21 +49,21 @@ function computeTableFromMatches(ms) {
     away.goalsAgainst += hg;
     if (hg > ag) {
       home.won += 1;
-      home.points += 3;
+      home.points += WIN_POINTS;
       away.lost += 1;
       home.form.push('W');
       away.form.push('L');
     } else if (hg < ag) {
       away.won += 1;
-      away.points += 3;
+      away.points += WIN_POINTS;
       home.lost += 1;
       home.form.push('L');
       away.form.push('W');
     } else {
       home.drawn += 1;
       away.drawn += 1;
-      home.points += 1;
-      away.points += 1;
+      home.points += DRAW_POINTS;
+      away.points += DRAW_POINTS;
       home.form.push('D');
       away.form.push('D');
     }

@@ -10,6 +10,9 @@ const PageContainer = styled.div`
   padding: 2rem 1rem;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: #00141e; /* Dark background matching the screenshot */
+  min-height: 100vh;
+  color: #ffffff;
 `;
 
 const NavContainer = styled.div`
@@ -28,7 +31,7 @@ const NavButton = styled(Link)<{ $active?: boolean }>`
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.25rem;
-  background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : theme.colors.lightGray};
+  background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#1f3b4d'};
   color: white;
   border-radius: ${({ theme }) => theme.borderRadius.medium};
   text-decoration: none;
@@ -39,14 +42,14 @@ const NavButton = styled(Link)<{ $active?: boolean }>`
   border: 1px solid ${({ theme, $active }) => $active ? theme.colors.secondary : 'transparent'};
 
   &:hover {
-    background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#495057'};
+    background-color: ${({ theme, $active }) => $active ? theme.colors.secondary : '#2c4a5f'};
     transform: translateY(-2px);
   }
 `;
 
 const Title = styled.h1`
   font-family: ${({ theme }) => theme.fonts.heading};
-  color: ${({ theme }) => theme.colors.text};
+  color: #ffffff;
   margin-bottom: 2rem;
   text-align: center;
   font-size: 2.5rem;
@@ -54,18 +57,18 @@ const Title = styled.h1`
 
 const TableWrapper = styled.div`
   overflow-x: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   border-radius: 12px;
-  background-color: #ffffff;
-  border: 1px solid #e9ecef;
+  background-color: #0f2d40;
+  border: 1px solid #1f3b4d;
 `;
 
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  background-color: #ffffff;
-  color: #333333;
+  background-color: #0f2d40;
+  color: #ffffff;
   font-family: ${({ theme }) => theme.fonts.main};
   
   @media (min-width: 769px) {
@@ -74,27 +77,27 @@ const StyledTable = styled.table`
 `;
 
 const Thead = styled.thead`
-  background-color: #f8f9fa;
+  background-color: #0b2230;
 `;
 
 const Th = styled.th`
-  padding: 18px 24px;
-  text-align: left;
+  padding: 12px 16px;
+  text-align: center;
   font-weight: 700;
-  color: #495057;
+  color: #8da3b1;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
-  border-bottom: 2px solid #dee2e6;
+  border-bottom: 1px solid #1f3b4d;
   white-space: nowrap;
   
-  &:first-child {
-    text-align: center;
+  &:nth-child(2) {
+    text-align: left;
   }
 
   @media (max-width: 768px) {
     padding: 12px 8px;
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 `;
 
@@ -108,23 +111,28 @@ const Tr = styled.tr`
   transition: background-color 0.2s ease;
 
   &:not(:last-child) td {
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #1f3b4d;
   }
 
   &:hover {
-    background-color: #f1f3f5;
+    background-color: #1a3547;
   }
 `;
 
 const Td = styled.td`
-  padding: 16px 24px;
+  padding: 12px 16px;
   vertical-align: middle;
-  color: #495057;
-  font-size: 1rem;
+  color: #ffffff;
+  font-size: 0.95rem;
+  text-align: center;
+
+  &:nth-child(2) {
+    text-align: left;
+  }
 
   @media (max-width: 768px) {
-    padding: 12px 8px;
-    font-size: 0.9rem;
+    padding: 10px 6px;
+    font-size: 0.85rem;
   }
 `;
 
@@ -134,18 +142,29 @@ const MobileHiddenTd = styled(Td)`
   }
 `;
 
-
-const PositionTd = styled(Td)`
+const PositionBadge = styled.div<{ $rank: number }>`
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 700;
-  color: #adb5bd;
-  text-align: center;
-  width: 60px;
+  font-size: 0.9rem;
+  color: white;
+  margin: 0 auto;
+  background-color: ${({ $rank }) => {
+    if ($rank <= 6) return '#007bff'; // Title group (Blue)
+    if ($rank <= 10) return '#17a2b8'; // Playoff (Cyan/Teal)
+    if ($rank >= 11) return '#dc3545'; // Relegation (Red)
+    return 'transparent';
+  }};
 `;
 
 const TeamCell = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 
   @media (max-width: 768px) {
     gap: 8px;
@@ -153,10 +172,10 @@ const TeamCell = styled.div`
 `;
 
 const TeamName = styled.span`
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.primary};
-  font-size: 1.1rem;
-  letter-spacing: 0.02em;
+  font-weight: 600;
+  color: #ffffff;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
 
   @media (max-width: 768px) {
     font-size: 0.9rem;
@@ -164,8 +183,8 @@ const TeamName = styled.span`
 `;
 
 const TeamLogo = styled.img`
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 
   @media (max-width: 768px) {
@@ -175,13 +194,14 @@ const TeamLogo = styled.img`
 `;
 
 const PointsTd = styled(Td)`
-  font-weight: 800;
-  color: #212529;
-  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 1rem;
 `;
 
 const StatTd = styled(Td)`
   font-feature-settings: "tnum";
+  color: #ced4da;
 `;
 
 const MobileHiddenStatTd = styled(StatTd)`
@@ -192,25 +212,25 @@ const MobileHiddenStatTd = styled(StatTd)`
 
 const FormContainer = styled.div`
   display: flex;
-  gap: 4px;
+  gap: 2px;
   justify-content: center;
 `;
 
 const FormBadge = styled.div<{ $result: string }>`
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #fff;
   background-color: ${({ $result }) => {
     switch ($result) {
-      case 'W': return '#00c853'; // Jasnější zelená
-      case 'D': return '#ffc107'; // Žlutá
-      case 'L': return '#ff3d00'; // Červená
+      case 'W': return '#28a745'; // Green
+      case 'D': return '#fd7e14'; // Orange
+      case 'L': return '#dc3545'; // Red
       default: return '#6c757d';
     }
   }};
@@ -236,20 +256,25 @@ const TablePage: React.FC = () => {
           <Thead>
             <tr>
               <Th>#</Th>
-              <Th>Tým</Th>
+              <Th>TÝM</Th>
               <Th>Z</Th>
-              <MobileHiddenTh>Výhry</MobileHiddenTh>
-              <MobileHiddenTh>Remízy</MobileHiddenTh>
-              <MobileHiddenTh>Prohry</MobileHiddenTh>
-              <Th>Skóre</Th>
+              <MobileHiddenTh>V</MobileHiddenTh>
+              <MobileHiddenTh>R</MobileHiddenTh>
+              <MobileHiddenTh>P</MobileHiddenTh>
+              <Th>G</Th>
+              <Th>RS</Th>
               <Th>B</Th>
-              <MobileHiddenTh>Forma</MobileHiddenTh>
+              <MobileHiddenTh>FORMA</MobileHiddenTh>
             </tr>
           </Thead>
           <tbody>
             {table.map((entry, index) => (
               <Tr key={entry.id}>
-                <PositionTd>{index + 1}.</PositionTd>
+                <Td>
+                  <PositionBadge $rank={index + 1}>
+                    {index + 1}.
+                  </PositionBadge>
+                </Td>
                 <Td>
                   <TeamCell>
                     <TeamLogo src={getTeamLogo(entry.team.name, entry.team.logo)} alt={entry.team.name} />
@@ -261,6 +286,7 @@ const TablePage: React.FC = () => {
                 <MobileHiddenStatTd>{entry.drawn}</MobileHiddenStatTd>
                 <MobileHiddenStatTd>{entry.lost}</MobileHiddenStatTd>
                 <StatTd>{entry.goalsFor}:{entry.goalsAgainst}</StatTd>
+                <StatTd>{entry.goalDifference > 0 ? `+${entry.goalDifference}` : entry.goalDifference}</StatTd>
                 <PointsTd>{entry.points}</PointsTd>
                 <MobileHiddenTd>
                   <FormContainer>
