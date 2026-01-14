@@ -8,6 +8,7 @@ import {
   selectTopRedCards 
 } from '../redux/statsSelectors.ts';
 import Navigation from '../components/Navigation.tsx';
+import { getTeamLogo } from '../utils/teamLogos.ts';
 
 const PageContainer = styled.div`
   max-width: 1200px;
@@ -61,6 +62,21 @@ const ListItem = styled.li`
   }
 `;
 
+const InlineGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const TeamLogoSmall = styled.img`
+  width: 22px;
+  height: 22px;
+  border-radius: 0;
+  object-fit: contain;
+  background: transparent;
+  border: none;
+`;
+
 const PlayerName = styled.span`
   font-weight: 500;
   color: ${({ theme }) => theme.colors.text};
@@ -93,7 +109,10 @@ const StatsPage: React.FC = () => {
             {topScorers.length > 0 ? (
               topScorers.map(player => (
                 <ListItem key={player.id}>
-                  <PlayerName>{player.name}</PlayerName>
+                  <InlineGroup>
+                    <TeamLogoSmall src={getTeamLogo(player.teamName ?? '', undefined)} alt={player.teamName ?? ''} />
+                    <PlayerName>{player.name}</PlayerName>
+                  </InlineGroup>
                   <Count>{player.count}</Count>
                 </ListItem>
               ))
@@ -109,7 +128,10 @@ const StatsPage: React.FC = () => {
             {topAssists.length > 0 ? (
               topAssists.map(player => (
                 <ListItem key={player.id}>
-                  <PlayerName>{player.name}</PlayerName>
+                  <InlineGroup>
+                    <TeamLogoSmall src={getTeamLogo(player.teamName ?? '', undefined)} alt={player.teamName ?? ''} />
+                    <PlayerName>{player.name}</PlayerName>
+                  </InlineGroup>
                   <Count>{player.count}</Count>
                 </ListItem>
               ))
@@ -125,7 +147,10 @@ const StatsPage: React.FC = () => {
             {yellowCards.length > 0 ? (
               yellowCards.map(player => (
                 <ListItem key={player.id}>
-                  <PlayerName>{player.name}</PlayerName>
+                  <InlineGroup>
+                    <TeamLogoSmall src={getTeamLogo(player.teamName ?? '', undefined)} alt={player.teamName ?? ''} />
+                    <PlayerName>{player.name}</PlayerName>
+                  </InlineGroup>
                   <Count>{player.count}</Count>
                 </ListItem>
               ))
@@ -141,7 +166,10 @@ const StatsPage: React.FC = () => {
             {redCards.length > 0 ? (
               redCards.map(player => (
                 <ListItem key={player.id}>
-                  <PlayerName>{player.name}</PlayerName>
+                  <InlineGroup>
+                    <TeamLogoSmall src={getTeamLogo(player.teamName ?? '', undefined)} alt={player.teamName ?? ''} />
+                    <PlayerName>{player.name}</PlayerName>
+                  </InlineGroup>
                   <Count>{player.count}</Count>
                 </ListItem>
               ))
