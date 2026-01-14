@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import type { Match } from './matchesSlice.ts';
-import { TEAM_LIST } from '../teamData.ts';
+import type { Match } from './matchesSlice';
+import { TEAM_LIST } from '../teamData';
 
 // Definice typů
 interface TableEntry {
@@ -175,7 +175,7 @@ export const fetchTable = createAsyncThunk(
     try {
       // dynamicky spočítáme tabulku z lokálních zápasů
       // kvůli případnému importnímu cyklu načteme MANUAL_MATCHES lazy až tady
-      const { MANUAL_MATCHES } = await import('./matchesSlice.ts');
+      const { MANUAL_MATCHES } = await import('./matchesSlice');
       const allMatches: Match[] = MANUAL_MATCHES as Match[];
       const table = computeTableFromMatches(allMatches);
       return table;

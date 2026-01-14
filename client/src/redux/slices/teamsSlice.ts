@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import type { Team } from '../teamData.ts'
-import { TEAM_LIST } from '../teamData.ts'
+import type { Team } from '../teamData'
+import { TEAM_LIST } from '../teamData'
 
 interface TeamsState {
   teams: Team[]
