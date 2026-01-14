@@ -12,6 +12,11 @@ import TeamPage from './pages/TeamPage.tsx';
 import TablePage from './pages/TablePage.tsx';
 import StatsPage from './pages/StatsPage.tsx';
 
+import AdminDashboard from './pages/admin/AdminDashboard.tsx';
+import MatchEditor from './pages/admin/MatchEditor.tsx';
+import LoginPage from './pages/LoginPage.tsx';
+import ProtectedRoute from './components/ProtectedRoute.tsx';
+
 const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
@@ -26,6 +31,25 @@ const App: React.FC = () => {
             <Route path="/team/:id" element={<TeamPage />} />
             <Route path="/table" element={<TablePage />} />
             <Route path="/stats" element={<StatsPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            
+            {/* Protected Admin Routes */}
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin/match/:id" 
+              element={
+                <ProtectedRoute>
+                  <MatchEditor />
+                </ProtectedRoute>
+              } 
+            />
           </Routes>
         </main>
         <Footer />

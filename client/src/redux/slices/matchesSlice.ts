@@ -1,4 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+
+const API_URL = 'http://localhost:5000/api';
 
 export interface Match {
   id: string;
@@ -23,7 +26,7 @@ export interface Match {
   round?: string;
   events: Array<{
     id: string;
-    type: 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'goal_disallowed' | 'missed_penalty';
+    type: 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'goal_disallowed' | 'missed_penalty' | 'commentary';
     minute: number;
     team: 'home' | 'away';
     player?: {
@@ -5088,9 +5091,23 @@ export const fetchMatches = createAsyncThunk(
   'matches/fetchMatches',
   async (_, { rejectWithValue }) => {
     try {
-      return MANUAL_MATCHES;
+      const response = await axios.get(`${API_URL}/matches`);
+      return response.data;
     } catch (error) {
-      return rejectWithValue('Nepodařilo se načíst zápasy');
+      console.warn('API nedostupné, používám lokální data');
+      return MANUAL_MATCHES;
+    }
+  }
+);
+
+export const saveMatch = createAsyncThunk(
+  'matches/saveMatch',
+  async (match: Match, { rejectWithValue }) => {
+    try {
+      const response = await axios.put(`${API_URL}/matches/${match.id}`, match);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue('Chyba při ukládání na server');
     }
   }
 );
@@ -5099,9 +5116,11 @@ export const fetchLiveMatches = createAsyncThunk(
   'matches/fetchLiveMatches',
   async (_, { rejectWithValue }) => {
     try {
-      return MANUAL_MATCHES.filter(m => m.status === 'live');
+      const response = await axios.get(`${API_URL}/matches/live`);
+      return response.data;
     } catch (error) {
-      return rejectWithValue('Nepodařilo se načíst živé zápasy');
+      console.warn('API nedostupné, používám lokální data');
+      return MANUAL_MATCHES.filter(m => m.status === 'live');
     }
   }
 );
@@ -5110,11 +5129,13 @@ export const fetchMatchById = createAsyncThunk(
   'matches/fetchMatchById',
   async (id: string, { rejectWithValue }) => {
     try {
+      const response = await axios.get(`${API_URL}/matches/${id}`);
+      return response.data;
+    } catch (error) {
+       console.warn('API nedostupné, používám lokální data');
       const found = MANUAL_MATCHES.find(m => m.id === id);
       if (found) return found;
       return rejectWithValue('Zápas nenalezen');
-    } catch (error) {
-      return rejectWithValue('Nepodařilo se načíst detail zápasu');
     }
   }
 );
@@ -5133,6 +5154,26 @@ const matchesSlice = createSlice({
       );
       if (state.currentMatch && state.currentMatch.id === updatedMatch.id) {
         state.currentMatch = updatedMatch;
+      }
+    },
+    updateMatchEvents: (state, action) => {
+      const { matchId, events } = action.payload;
+      const matchIndex = state.matches.findIndex(m => m.id === matchId);
+      if (matchIndex !== -1) {
+        state.matches[matchIndex].events = events;
+        if (state.currentMatch && state.currentMatch.id === matchId) {
+          state.currentMatch.events = events;
+        }
+      }
+    },
+    updateMatchScore: (state, action) => {
+      const { matchId, score } = action.payload;
+      const matchIndex = state.matches.findIndex(m => m.id === matchId);
+      if (matchIndex !== -1) {
+        state.matches[matchIndex].score = score;
+        if (state.currentMatch && state.currentMatch.id === matchId) {
+          state.currentMatch.score = score;
+        }
       }
     }
   },
@@ -5173,9 +5214,19 @@ const matchesSlice = createSlice({
       .addCase(fetchMatchById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(saveMatch.fulfilled, (state, action) => {
+        const updatedMatch = action.payload;
+        const index = state.matches.findIndex(m => m.id === updatedMatch.id);
+        if (index !== -1) {
+          state.matches[index] = updatedMatch;
+        }
+        if (state.currentMatch && state.currentMatch.id === updatedMatch.id) {
+          state.currentMatch = updatedMatch;
+        }
       });
   }
 });
 
-export const { clearCurrentMatch, updateLiveMatch } = matchesSlice.actions;
+export const { clearCurrentMatch, updateLiveMatch, updateMatchEvents, updateMatchScore } = matchesSlice.actions;
 export default matchesSlice.reducer;

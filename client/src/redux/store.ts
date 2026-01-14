@@ -2,12 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import matchesReducer from './slices/matchesSlice.ts';
 import teamsReducer from './slices/teamsSlice.ts';
 import tableReducer from './slices/tableSlice.ts';
+import authReducer from './slices/authSlice.ts';
 
 export const store = configureStore({
   reducer: {
     matches: matchesReducer,
     teams: teamsReducer,
-    table: tableReducer
+    table: tableReducer,
+    auth: authReducer
   }
 });
 

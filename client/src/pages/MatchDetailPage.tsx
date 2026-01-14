@@ -413,6 +413,12 @@ const MatchDetailPage: React.FC = () => {
         >
           <span></span> Střídání
         </FilterButton>
+        <FilterButton 
+          active={activeFilter === 'commentary'} 
+          onClick={() => handleFilterChange('commentary')}
+        >
+          <span>💬</span> Komentář
+        </FilterButton>
       </FilterContainer>
 
       <TimelineSection>
@@ -462,15 +468,23 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
             e.type === 'yellow_card' ? '🟨' :
             e.type === 'red_card' ? '🟥' :
             e.type === 'goal_disallowed' ? '🚫' :
-            e.type === 'missed_penalty' ? '❌' : '🔁';
+            e.type === 'missed_penalty' ? '❌' : 
+            e.type === 'commentary' ? '💬' : '🔁';
             
           const minuteText = formatMinute(e.minute);
-          const playerText =
-            e.type === 'substitution'
-              ? `${(e.playerIn?.name || e.player?.name || '')}${e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : ''}`
-              : (e.player?.name ? `${e.player.name}` : '');
+          
+          let playerText = '';
+          if (e.type === 'substitution') {
+            playerText = `${(e.playerIn?.name || e.player?.name || '')}${e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : ''}`;
+          } else if (e.type === 'commentary') {
+            playerText = e.note; // For commentary, display the note as the main text
+          } else {
+            playerText = e.player?.name ? `${e.player.name}` : '';
+          }
+
           const assistText = e.assistPlayer?.name ? ` (${e.assistPlayer.name})` : '';
-          const noteText = e.note ? ` (${e.note})` : '';
+          // Only show note if it's NOT commentary (since we use note as main text for commentary)
+          const noteText = (e.note && e.type !== 'commentary') ? ` (${e.note})` : '';
           
           const content = (
             <>

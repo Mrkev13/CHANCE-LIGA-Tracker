@@ -57,3 +57,24 @@ exports.getMatchById = async (req, res) => {
 exports.getRawMatches = async (_req, res) => {
   res.json(allMatches);
 };
+
+exports.updateMatch = async (req, res) => {
+  const { id } = req.params;
+  const updatedData = req.body;
+  
+  const index = allMatches.findIndex(m => m.id === id);
+  if (index === -1) {
+    return res.status(404).json({ message: 'Zápas nenalezen' });
+  }
+  
+  // Merge data
+  allMatches[index] = { ...allMatches[index], ...updatedData, id };
+  
+  try {
+    fs.writeFileSync(path.join(__dirname, '../../parsed_matches.json'), JSON.stringify(allMatches, null, 2), 'utf-8');
+    res.json(allMatches[index]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Chyba při ukládání' });
+  }
+};
