@@ -2,10 +2,10 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
 import styled from 'styled-components';
-import { RootState, AppDispatch } from '../redux/store.ts';
-import { fetchTable } from '../redux/slices/tableSlice.ts';
-import { getTeamLogo } from '../utils/teamLogos.ts';
-import Navigation from '../components/Navigation.tsx';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchTable } from '../redux/slices/tableSlice';
+import { getTeamLogo } from '../utils/teamLogos';
+import Navigation from '../components/Navigation';
 
 const PageContainer = styled.div`
   padding: 2rem 1rem;

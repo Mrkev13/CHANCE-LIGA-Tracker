@@ -3,12 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { FaArrowUp } from 'react-icons/fa';
 import styled from 'styled-components';
-import { fetchMatches, Match } from '../redux/slices/matchesSlice.ts';
-import { TEAM_LIST } from '../redux/teamData.ts';
-import { RootState, AppDispatch } from '../redux/store.ts';
-import { theme } from '../styles/theme.ts';
-import { getTeamLogo } from '../utils/teamLogos.ts';
-import Navigation from '../components/Navigation.tsx';
+import { fetchMatches, Match } from '../redux/slices/matchesSlice';
+import { TEAM_LIST } from '../redux/teamData';
+import { RootState, AppDispatch } from '../redux/store';
+import { theme } from '../styles/theme';
+import { getTeamLogo } from '../utils/teamLogos';
+import Navigation from '../components/Navigation';
 
 const HomeContainer = styled.div`
   padding: 2rem 1rem;

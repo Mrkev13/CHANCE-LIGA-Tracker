@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState, AppDispatch } from '../redux/store.ts';
-import { fetchMatchById } from '../redux/slices/matchesSlice.ts';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchMatchById } from '../redux/slices/matchesSlice';
 import styled from 'styled-components';
-import { getTeamLogo } from '../utils/teamLogos.ts';
+import { getTeamLogo } from '../utils/teamLogos';
 
 const Container = styled.div`
   max-width: 1000px;
