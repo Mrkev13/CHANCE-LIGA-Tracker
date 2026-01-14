@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { RootState, AppDispatch } from '../../redux/store.ts';
-import { updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice.ts';
-import Navigation from '../../components/Navigation.tsx';
+import { RootState, AppDispatch } from '../../redux/store';
+import { updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice';
+import Navigation from '../../components/Navigation';
 
 const PageContainer = styled.div`
   max-width: 1200px;

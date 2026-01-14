@@ -2,9 +2,17 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const connectDB = require('./config/db');
 const apiRoutes = require('./api/routes');
 
 const app = express();
+
+// Connect to MongoDB
+if (process.env.MONGODB_URI) {
+  connectDB();
+} else {
+  console.warn('MONGODB_URI is not defined, running without database connection');
+}
 
 app.use(cors());
 app.use(express.json());

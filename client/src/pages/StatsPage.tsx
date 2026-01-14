@@ -6,9 +6,9 @@ import {
   selectTopAssists, 
   selectTopYellowCards, 
   selectTopRedCards 
-} from '../redux/statsSelectors.ts';
-import Navigation from '../components/Navigation.tsx';
-import { getTeamLogo } from '../utils/teamLogos.ts';
+} from '../redux/statsSelectors';
+import Navigation from '../components/Navigation';
+import { getTeamLogo } from '../utils/teamLogos';
 
 const PageContainer = styled.div`
   max-width: 1200px;

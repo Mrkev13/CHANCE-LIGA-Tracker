@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Navigate, useLocation } from 'react-router-dom';
-import { RootState } from '../redux/store.ts';
-import { logSecurityEvent } from '../redux/slices/authSlice.ts';
+import { RootState } from '../redux/store';
+import { logSecurityEvent } from '../redux/slices/authSlice';
 
 interface ProtectedRouteProps {
   children: React.ReactElement;

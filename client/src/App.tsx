@@ -1,21 +1,21 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
-import { GlobalStyle } from './styles/GlobalStyle.ts';
-import { theme } from './styles/theme.ts';
-import Header from './components/Header.tsx';
-import Footer from './components/Footer.tsx';
-import ScrollToTop from './components/ScrollToTop.tsx';
-import HomePage from './pages/HomePage.tsx';
-import MatchDetailPage from './pages/MatchDetailPage.tsx';
-import TeamPage from './pages/TeamPage.tsx';
-import TablePage from './pages/TablePage.tsx';
-import StatsPage from './pages/StatsPage.tsx';
+import { GlobalStyle } from './styles/GlobalStyle';
+import { theme } from './styles/theme';
+import Header from './components/Header';
+import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
+import HomePage from './pages/HomePage';
+import MatchDetailPage from './pages/MatchDetailPage';
+import TeamPage from './pages/TeamPage';
+import TablePage from './pages/TablePage';
+import StatsPage from './pages/StatsPage';
 
-import AdminDashboard from './pages/admin/AdminDashboard.tsx';
-import MatchEditor from './pages/admin/MatchEditor.tsx';
-import LoginPage from './pages/LoginPage.tsx';
-import ProtectedRoute from './components/ProtectedRoute.tsx';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import MatchEditor from './pages/admin/MatchEditor';
+import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const App: React.FC = () => {
   return (

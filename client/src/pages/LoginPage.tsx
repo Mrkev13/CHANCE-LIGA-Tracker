@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
-import { login, clearError } from '../redux/slices/authSlice.ts';
-import { RootState } from '../redux/store.ts';
-import Navigation from '../components/Navigation.tsx';
+import { login, clearError } from '../redux/slices/authSlice';
+import { RootState } from '../redux/store';
+import Navigation from '../components/Navigation';
 
 const PageContainer = styled.div`
   max-width: 400px;

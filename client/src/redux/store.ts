@@ -1,8 +1,8 @@
 import { configureStore } from '@reduxjs/toolkit';
-import matchesReducer from './slices/matchesSlice.ts';
-import teamsReducer from './slices/teamsSlice.ts';
-import tableReducer from './slices/tableSlice.ts';
-import authReducer from './slices/authSlice.ts';
+import matchesReducer from './slices/matchesSlice';
+import teamsReducer from './slices/teamsSlice';
+import tableReducer from './slices/tableSlice';
+import authReducer from './slices/authSlice';
 
 export const store = configureStore({
   reducer: {

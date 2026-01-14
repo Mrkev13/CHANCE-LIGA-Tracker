@@ -2,11 +2,11 @@ import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import { RootState, AppDispatch } from '../redux/store.ts';
-import { fetchTeams } from '../redux/slices/teamsSlice.ts';
-import { fetchMatches } from '../redux/slices/matchesSlice.ts';
-import Navigation from '../components/Navigation.tsx';
-import { getTeamLogo } from '../utils/teamLogos.ts';
+import { RootState, AppDispatch } from '../redux/store';
+import { fetchTeams } from '../redux/slices/teamsSlice';
+import { fetchMatches } from '../redux/slices/matchesSlice';
+import Navigation from '../components/Navigation';
+import { getTeamLogo } from '../utils/teamLogos';
 
 const PageContainer = styled.div`
   max-width: 1200px;
