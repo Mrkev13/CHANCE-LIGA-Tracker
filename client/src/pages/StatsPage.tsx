@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { 
   selectTopScorers, 
   selectTopAssists, 
@@ -9,6 +9,8 @@ import {
 } from '../redux/statsSelectors';
 import Navigation from '../components/Navigation';
 import { getTeamLogo } from '../utils/teamLogos';
+import { fetchMatches } from '../redux/slices/matchesSlice';
+import { RootState, AppDispatch } from '../redux/store';
 
 const PageContainer = styled.div`
   max-width: 1200px;
@@ -93,10 +95,18 @@ const Count = styled.span`
 `;
 
 const StatsPage: React.FC = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const matchesLoaded = useSelector((state: RootState) => state.matches.matches.length > 0);
   const topScorers = useSelector(selectTopScorers);
   const topAssists = useSelector(selectTopAssists);
   const yellowCards = useSelector(selectTopYellowCards);
   const redCards = useSelector(selectTopRedCards);
+
+  useEffect(() => {
+    if (!matchesLoaded) {
+      dispatch(fetchMatches());
+    }
+  }, [dispatch, matchesLoaded]);
 
   return (
     <PageContainer>

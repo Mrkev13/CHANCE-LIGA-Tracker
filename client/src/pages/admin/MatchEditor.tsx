@@ -4,6 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { RootState, AppDispatch } from '../../redux/store';
 import { updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice';
+import { selectAllPlayerNames } from '../../redux/statsSelectors';
 import Navigation from '../../components/Navigation';
 
 const PageContainer = styled.div`
@@ -135,6 +136,7 @@ const MatchEditor: React.FC = () => {
   const match = useSelector((state: RootState) => 
     state.matches.matches.find(m => m.id === id)
   );
+  const allPlayerNames = useSelector(selectAllPlayerNames);
 
   const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution' | 'commentary'>('goal');
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
@@ -327,6 +329,11 @@ const MatchEditor: React.FC = () => {
   return (
     <PageContainer>
       <Navigation />
+      <datalist id="player-names">
+        {allPlayerNames.map((name) => (
+          <option key={name} value={name} />
+        ))}
+      </datalist>
       <Header>
         <h1>Editor Zápasu</h1>
         <Button onClick={() => navigate('/admin')}>Zpět na přehled</Button>
@@ -383,11 +390,11 @@ const MatchEditor: React.FC = () => {
           <>
             <FormGroup>
               <Label>Střelec</Label>
-              <Input value={player} onChange={(e) => setPlayer(e.target.value)} placeholder="Jméno střelce" />
+              <Input list="player-names" value={player} onChange={(e) => setPlayer(e.target.value)} placeholder="Jméno střelce" />
             </FormGroup>
             <FormGroup>
               <Label>Asistence (nepovinné)</Label>
-              <Input value={assist} onChange={(e) => setAssist(e.target.value)} placeholder="Jméno asistenta" />
+              <Input list="player-names" value={assist} onChange={(e) => setAssist(e.target.value)} placeholder="Jméno asistenta" />
             </FormGroup>
           </>
         )}

@@ -73,9 +73,10 @@ const SectionTitle = styled.h3`
 `;
 
 const MatchItem = styled.div<{ result?: 'win' | 'draw' | 'loss' }>`
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 90px 1.5fr auto 1.5fr 140px;
   align-items: center;
+  gap: 1rem;
   padding: 1rem;
   border-bottom: 1px solid #444;
   color: #f0f0f0;
@@ -87,6 +88,42 @@ const MatchItem = styled.div<{ result?: 'win' | 'draw' | 'loss' }>`
   &:last-child {
     border-bottom: none;
   }
+`;
+
+const MatchDate = styled.span`
+  min-width: 90px;
+  font-size: 0.9rem;
+  color: #ccc;
+`;
+
+const TeamSide = styled.div<{ highlight?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: ${({ highlight }) => (highlight ? 600 : 400)};
+`;
+
+const TeamLogoSmall = styled.img`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: contain;
+  background: #2a2a2a;
+  padding: 2px;
+`;
+
+const ScoreBadge = styled.div`
+  min-width: 64px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+`;
+
+const MatchExtra = styled.span`
+  min-width: 120px;
+  text-align: right;
+  font-size: 0.9rem;
+  color: #ccc;
 `;
 
 const FormContainer = styled.div`
@@ -231,9 +268,25 @@ const TeamPage: React.FC = () => {
               
               return (
                 <MatchItem key={m.id} result={result}>
-                  <span>{new Date(m.date).toLocaleDateString()}</span>
-                  <span>{m.homeTeam.name} vs {m.awayTeam.name}</span>
-                  <strong>{m.score.home}:{m.score.away}</strong>
+                  <MatchDate>{new Date(m.date).toLocaleDateString()}</MatchDate>
+                  <TeamSide highlight={m.homeTeam.id === id}>
+                    <TeamLogoSmall
+                      src={getTeamLogo(m.homeTeam.name, m.homeTeam.logo)}
+                      alt={m.homeTeam.name}
+                    />
+                    <span>{m.homeTeam.name}</span>
+                  </TeamSide>
+                  <ScoreBadge>
+                    {m.score.home}:{m.score.away}
+                  </ScoreBadge>
+                  <TeamSide highlight={m.awayTeam.id === id}>
+                    <span>{m.awayTeam.name}</span>
+                    <TeamLogoSmall
+                      src={getTeamLogo(m.awayTeam.name, m.awayTeam.logo)}
+                      alt={m.awayTeam.name}
+                    />
+                  </TeamSide>
+                  <MatchExtra />
                 </MatchItem>
               );
             })}
@@ -244,9 +297,23 @@ const TeamPage: React.FC = () => {
             <SectionTitle>Plánované Zápasy</SectionTitle>
             {stats.scheduled.map(m => (
               <MatchItem key={m.id}>
-                <span>{new Date(m.date).toLocaleDateString()}</span>
-                <span>{m.homeTeam.name} vs {m.awayTeam.name}</span>
-                <span>{m.stadium}</span>
+                <MatchDate>{new Date(m.date).toLocaleDateString()}</MatchDate>
+                <TeamSide highlight={m.homeTeam.id === id}>
+                  <TeamLogoSmall
+                    src={getTeamLogo(m.homeTeam.name, m.homeTeam.logo)}
+                    alt={m.homeTeam.name}
+                  />
+                  <span>{m.homeTeam.name}</span>
+                </TeamSide>
+                <ScoreBadge>vs</ScoreBadge>
+                <TeamSide highlight={m.awayTeam.id === id}>
+                  <span>{m.awayTeam.name}</span>
+                  <TeamLogoSmall
+                    src={getTeamLogo(m.awayTeam.name, m.awayTeam.logo)}
+                    alt={m.awayTeam.name}
+                  />
+                </TeamSide>
+                <MatchExtra>{m.stadium}</MatchExtra>
               </MatchItem>
             ))}
             {stats.scheduled.length === 0 && <p>Žádné plánované zápasy</p>}

@@ -24,14 +24,18 @@ const selectPlayerStatsRaw = createSelector(
 
     const updateStat = (
       map: Map<string, PlayerStat>,
-      id: string,
+      originalId: string, // ID z eventu (může být náhodné)
       name: string,
       teamId?: string,
       teamName?: string,
       roundNum?: number,
       dateIso?: string
     ) => {
-      const existing = map.get(id);
+      // Použijeme jméno jako klíč pro agregaci, aby se sloučily statistiky 
+      // hráče i když má v různých zápasech různé vygenerované ID.
+      const key = name.trim(); 
+      
+      const existing = map.get(key);
       if (existing) {
         existing.count += 1;
         const prevRound = existing.lastRound ?? -1;
@@ -45,7 +49,9 @@ const selectPlayerStatsRaw = createSelector(
           existing.lastDate = dateIso;
         }
       } else {
-        map.set(id, { id, name, count: 1, teamId, teamName, lastRound: roundNum, lastDate: dateIso });
+        // Použijeme originalId, ale pokud jich bude víc, zůstane to první.
+        // To nevadí, pro zobrazení potřebujeme hlavně jméno a počet.
+        map.set(key, { id: originalId, name, count: 1, teamId, teamName, lastRound: roundNum, lastDate: dateIso });
       }
     };
 
@@ -101,4 +107,16 @@ export const selectTopYellowCards = createSelector(
 export const selectTopRedCards = createSelector(
   [selectPlayerStatsRaw],
   (stats) => sortAndSlice(stats.redCards)
+);
+
+export const selectAllPlayerNames = createSelector(
+  [selectPlayerStatsRaw],
+  (stats) => {
+    const names = new Set<string>();
+    stats.goals.forEach(p => names.add(p.name));
+    stats.assists.forEach(p => names.add(p.name));
+    stats.yellowCards.forEach(p => names.add(p.name));
+    stats.redCards.forEach(p => names.add(p.name));
+    return Array.from(names).sort();
+  }
 );

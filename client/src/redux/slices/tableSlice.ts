@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { Match } from './matchesSlice';
 import { TEAM_LIST } from '../teamData';
+import type { RootState } from '../store';
 
 // Definice typů
 interface TableEntry {
@@ -168,16 +169,29 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
   return table;
 }
 
-// Asynchronní akce pro načtení tabulky – počítá se z lokálních zápasů
-export const fetchTable = createAsyncThunk(
+// Asynchronní akce pro načtení tabulky – preferuje aktuální zápasy z Redux stavu,
+// pokud nejsou k dispozici, použije lokální MANUAL_MATCHES
+export const fetchTable = createAsyncThunk<
+  TableEntry[],
+  void,
+  { state: RootState; rejectValue: string }
+>(
   'table/fetchTable',
-  async (_, { rejectWithValue }) => {
+  async (_, { getState, rejectWithValue }) => {
     try {
-      // dynamicky spočítáme tabulku z lokálních zápasů
-      // kvůli případnému importnímu cyklu načteme MANUAL_MATCHES lazy až tady
-      const { MANUAL_MATCHES } = await import('./matchesSlice');
-      const allMatches: Match[] = MANUAL_MATCHES as Match[];
-      const table = computeTableFromMatches(allMatches);
+      const state = getState();
+      const matchesFromState = state.matches?.matches as Match[] | undefined;
+
+      let sourceMatches: Match[];
+
+      if (Array.isArray(matchesFromState) && matchesFromState.length > 0) {
+        sourceMatches = matchesFromState;
+      } else {
+        const { MANUAL_MATCHES } = await import('./matchesSlice');
+        sourceMatches = MANUAL_MATCHES as Match[];
+      }
+
+      const table = computeTableFromMatches(sourceMatches);
       return table;
     } catch (error) {
       return rejectWithValue('Nepodařilo se načíst tabulku ligy.');

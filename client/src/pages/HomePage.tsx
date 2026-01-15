@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowUp } from 'react-icons/fa';
 import styled from 'styled-components';
 import { fetchMatches, Match } from '../redux/slices/matchesSlice';
@@ -408,13 +408,13 @@ const DropdownItem = styled.button<{ isSelected: boolean }>`
 
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const { matches, loading, error } = useSelector(
     (state: RootState) => state.matches
   );
   
   const [selectedRound, setSelectedRound] = useState<string>(() => sessionStorage.getItem('homeRound') || 'all');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [selectedTeamId, setSelectedTeamId] = useState<string>(() => sessionStorage.getItem('homeTeam') || 'all');
   const [isTeamOpen, setIsTeamOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -464,10 +464,6 @@ const HomePage: React.FC = () => {
     sessionStorage.setItem('homeRound', selectedRound);
   }, [selectedRound]);
   
-  useEffect(() => {
-    sessionStorage.setItem('homeTeam', selectedTeamId);
-  }, [selectedTeamId]);
-
   // Seskupení podle kola + řazení kol dle požadavku
   const { roundsMap, sortedRoundKeys } = useMemo(() => {
     const map: Record<string, Match[]> = {};
@@ -573,30 +569,29 @@ const HomePage: React.FC = () => {
                 aria-haspopup="listbox"
                 aria-expanded={isTeamOpen}
               >
-                {selectedTeamId === 'all' ? 'Všechny týmy' : TEAM_LIST.find(t => t.id === selectedTeamId)?.name || 'Tým'}
+                Všechny týmy
               </TeamButton>
               <TeamMenu isOpen={isTeamOpen} role="listbox">
                 <TeamItem
-                  isSelected={selectedTeamId === 'all'}
+                  isSelected={true}
                   onClick={() => {
-                    setSelectedTeamId('all');
                     setIsTeamOpen(false);
                   }}
                   role="option"
-                  aria-selected={selectedTeamId === 'all'}
+                  aria-selected={true}
                 >
                   Všechny týmy
                 </TeamItem>
                 {TEAM_LIST.map(team => (
                   <TeamItem
                     key={team.id}
-                    isSelected={selectedTeamId === team.id}
+                    isSelected={false}
                     onClick={() => {
-                      setSelectedTeamId(team.id);
+                      navigate(`/team/${team.id}`);
                       setIsTeamOpen(false);
                     }}
                     role="option"
-                    aria-selected={selectedTeamId === team.id}
+                    aria-selected={false}
                   >
                     <img src={getTeamLogo(team.name, team.logo)} alt={team.name} style={{ width: 22, height: 22, objectFit: 'contain' }} />
                     {team.name}
@@ -613,11 +608,7 @@ const HomePage: React.FC = () => {
                 let roundMatches = roundsMap[roundKey]
                   .sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 
-                if (selectedTeamId !== 'all') {
-                  roundMatches = roundMatches.filter((m: Match) => 
-                    m.homeTeam.id === selectedTeamId || m.awayTeam.id === selectedTeamId
-                  );
-                } else if (selectedRound === 'all') {
+                if (selectedRound === 'all') {
                   roundMatches = roundMatches.slice(0, 8);
                 }
 
