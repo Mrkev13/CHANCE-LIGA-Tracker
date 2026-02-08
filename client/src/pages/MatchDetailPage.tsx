@@ -323,19 +323,23 @@ const MatchDetailPage: React.FC = () => {
     return <div>Zápas nenalezen</div>;
   }
 
-  const statusLabel = currentMatch.status === 'live'
+  const hasEvents = currentMatch.events && currentMatch.events.length > 0;
+  // If match has events but status is scheduled, treat it as live
+  const effectiveStatus = (currentMatch.status === 'scheduled' && hasEvents) ? 'live' : currentMatch.status;
+
+  const statusLabel = effectiveStatus === 'live'
     ? 'ŽIVĚ'
-    : currentMatch.status === 'finished'
+    : effectiveStatus === 'finished'
       ? 'KONEC'
-      : currentMatch.status === 'awarded'
+      : effectiveStatus === 'awarded'
         ? 'KONTUMACE'
-        : currentMatch.status === 'canceled'
+        : effectiveStatus === 'canceled'
           ? 'ZRUŠENO'
-          : currentMatch.status === 'not_played'
+          : effectiveStatus === 'not_played'
             ? 'NEODEHRÁNO'
             : 'NAPLÁNOVÁNO';
 
-  const combinedScore = (currentMatch.status === 'scheduled' || currentMatch.status === 'canceled' || currentMatch.status === 'not_played')
+  const combinedScore = (effectiveStatus === 'scheduled' || effectiveStatus === 'canceled' || effectiveStatus === 'not_played')
     ? '-:-'
     : `${currentMatch.score.home}-${currentMatch.score.away}`;
 
@@ -413,12 +417,6 @@ const MatchDetailPage: React.FC = () => {
         >
           <span></span> Střídání
         </FilterButton>
-        <FilterButton 
-          active={activeFilter === 'commentary'} 
-          onClick={() => handleFilterChange('commentary')}
-        >
-          <span>💬</span> Komentář
-        </FilterButton>
       </FilterContainer>
 
       <TimelineSection>
@@ -437,21 +435,52 @@ const MatchDetailPage: React.FC = () => {
 
 export default MatchDetailPage;
 
-function formatMinute(m: number): string {
-  if (m >= 46 && m <= 54) return `45+${m - 45}`;
-  if (m >= 91) return `90+${m - 90}`;
-  return String(m);
+function formatMinute(m: string | number): string {
+  if (typeof m === 'string' && m.includes('+')) return m;
+  const val = Number(m);
+  if (isNaN(val)) return String(m);
+  
+  // Removed automatic conversion of 46-54 to 45+X because 46 is start of 2nd half
+  // Also removed 91+ conversion to respect user input (user can type 90+1 if they want)
+  
+  return String(val);
 }
 
-function isFirstHalf(m: number): boolean {
-  return m <= 45 || (m >= 46 && m <= 54);
+function isFirstHalf(m: string | number): string | boolean {
+  // Check explicit 45+ format first
+  if (String(m).includes('45+')) return true;
+  if (String(m).includes('90+')) return false;
+
+  const val = parseInt(String(m));
+  if (isNaN(val)) return false; // Fallback
+  
+  // Standard time: <= 45 is first half. 46+ is second half.
+  // Note: 45+X strings are handled above. 
+  // If input is just number 46, it is 2nd half.
+  return val <= 45;
 }
 
 function renderHalf(title: string, match: any, half: 'first' | 'second', activeFilter: string) {
-  const events = [...match.events].sort((a: any, b: any) => a.minute - b.minute);
+  const events = [...match.events].sort((a: any, b: any) => {
+     const minA = parseInt(a.minute);
+     const minB = parseInt(b.minute);
+     if (minA !== minB) return minA - minB;
+     const isPlusA = String(a.minute).includes('+');
+     const isPlusB = String(b.minute).includes('+');
+     if (isPlusA && !isPlusB) return 1;
+     if (!isPlusA && isPlusB) return -1;
+     if (isPlusA && isPlusB) {
+       const extraA = parseInt(String(a.minute).split('+')[1] || '0');
+       const extraB = parseInt(String(b.minute).split('+')[1] || '0');
+       return extraA - extraB;
+     }
+     return 0;
+  });
+
   const filtered = events.filter((e: any) =>
     (half === 'first' ? isFirstHalf(e.minute) : !isFirstHalf(e.minute)) &&
-    (activeFilter === 'all' || e.type === activeFilter)
+    (activeFilter === 'all' || e.type === activeFilter || 
+      (activeFilter === 'goal' && (e.type === 'goal_disallowed' || e.type === 'missed_penalty')))
   );
   
   if (filtered.length === 0) return null;
@@ -468,23 +497,20 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
             e.type === 'yellow_card' ? '🟨' :
             e.type === 'red_card' ? '🟥' :
             e.type === 'goal_disallowed' ? '🚫' :
-            e.type === 'missed_penalty' ? '❌' : 
-            e.type === 'commentary' ? '💬' : '🔁';
+            e.type === 'missed_penalty' ? '❌' : '🔁';
             
           const minuteText = formatMinute(e.minute);
           
           let playerText = '';
           if (e.type === 'substitution') {
             playerText = `${(e.playerIn?.name || e.player?.name || '')}${e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : ''}`;
-          } else if (e.type === 'commentary') {
-            playerText = e.note; // For commentary, display the note as the main text
           } else {
             playerText = e.player?.name ? `${e.player.name}` : '';
           }
 
           const assistText = e.assistPlayer?.name ? ` (${e.assistPlayer.name})` : '';
           // Only show note if it's NOT commentary (since we use note as main text for commentary)
-          const noteText = (e.note && e.type !== 'commentary') ? ` (${e.note})` : '';
+          const noteText = e.note ? ` (${e.note})` : '';
           
           const content = (
             <>

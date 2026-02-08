@@ -109,13 +109,22 @@ const AdminDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const { matches, loading } = useSelector((state: RootState) => state.matches);
-  const [selectedRound, setSelectedRound] = useState<string>('all');
+  
+  // Initialize state from sessionStorage if available, otherwise 'all'
+  const [selectedRound, setSelectedRound] = useState<string>(() => {
+    return sessionStorage.getItem('adminSelectedRound') || 'all';
+  });
 
   useEffect(() => {
     if (matches.length === 0) {
       dispatch(fetchMatches());
     }
   }, [dispatch, matches.length]);
+
+  // Update sessionStorage when selection changes
+  useEffect(() => {
+    sessionStorage.setItem('adminSelectedRound', selectedRound);
+  }, [selectedRound]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -133,6 +142,27 @@ const AdminDashboard: React.FC = () => {
   };
 
   if (loading) return <PageContainer>Načítání...</PageContainer>;
+
+  const getStatusLabel = (match: any) => {
+    const hasEvents = match.events && match.events.length > 0;
+    // If match has events but is scheduled, treat as live (unless we know it's finished)
+    // However, for admin, maybe we should show the real status? 
+    // User requested "místo scheduled by měl být finished".
+    // If we want to show 'live' when events exist, we can. 
+    // But if it's 1:0 and over, it should be finished. 
+    // We'll stick to 'live' as effective status for scheduled+events.
+    const effectiveStatus = (match.status === 'scheduled' && hasEvents) ? 'live' : match.status;
+
+    switch (effectiveStatus) {
+      case 'live': return 'ŽIVĚ';
+      case 'finished': return 'KONEC';
+      case 'awarded': return 'KONTUMACE';
+      case 'canceled': return 'ZRUŠENO';
+      case 'not_played': return 'NEODEHRÁNO';
+      case 'scheduled': return 'NAPLÁNOVÁNO';
+      default: return effectiveStatus;
+    }
+  };
 
   return (
     <PageContainer>
@@ -157,7 +187,7 @@ const AdminDashboard: React.FC = () => {
             <MatchInfo>
               <Teams>{match.homeTeam.name} vs {match.awayTeam.name}</Teams>
               <Details>
-                {new Date(match.date).toLocaleDateString()} | {match.score.home}:{match.score.away} | {match.status}
+                {new Date(match.date).toLocaleDateString()} | {match.score.home}:{match.score.away} | {getStatusLabel(match)}
               </Details>
             </MatchInfo>
             <EditButton onClick={() => handleEdit(match.id)}>

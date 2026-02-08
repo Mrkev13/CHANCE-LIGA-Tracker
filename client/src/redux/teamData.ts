@@ -1,4 +1,10 @@
 import teamsData from '../shared/teams.json';
+export interface Player {
+  id: string;
+  name: string;
+  position?: string;
+}
+
 export interface Team {
   id: string;
   name: string;
@@ -6,6 +12,7 @@ export interface Team {
   stadium?: string;
   foundedYear?: number;
   coach?: string;
+  players?: Player[];
 }
 
 export const TEAM_LIST: Team[] = teamsData as Team[];

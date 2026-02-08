@@ -475,17 +475,18 @@ const HomePage: React.FC = () => {
       }
     });
     const keys = Object.keys(map);
-    const playedStatuses: Match['status'][] = ['finished', 'live'];
-    const roundLastPlayedAt: Record<string, number> = {};
-    keys.forEach((rk) => {
-      const played = map[rk]
-        .filter((m) => playedStatuses.includes(m.status))
-        .map((m) => new Date(m.date).getTime());
-      roundLastPlayedAt[rk] = played.length ? Math.max(...played) : -1;
-    });
-    const latestPlayedRound = keys
-      .filter((rk) => roundLastPlayedAt[rk] !== -1)
-      .sort((a, b) => roundLastPlayedAt[b] - roundLastPlayedAt[a])[0];
+    
+    // Find highest round number that has at least one 'finished' or 'live' match
+    const finishedOrLiveRounds = keys.filter(rk => 
+      map[rk].some(m => m.status === 'finished' || m.status === 'live')
+    );
+    
+    // Sort descending by round number
+    finishedOrLiveRounds.sort((a, b) => Number(b) - Number(a));
+    
+    // The "current" round is the highest finished/live round
+    const latestPlayedRound = finishedOrLiveRounds.length > 0 ? finishedOrLiveRounds[0] : null;
+
     const remainingDesc = keys
       .filter((rk) => rk !== latestPlayedRound)
       .sort((a, b) => Number(b) - Number(a));
@@ -618,26 +619,30 @@ const HomePage: React.FC = () => {
                   <div key={roundKey} style={{ marginBottom: '1.5rem' }}>
                     {selectedRound === 'all' && <SectionTitle>Kolo {roundKey}</SectionTitle>}
                     <MatchesGrid>
-                      {roundMatches.map((match: Match) => (
+                      {roundMatches.map((match: Match) => {
+                        const hasEvents = match.events && match.events.length > 0;
+                        const effectiveStatus = (match.status === 'scheduled' && hasEvents) ? 'live' : match.status;
+                        
+                        return (
                         <MatchCard 
                           key={match.id} 
                           to={`/match/${match.id}`}
-                          className={match.status === 'live' ? 'live' : ''}
+                          className={effectiveStatus === 'live' ? 'live' : ''}
                           onClick={() => sessionStorage.setItem('homeScroll', String(window.scrollY))}
                         >
                           <MatchHeader>
                             <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>
                             <HeaderRight>
-                              <MatchStatus status={match.status}>
-                                {match.status === 'live' 
+                              <MatchStatus status={effectiveStatus}>
+                                {effectiveStatus === 'live' 
                                   ? 'ŽIVĚ' 
-                                  : match.status === 'finished' 
+                                  : effectiveStatus === 'finished' 
                                     ? 'KONEC' 
-                                    : match.status === 'awarded'
+                                    : effectiveStatus === 'awarded'
                                       ? 'KONTUMACE'
-                                      : match.status === 'canceled'
+                                      : effectiveStatus === 'canceled'
                                         ? 'ZRUŠENO'
-                                        : match.status === 'not_played'
+                                        : effectiveStatus === 'not_played'
                                           ? 'NEODEHRÁNO'
                                           : 'NAPLÁNOVÁNO'}
                               </MatchStatus>
@@ -652,7 +657,7 @@ const HomePage: React.FC = () => {
                             
                             <ScoreSection>
                               <VersusScore>
-                                {match.status === 'scheduled' || match.status === 'canceled' || match.status === 'not_played' 
+                                {effectiveStatus === 'scheduled' || effectiveStatus === 'canceled' || effectiveStatus === 'not_played' 
                                   ? '-:-' 
                                   : `${match.score.home}:${match.score.away}`}
                               </VersusScore>
@@ -671,7 +676,8 @@ const HomePage: React.FC = () => {
                             </MatchDate>
                           ) : null}
                         </MatchCard>
-                      ))}
+                        );
+                      })}
                     </MatchesGrid>
                   </div>
                 );

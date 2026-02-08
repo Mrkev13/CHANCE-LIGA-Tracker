@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { RootState, AppDispatch } from '../../redux/store';
 import { updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice';
 import { selectAllPlayerNames } from '../../redux/statsSelectors';
+import { TEAM_BY_ID } from '../../redux/teamData';
 import Navigation from '../../components/Navigation';
 
 const PageContainer = styled.div`
@@ -129,6 +130,19 @@ const EventItem = styled.div`
   color: white;
 `;
 
+// Helper to recalculate score from events
+const calculateScoreFromEvents = (events: any[]) => {
+  let home = 0;
+  let away = 0;
+  events.forEach(e => {
+    if (e.type === 'goal') {
+      if (e.team === 'home') home++;
+      else away++;
+    }
+  });
+  return { home, away };
+};
+
 const MatchEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
@@ -136,9 +150,36 @@ const MatchEditor: React.FC = () => {
   const match = useSelector((state: RootState) => 
     state.matches.matches.find(m => m.id === id)
   );
+  
+  // Get all matches to gather historical player data
+  const allMatches = useSelector((state: RootState) => state.matches.matches);
   const allPlayerNames = useSelector(selectAllPlayerNames);
 
-  const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution' | 'commentary'>('goal');
+  // Get full team data including players from static file
+  const homeTeamData = match ? TEAM_BY_ID[match.homeTeam.id] : null;
+  const awayTeamData = match ? TEAM_BY_ID[match.awayTeam.id] : null;
+
+  const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution'>('goal');
+  // Subtype for goal tab
+  const [goalType, setGoalType] = useState<'goal' | 'goal_disallowed' | 'missed_penalty'>('goal');
+  const [isInjury, setIsInjury] = useState(false);
+
+  // Helper for formatting player name: "David Douděra" -> "Douděra D."
+  const formatPlayerName = (fullName: string) => {
+    if (!fullName) return '';
+    const parts = fullName.trim().split(/\s+/);
+    if (parts.length < 2) return fullName;
+    const surname = parts.slice(1).join(' ');
+    const firstname = parts[0];
+    return `${surname} ${firstname.charAt(0)}.`;
+  };
+
+  const NOTE_OPTIONS = [
+    'gól', 'penalta', 'neuznaný gól', 'faul', 'ofsajd', 'ruka', 
+    'žlutá karta', 'podražení', 'držení', 'nafilmování/pád', 
+    'nesportovní chování', 'hrubost', 'STOP na další zápas'
+  ];
+  
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   
   // Form State
@@ -154,17 +195,23 @@ const MatchEditor: React.FC = () => {
   // Score State
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
+  const [status, setStatus] = useState<'scheduled' | 'live' | 'finished' | 'awarded' | 'canceled' | 'not_played'>('scheduled');
 
   useEffect(() => {
     if (match) {
       setHomeScore(match.score.home);
       setAwayScore(match.score.away);
+      setStatus(match.status);
     }
   }, [match]);
 
   if (!match) return <PageContainer>Zápas nenalezen</PageContainer>;
+  
+  const handleBack = () => {
+    navigate('/admin');
+  };
 
-  const handleUpdateScore = async () => {
+  const handleUpdateMatchInfo = async () => {
     const newScore = { home: homeScore, away: awayScore };
     
     // Optimistic Update
@@ -175,8 +222,8 @@ const MatchEditor: React.FC = () => {
     
     // Save to Server
     try {
-      await dispatch(saveMatch({ ...match, score: newScore })).unwrap();
-      alert('Skóre uloženo na server');
+      await dispatch(saveMatch({ ...match, score: newScore, status: status })).unwrap();
+      alert('Informace o zápasu uloženy na server');
     } catch (err) {
       alert('Chyba: Nepodařilo se uložit na server. Zkontrolujte, zda server běží.');
     }
@@ -191,13 +238,16 @@ const MatchEditor: React.FC = () => {
     if (event.type === 'yellow_card' || event.type === 'red_card') {
       setEventType('card');
       setCardType(event.type);
+    } else if (event.type === 'goal' || event.type === 'goal_disallowed' || event.type === 'missed_penalty') {
+      setEventType('goal');
+      setGoalType(event.type);
     } else {
       setEventType(event.type);
     }
     
     setNote(event.note || '');
     
-    if (event.type === 'goal') {
+    if (event.type === 'goal' || event.type === 'goal_disallowed' || event.type === 'missed_penalty') {
       setPlayer(event.player?.name || '');
       setAssist(event.assistPlayer?.name || '');
     } else if (event.type === 'yellow_card' || event.type === 'red_card') {
@@ -211,7 +261,7 @@ const MatchEditor: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleCancelEdit = () => {
+  const resetForm = (keepType = false) => {
     setEditingEventId(null);
     setMinute('');
     setPlayer('');
@@ -219,15 +269,27 @@ const MatchEditor: React.FC = () => {
     setPlayerIn('');
     setPlayerOut('');
     setNote('');
-    setEventType('goal');
+    setIsInjury(false);
+    
+    if (!keepType) {
+      setEventType('goal');
+      setGoalType('goal');
+      setCardType('yellow_card');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    resetForm(false);
   };
 
   const validateEvent = () => {
-    if (!minute || isNaN(Number(minute))) return 'Minuta musí být číslo';
-    if (eventType === 'goal' && !player) return 'Musíte zadat střelce';
+    // Regex for minute: allows simple numbers (1-120) or added time format (45+2, 90+4)
+    const minuteRegex = /^([1-9][0-9]?|1[0-1][0-9]|120)(\+[0-9]+)?$/;
+    if (!minute || !minuteRegex.test(minute)) return 'Minuta musí být číslo (např. 45) nebo nastavený čas (např. 90+2)';
+    
+    if (eventType === 'goal' && !player) return 'Musíte zadat hráče (střelce/aktéra)';
     if (eventType === 'card' && !player) return 'Musíte zadat hráče';
     if (eventType === 'substitution' && (!playerIn || !playerOut)) return 'Musíte zadat oba hráče';
-    if (eventType === 'commentary' && !note) return 'Musíte zadat text komentáře';
 
     // Only check cards if NOT editing (to avoid blocking edit of existing event)
     if (!editingEventId && eventType === 'card' && match) {
@@ -250,32 +312,15 @@ const MatchEditor: React.FC = () => {
     }
 
     const newEvent: any = {
-      minute: Number(minute),
+      minute: minute, // Keep as string to support 90+1
       team,
       note
     };
 
-    let newScore = { home: homeScore, away: awayScore };
-
     if (eventType === 'goal') {
-      newEvent.type = 'goal';
+      newEvent.type = goalType;
       newEvent.player = { id: `p_${Math.random()}`, name: player };
-      if (assist) newEvent.assistPlayer = { id: `p_${Math.random()}`, name: assist };
-      
-      // Calculate new score only if adding new goal, OR if editing and we want to recalc? 
-      // Simplified: We assume manual score edit for corrections, but auto-increment for new goals.
-      // If editing, we DON'T change score automatically to avoid mess.
-      if (!editingEventId) {
-        const isHome = team === 'home';
-        newScore = { 
-          home: isHome ? homeScore + 1 : homeScore,
-          away: !isHome ? awayScore + 1 : awayScore
-        };
-        setHomeScore(newScore.home);
-        setAwayScore(newScore.away);
-        newEvent.scoreUpdate = `${newScore.home}-${newScore.away}`;
-        dispatch(updateMatchScore({ matchId: match.id, score: newScore }));
-      }
+      if (assist && goalType === 'goal') newEvent.assistPlayer = { id: `p_${Math.random()}`, name: assist };
     } else if (eventType === 'card') {
       newEvent.type = cardType;
       newEvent.player = { id: `p_${Math.random()}`, name: player };
@@ -283,29 +328,56 @@ const MatchEditor: React.FC = () => {
       newEvent.type = 'substitution';
       newEvent.playerIn = { id: `p_${Math.random()}`, name: playerIn };
       newEvent.playerOut = { id: `p_${Math.random()}`, name: playerOut };
-    } else if (eventType === 'commentary') {
-      newEvent.type = 'commentary';
-      // note is already set
     }
 
     let updatedEvents;
+    
+    // Helper for sorting events with 90+1 support
+    const sortEvents = (a: any, b: any) => {
+       const minA = parseInt(a.minute);
+       const minB = parseInt(b.minute);
+       if (minA !== minB) return minA - minB;
+       const isPlusA = a.minute.toString().includes('+');
+       const isPlusB = b.minute.toString().includes('+');
+       if (isPlusA && !isPlusB) return 1;
+       if (!isPlusA && isPlusB) return -1;
+       if (isPlusA && isPlusB) {
+         const extraA = parseInt(a.minute.split('+')[1] || '0');
+         const extraB = parseInt(b.minute.split('+')[1] || '0');
+         return extraA - extraB;
+       }
+       return 0;
+    };
+
     if (editingEventId) {
       newEvent.id = editingEventId;
-      updatedEvents = match.events.map(e => e.id === editingEventId ? { ...e, ...newEvent } : e).sort((a, b) => a.minute - b.minute);
+      updatedEvents = match.events.map(e => e.id === editingEventId ? { ...e, ...newEvent } : e).sort(sortEvents);
     } else {
       newEvent.id = Math.random().toString(36).substr(2, 9);
-      updatedEvents = [...match.events, newEvent].sort((a, b) => a.minute - b.minute);
+      updatedEvents = [...match.events, newEvent].sort(sortEvents);
     }
     
     dispatch(updateMatchEvents({ matchId: match.id, events: updatedEvents }));
     
-    // Use current state score if editing, or newScore if adding goal
-    const scoreToSave = editingEventId ? { home: homeScore, away: awayScore } : newScore;
-    const updatedMatch = { ...match, events: updatedEvents, score: scoreToSave };
+    // Auto-update status to live if scheduled
+    let newStatus = status;
+    if (status === 'scheduled') {
+        newStatus = 'live';
+        setStatus('live');
+    }
+    
+    // Recalculate score from updated events
+    const newScore = calculateScoreFromEvents(updatedEvents);
+    setHomeScore(newScore.home);
+    setAwayScore(newScore.away);
+    
+    const updatedMatch = { ...match, events: updatedEvents, score: newScore, status: newStatus };
     
     try {
       await dispatch(saveMatch(updatedMatch)).unwrap();
-      handleCancelEdit(); // Reset form
+      // If we were editing, reset completely (to default goal tab). 
+      // If we were adding, keep the current event type for rapid entry (e.g. multiple cards).
+      resetForm(!editingEventId); 
     } catch (err) {
       alert('Chyba: Nepodařilo se uložit na server.');
     }
@@ -317,7 +389,12 @@ const MatchEditor: React.FC = () => {
       
       dispatch(updateMatchEvents({ matchId: match.id, events: updatedEvents }));
       
-      const updatedMatch = { ...match, events: updatedEvents };
+      // Recalculate score
+      const newScore = calculateScoreFromEvents(updatedEvents);
+      setHomeScore(newScore.home);
+      setAwayScore(newScore.away);
+      
+      const updatedMatch = { ...match, events: updatedEvents, score: newScore };
       try {
         await dispatch(saveMatch(updatedMatch)).unwrap();
       } catch (err) {
@@ -326,40 +403,83 @@ const MatchEditor: React.FC = () => {
     }
   };
 
+  const availablePlayers = team === 'home' 
+    ? (homeTeamData?.players || []) 
+    : (awayTeamData?.players || []);
+
+  // Merge static players with those already in stats (if any missing) - simple version just uses static if exists
+  // If static list is empty (teams not seeded), fallback to all known names filtered roughly? 
+  // For now, we prioritize the static list as requested.
+  
   return (
     <PageContainer>
       <Navigation />
       <datalist id="player-names">
-        {allPlayerNames.map((name) => (
-          <option key={name} value={name} />
-        ))}
+        {(() => {
+          // Deduplication logic:
+          // 1. Static players take precedence.
+          // 2. Dynamic players are added only if their FORMATTED name is not in static.
+          // 3. Dynamic players are deduplicated by formatted name.
+
+          const staticNames = new Set(availablePlayers.map(p => formatPlayerName(p.name)));
+          
+          const renderedStatic = availablePlayers.map(p => (
+            <option key={`static-${p.id}`} value={formatPlayerName(p.name)}>{p.position ? `(${p.position})` : ''}</option>
+          ));
+
+          const dynamicOptions = allPlayerNames
+            .map(name => ({ raw: name, formatted: formatPlayerName(name) }))
+            .filter(item => !staticNames.has(item.formatted))
+            .filter((item, index, self) => 
+              index === self.findIndex(t => t.formatted === item.formatted)
+            )
+            .map((item) => (
+              <option key={`dynamic-${item.raw}`} value={item.formatted} />
+            ));
+
+          return [...renderedStatic, ...dynamicOptions];
+        })()}
       </datalist>
       <Header>
-        <h1>Editor Zápasu</h1>
-        <Button onClick={() => navigate('/admin')}>Zpět na přehled</Button>
+        <Button onClick={handleBack} variant="secondary">← Zpět na přehled</Button>
+        <SectionTitle>Editace zápasu: {match.homeTeam.name} vs {match.awayTeam.name}</SectionTitle>
       </Header>
 
       <Section>
-        <SectionTitle>Skóre</SectionTitle>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <SectionTitle>Základní informace</SectionTitle>
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <FormGroup>
+            <Label>Stav</Label>
+            <Select value={status} onChange={(e: any) => setStatus(e.target.value)}>
+              <option value="scheduled">Naplánováno</option>
+              <option value="live">Živě</option>
+              <option value="finished">Konec</option>
+              <option value="awarded">Kontumace</option>
+              <option value="canceled">Zrušeno</option>
+              <option value="not_played">Neodehráno</option>
+            </Select>
+          </FormGroup>
+
           <FormGroup>
             <Label>{match.homeTeam.name}</Label>
             <Input 
               type="number" 
               value={homeScore} 
               onChange={(e) => setHomeScore(Number(e.target.value))} 
+              style={{ width: '60px', textAlign: 'center' }}
             />
           </FormGroup>
-          <span>:</span>
+          <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>:</span>
           <FormGroup>
             <Label>{match.awayTeam.name}</Label>
             <Input 
               type="number" 
               value={awayScore} 
               onChange={(e) => setAwayScore(Number(e.target.value))} 
+              style={{ width: '60px', textAlign: 'center' }}
             />
           </FormGroup>
-          <Button onClick={handleUpdateScore}>Uložit Skóre</Button>
+          <Button onClick={handleUpdateMatchInfo}>Uložit Změny</Button>
         </div>
       </Section>
 
@@ -369,13 +489,12 @@ const MatchEditor: React.FC = () => {
           <Tab active={eventType === 'goal'} onClick={() => setEventType('goal')}>Gól</Tab>
           <Tab active={eventType === 'card'} onClick={() => setEventType('card')}>Karta</Tab>
           <Tab active={eventType === 'substitution'} onClick={() => setEventType('substitution')}>Střídání</Tab>
-          <Tab active={eventType === 'commentary'} onClick={() => setEventType('commentary')}>Komentář</Tab>
         </Tabs>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <FormGroup>
             <Label>Minuta</Label>
-            <Input type="number" value={minute} onChange={(e) => setMinute(e.target.value)} />
+            <Input type="text" value={minute} onChange={(e) => setMinute(e.target.value)} placeholder="např. 45 nebo 90+2" />
           </FormGroup>
           <FormGroup>
             <Label>Tým</Label>
@@ -389,13 +508,23 @@ const MatchEditor: React.FC = () => {
         {eventType === 'goal' && (
           <>
             <FormGroup>
-              <Label>Střelec</Label>
-              <Input list="player-names" value={player} onChange={(e) => setPlayer(e.target.value)} placeholder="Jméno střelce" />
+              <Label>Typ události</Label>
+              <Select value={goalType} onChange={(e: any) => setGoalType(e.target.value)}>
+                <option value="goal">Gól</option>
+                <option value="goal_disallowed">Neuznaný gól</option>
+                <option value="missed_penalty">Neproměněná penalta</option>
+              </Select>
             </FormGroup>
             <FormGroup>
-              <Label>Asistence (nepovinné)</Label>
-              <Input list="player-names" value={assist} onChange={(e) => setAssist(e.target.value)} placeholder="Jméno asistenta" />
+              <Label>{goalType === 'missed_penalty' ? 'Exekutor' : 'Střelec'}</Label>
+              <Input list="player-names" value={player} onChange={(e) => setPlayer(e.target.value)} placeholder={goalType === 'missed_penalty' ? 'Jméno hráče' : 'Jméno střelce'} />
             </FormGroup>
+            {goalType === 'goal' && (
+              <FormGroup>
+                <Label>Asistence (nepovinné)</Label>
+                <Input list="player-names" value={assist} onChange={(e) => setAssist(e.target.value)} placeholder="Jméno asistenta" />
+              </FormGroup>
+            )}
           </>
         )}
 
@@ -410,7 +539,7 @@ const MatchEditor: React.FC = () => {
             </FormGroup>
             <FormGroup>
               <Label>Hráč</Label>
-              <Input value={player} onChange={(e) => setPlayer(e.target.value)} placeholder="Hříšník" />
+              <Input list="player-names" value={player} onChange={(e) => setPlayer(e.target.value)} placeholder="Hříšník" />
             </FormGroup>
           </>
         )}
@@ -419,28 +548,95 @@ const MatchEditor: React.FC = () => {
           <>
             <FormGroup>
               <Label>Hráč DOVNITŘ</Label>
-              <Input value={playerIn} onChange={(e) => setPlayerIn(e.target.value)} />
+              <Input list="player-names" value={playerIn} onChange={(e) => setPlayerIn(e.target.value)} />
             </FormGroup>
             <FormGroup>
               <Label>Hráč VEN</Label>
-              <Input value={playerOut} onChange={(e) => setPlayerOut(e.target.value)} />
+              <Input list="player-names" value={playerOut} onChange={(e) => setPlayerOut(e.target.value)} />
+            </FormGroup>
+            <FormGroup>
+               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', color: '#fff' }}>
+                 <input 
+                   type="checkbox" 
+                   checked={isInjury} 
+                   onChange={(e) => {
+                     setIsInjury(e.target.checked);
+                     if (e.target.checked) {
+                        setNote(prev => prev ? `${prev}, střídání – zranění` : 'střídání – zranění');
+                     }
+                   }} 
+                 />
+                 Zranění
+               </label>
             </FormGroup>
           </>
         )}
 
-        {eventType === 'commentary' && (
-          <FormGroup>
-            <Label>Text komentáře</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Zadejte text..." />
-          </FormGroup>
-        )}
+        <FormGroup style={{ position: 'relative' }}>
+          <Label>Poznámka</Label>
+          <Input 
+            value={note} 
+            onChange={(e) => setNote(e.target.value)} 
+            placeholder="Např. z penalty, hrubost..." 
+            autoComplete="off"
+          />
+          {(() => {
+             const segments = note.split(/,\s*/);
+             const lastSegment = segments[segments.length - 1];
+             if (!lastSegment || lastSegment.length < 1) return null;
+             
+             // Diacritic sensitive/insensitive? "citlivý na diakritiku" means sensitive.
+             // But usually users want insensitive search (typing "zluta" finds "žlutá").
+             // "Zajisti, že našeptávač je citlivý na diakritiku" -> strictly means sensitive.
+             // But usually "citlivý" means "handles it correctly".
+             // If I type "zluta", should it find "žlutá"? Usually yes.
+             // If I type "č", should it find "červená"? Yes.
+             // If I type "c", should it find "červená"? Usually yes.
+             // But strictly "citlivý" (sensitive) means 'c' != 'č'.
+             // Given the context of "inteligentní", I assume they want it to WORK well.
+             // I'll stick to strict startswith for now to be safe with "citlivý".
+             
+             const matches = NOTE_OPTIONS.filter(opt => 
+               opt.toLowerCase().startsWith(lastSegment.toLowerCase()) && 
+               opt.toLowerCase() !== lastSegment.toLowerCase()
+             );
+             
+             if (matches.length === 0) return null;
 
-        {eventType !== 'commentary' && (
-          <FormGroup>
-            <Label>Poznámka</Label>
-            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="Např. z penalty, hrubost..." />
-          </FormGroup>
-        )}
+             return (
+               <div style={{
+                 position: 'absolute',
+                 top: '100%',
+                 left: 0,
+                 right: 0,
+                 backgroundColor: '#222',
+                 border: '1px solid #444',
+                 zIndex: 1000,
+                 maxHeight: '150px',
+                 overflowY: 'auto',
+                 borderRadius: '4px',
+                 boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+               }}>
+                 {matches.map(match => (
+                   <div 
+                     key={match}
+                     style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid #333', color: '#fff' }}
+                     onClick={() => {
+                       const newSegments = [...segments];
+                       newSegments.pop();
+                       newSegments.push(match);
+                       setNote(newSegments.join(', ') + ', ');
+                     }}
+                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
+                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                   >
+                     {match}
+                   </div>
+                 ))}
+               </div>
+             );
+          })()}
+        </FormGroup>
 
         <ButtonGroup>
           <Button onClick={handleAddEvent}>

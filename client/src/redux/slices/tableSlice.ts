@@ -1,7 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
 import type { Match } from './matchesSlice';
 import { TEAM_LIST } from '../teamData';
 import type { RootState } from '../store';
+
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 // Definice typů
 interface TableEntry {
@@ -81,13 +84,14 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
     ensureTeam(team.id, team.name, team.logo);
   });
 
-  // vezmeme jen skutečně odehrané zápasy
-  const finishedMatches = matches
-    .filter(m => m.status === 'finished' || m.status === 'awarded')
+  // vezmeme jen skutečně odehrané nebo právě hrané zápasy
+  // Zahrnujeme i 'live' zápasy, aby se změny projevovaly v reálném čase
+  const activeMatches = matches
+    .filter(m => m.status === 'finished' || m.status === 'awarded' || m.status === 'live')
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   // Pro každý zápas aktualizujeme statistiky obou týmů
-  finishedMatches.forEach(match => {
+  activeMatches.forEach(match => {
     const key = match.id ?? `${match.homeTeam?.id ?? ''}-${match.awayTeam?.id ?? ''}-${match.date ?? ''}`;
     if (seen.has(key)) return;
     seen.add(key);
@@ -98,6 +102,7 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
     const homeGoals = Number(match.score?.home);
     const awayGoals = Number(match.score?.away);
     const validScores = Number.isFinite(homeGoals) && Number.isFinite(awayGoals);
+
     if (!validScores) return;
 
     home.played += 1;
@@ -169,8 +174,8 @@ export function computeTableFromMatches(matches: Match[]): TableEntry[] {
   return table;
 }
 
-// Asynchronní akce pro načtení tabulky – preferuje aktuální zápasy z Redux stavu,
-// pokud nejsou k dispozici, použije lokální MANUAL_MATCHES
+// Asynchronní akce pro načtení tabulky
+// Nyní primárně stahuje data z backendu (DB), aby byla zajištěna konzistence i po refresh
 export const fetchTable = createAsyncThunk<
   TableEntry[],
   void,
@@ -179,22 +184,31 @@ export const fetchTable = createAsyncThunk<
   'table/fetchTable',
   async (_, { getState, rejectWithValue }) => {
     try {
-      const state = getState();
-      const matchesFromState = state.matches?.matches as Match[] | undefined;
-
-      let sourceMatches: Match[];
-
-      if (Array.isArray(matchesFromState) && matchesFromState.length > 0) {
-        sourceMatches = matchesFromState;
-      } else {
-        const { MANUAL_MATCHES } = await import('./matchesSlice');
-        sourceMatches = MANUAL_MATCHES as Match[];
-      }
-
-      const table = computeTableFromMatches(sourceMatches);
-      return table;
+      // 1. Zkusíme načíst tabulku přímo z backendu (který čte z DB)
+      const response = await axios.get(`${API_URL}/table`);
+      return response.data;
     } catch (error) {
-      return rejectWithValue('Nepodařilo se načíst tabulku ligy.');
+      console.warn('Nepodařilo se načíst tabulku z API, zkouším fallback...', error);
+      
+      // 2. Fallback: Pokud API selže, zkusíme použít data ze state nebo hardcoded data
+      try {
+        const state = getState();
+        const matchesFromState = state.matches?.matches as Match[] | undefined;
+
+        let sourceMatches: Match[];
+
+        if (Array.isArray(matchesFromState) && matchesFromState.length > 0) {
+          sourceMatches = matchesFromState;
+        } else {
+          const { MANUAL_MATCHES } = await import('./matchesSlice');
+          sourceMatches = MANUAL_MATCHES as Match[];
+        }
+
+        const table = computeTableFromMatches(sourceMatches);
+        return table;
+      } catch (fallbackError) {
+        return rejectWithValue('Nepodařilo se načíst tabulku ligy.');
+      }
     }
   }
 );

@@ -25,7 +25,7 @@ const matchSchema = mongoose.Schema({
   events: [{
     id: String,
     type: { type: String },
-    minute: Number,
+    minute: String, // Changed to String to support '90+1'
     team: String,
     player: { id: String, name: String },
     assistPlayer: { id: String, name: String },

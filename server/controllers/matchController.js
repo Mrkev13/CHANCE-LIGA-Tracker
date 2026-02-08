@@ -82,13 +82,29 @@ exports.updateMatch = async (req, res) => {
   const { id } = req.params;
   const updatedData = req.body;
   
+  // Validation
+  if (updatedData.score) {
+    if (updatedData.score.home < 0 || updatedData.score.away < 0) {
+      return res.status(400).json({ message: 'Skóre nemůže být záporné' });
+    }
+  }
+
+  // Transaction simulation (Mongoose transactions require replica set, checking just connection state here)
+  const session = mongoose.connection.readyState === 1 ? await mongoose.startSession() : null;
+  if (session) session.startTransaction();
+
   try {
     if (mongoose.connection.readyState === 1) {
       const match = await Match.findOneAndUpdate(
         { id: id },
         updatedData,
-        { new: true, upsert: true } // Create if not exists
+        { new: true, upsert: true, session } // Use session if available
       );
+      
+      if (session) {
+        await session.commitTransaction();
+        session.endSession();
+      }
       res.json(match);
     } else {
       // Fallback to file system
@@ -102,8 +118,12 @@ exports.updateMatch = async (req, res) => {
       }
     }
   } catch (error) {
+    if (session) {
+      await session.abortTransaction();
+      session.endSession();
+    }
     console.error(error);
-    res.status(500).json({ message: 'Chyba při ukládání' });
+    res.status(500).json({ message: 'Chyba při ukládání: ' + error.message });
   }
 };
 
@@ -116,25 +136,25 @@ function groupRoundsSorted(matches) {
     (map[key] ||= []).push(m);
   }
   const keys = Object.keys(map);
-  const playedStatuses = new Set(['finished', 'live']);
-  const roundLastPlayedAt = {};
-  for (const rk of keys) {
-    const times = map[rk]
-      .filter((m) => playedStatuses.has(m.status))
-      .map((m) => new Date(m.date).getTime());
-    roundLastPlayedAt[rk] = times.length ? Math.max(...times) : -1;
-  }
-  const latestPlayedRound = keys
-    .filter((rk) => roundLastPlayedAt[rk] !== -1)
-    .sort((a, b) => roundLastPlayedAt[b] - roundLastPlayedAt[a])[0];
+  
+  // Find highest round number that has at least one 'finished' or 'live' match
+  const finishedOrLiveRounds = keys.filter(rk => 
+    map[rk].some(m => m.status === 'finished' || m.status === 'live')
+  );
+  
+  // Sort descending by round number
+  finishedOrLiveRounds.sort((a, b) => Number(b) - Number(a));
+  
+  const latestPlayedRound = finishedOrLiveRounds.length > 0 ? finishedOrLiveRounds[0] : null;
+
   const remainingDesc = keys
     .filter((rk) => rk !== latestPlayedRound)
     .sort((a, b) => Number(b) - Number(a));
   const ordered = latestPlayedRound ? [latestPlayedRound, ...remainingDesc] : remainingDesc;
   const rounds = ordered.map((rk) => ({
     round: rk,
-    played: roundLastPlayedAt[rk] !== -1,
-    lastPlayedAt: roundLastPlayedAt[rk] !== -1 ? new Date(roundLastPlayedAt[rk]).toISOString() : null,
+    played: map[rk].some(m => m.status === 'finished' || m.status === 'live'),
+    lastPlayedAt: null, // No longer using time-based sorting
     matches: map[rk].sort((a, b) => new Date(a.date) - new Date(b.date)),
   }));
   return { rounds, order: ordered };

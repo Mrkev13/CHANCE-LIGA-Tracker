@@ -1,8 +1,29 @@
 const path = require('path');
 const fs = require('fs');
-const matches = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../../parsed_matches.json'), 'utf-8')
-);
+const mongoose = require('mongoose');
+const Match = require('../models/Match');
+
+const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
+
+// Helper to get matches (DB or File)
+const getMatches = async () => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      return await Match.find({ status: { $in: ['finished', 'awarded', 'live'] } });
+    }
+  } catch (e) {
+    console.error('Table DB Error:', e);
+  }
+  
+  // Fallback
+  try {
+    const local = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
+    return local; // We filter status in compute function anyway
+  } catch (e) {
+    return [];
+  }
+};
+
 const teams = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../../client/src/shared/teams.json'), 'utf-8')
 );
@@ -31,7 +52,7 @@ function computeTableFromMatches(ms) {
     return map.get(id);
   };
   teams.forEach(t => ensure(t.id, t.name, t.logo));
-  ms.filter(m => m.status === 'finished' || m.status === 'awarded').forEach(m => {
+  ms.filter(m => m.status === 'finished' || m.status === 'awarded' || m.status === 'live').forEach(m => {
     const key = m.id ?? `${m.homeTeam?.id ?? ''}-${m.awayTeam?.id ?? ''}-${m.date ?? ''}`;
     if (seen.has(key)) return;
     seen.add(key);
@@ -93,13 +114,16 @@ function computeTableFromMatches(ms) {
 }
 
 exports.getTable = async (_req, res) => {
+  const matches = await getMatches();
   res.json(computeTableFromMatches(matches));
 };
 
 exports.getHomeTable = async (_req, res) => {
+  const matches = await getMatches();
   res.json(computeTableFromMatches(matches)); 
 };
 
 exports.getAwayTable = async (_req, res) => {
+  const matches = await getMatches();
   res.json(computeTableFromMatches(matches));
 };

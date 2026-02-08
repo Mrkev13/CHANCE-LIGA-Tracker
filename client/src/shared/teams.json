@@ -1,6 +1,42 @@
 [
-  { "id": "t_sla", "name": "Slavia Praha", "logo": "", "stadium": "Eden Aréna" },
-  { "id": "t_spa", "name": "Sparta Praha", "logo": "", "stadium": "Letná" },
+  { 
+    "id": "t_sla", 
+    "name": "Slavia Praha", 
+    "logo": "", 
+    "stadium": "Eden Aréna",
+    "players": [
+      {"id": "p_sla_1", "name": "Aleš Mandous", "position": "GK"},
+      {"id": "p_sla_2", "name": "Tomáš Holeš", "position": "DEF"},
+      {"id": "p_sla_3", "name": "Igoh Ogbu", "position": "DEF"},
+      {"id": "p_sla_4", "name": "Oscar Dorley", "position": "MID"},
+      {"id": "p_sla_5", "name": "Mojmír Chytil", "position": "FWD"},
+      {"id": "p_sla_6", "name": "Václav Jurečka", "position": "FWD"},
+      {"id": "p_sla_7", "name": "Ivan Schranz", "position": "FWD"},
+      {"id": "p_sla_8", "name": "Petr Ševčík", "position": "MID"},
+      {"id": "p_sla_9", "name": "Christos Zafeiris", "position": "MID"},
+      {"id": "p_sla_10", "name": "David Douděra", "position": "DEF"},
+      {"id": "p_sla_11", "name": "Lukáš Masopust", "position": "MID"}
+    ]
+  },
+  { 
+    "id": "t_spa", 
+    "name": "Sparta Praha", 
+    "logo": "", 
+    "stadium": "Letná",
+    "players": [
+      {"id": "p_spa_1", "name": "Peter Vindahl", "position": "GK"},
+      {"id": "p_spa_2", "name": "Ladislav Krejčí", "position": "DEF"},
+      {"id": "p_spa_3", "name": "Martin Vitík", "position": "DEF"},
+      {"id": "p_spa_4", "name": "Filip Panák", "position": "DEF"},
+      {"id": "p_spa_5", "name": "Qazim Laci", "position": "MID"},
+      {"id": "p_spa_6", "name": "Kaan Kairinen", "position": "MID"},
+      {"id": "p_spa_7", "name": "Lukáš Haraslín", "position": "FWD"},
+      {"id": "p_spa_8", "name": "Veljko Birmančevič", "position": "FWD"},
+      {"id": "p_spa_9", "name": "Jan Kuchta", "position": "FWD"},
+      {"id": "p_spa_10", "name": "Angelo Preciado", "position": "DEF"},
+      {"id": "p_spa_11", "name": "Matěj Ryneš", "position": "MID"}
+    ]
+  },
   { "id": "t_jab", "name": "FK Jablonec", "logo": "", "stadium": "Stadion Střelnice" },
   { "id": "t_olo", "name": "SK Sigma Olomouc", "logo": "", "stadium": "Andrův stadion" },
   { "id": "t_lib", "name": "Slovan Liberec", "logo": "", "stadium": "Stadion U Nisy" },
