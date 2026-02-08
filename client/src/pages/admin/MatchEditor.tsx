@@ -138,6 +138,9 @@ const calculateScoreFromEvents = (events: any[]) => {
     if (e.type === 'goal') {
       if (e.team === 'home') home++;
       else away++;
+    } else if (e.type === 'own_goal') {
+      if (e.team === 'home') away++;
+      else home++;
     }
   });
   return { home, away };
@@ -161,23 +164,33 @@ const MatchEditor: React.FC = () => {
 
   const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution'>('goal');
   // Subtype for goal tab
-  const [goalType, setGoalType] = useState<'goal' | 'goal_disallowed' | 'missed_penalty'>('goal');
+  const [goalType, setGoalType] = useState<'goal' | 'goal_disallowed' | 'missed_penalty' | 'own_goal'>('goal');
   const [isInjury, setIsInjury] = useState(false);
 
   // Helper for formatting player name: "David Douděra" -> "Douděra D."
   const formatPlayerName = (fullName: string) => {
     if (!fullName) return '';
-    const parts = fullName.trim().split(/\s+/);
-    if (parts.length < 2) return fullName;
+    const trimmed = fullName.trim();
+    const parts = trimmed.split(/\s+/);
+    
+    if (parts.length < 2) return trimmed;
+
+    // Check if already in "Surname F." format (last part is single letter with dot)
+    const lastPart = parts[parts.length - 1];
+    if (lastPart.length === 2 && lastPart.endsWith('.')) {
+      return trimmed;
+    }
+
     const surname = parts.slice(1).join(' ');
     const firstname = parts[0];
     return `${surname} ${firstname.charAt(0)}.`;
   };
 
   const NOTE_OPTIONS = [
-    'gól', 'penalta', 'neuznaný gól', 'faul', 'ofsajd', 'ruka', 
-    'žlutá karta', 'podražení', 'držení', 'nafilmování/pád', 
-    'nesportovní chování', 'hrubost', 'STOP na další zápas'
+    'Gól', 'Penalta', 'Neuznaný gól', 'Faul', 'Ofsajd', 'Ruka', 
+    'Žlutá karta', 'Podražení', 'Držení', 'Nafilmovaný pád', 
+    'Nesportovní chování', 'Hrubost', 'STOP na další zápas', 'Zdržování hry',
+    'Mimo hřiště', 'Neproměněná penalta'
   ];
   
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
@@ -189,9 +202,54 @@ const MatchEditor: React.FC = () => {
   const [assist, setAssist] = useState('');
   const [playerIn, setPlayerIn] = useState('');
   const [playerOut, setPlayerOut] = useState('');
-  const [cardType, setCardType] = useState<'yellow_card' | 'red_card'>('yellow_card');
+  const [cardType, setCardType] = useState<'yellow_card' | 'red_card' | 'second_yellow'>('yellow_card');
   const [note, setNote] = useState('');
   
+  const minuteInputRef = React.useRef<HTMLInputElement>(null);
+  
+  const [noteHighlightIndex, setNoteHighlightIndex] = useState(0);
+  
+  // Derived state for note autocomplete
+  const noteSegments = note.split(/,\s*/);
+  const lastNoteSegment = noteSegments[noteSegments.length - 1];
+  const showNoteAutocomplete = lastNoteSegment && lastNoteSegment.length >= 1;
+  
+  const noteMatches = showNoteAutocomplete ? NOTE_OPTIONS.filter(opt => 
+     opt.toLowerCase().startsWith(lastNoteSegment.toLowerCase()) && 
+     opt.toLowerCase() !== lastNoteSegment.toLowerCase()
+  ) : [];
+
+  // Reset highlight when options change
+  useEffect(() => {
+    setNoteHighlightIndex(0);
+  }, [lastNoteSegment]);
+
+  const selectNoteOption = (option: string) => {
+    const newSegments = [...noteSegments];
+    newSegments.pop();
+    newSegments.push(option);
+    setNote(newSegments.join(', '));
+  };
+
+  const handleNoteKeyDown = (e: React.KeyboardEvent) => {
+    if (noteMatches.length === 0) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setNoteHighlightIndex(prev => (prev + 1) % noteMatches.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setNoteHighlightIndex(prev => (prev - 1 + noteMatches.length) % noteMatches.length);
+    } else if (e.key === 'Enter' || e.key === 'Tab') {
+      if (noteMatches.length > 0) {
+        e.preventDefault();
+        selectNoteOption(noteMatches[noteHighlightIndex]);
+      }
+    } else if (e.key === 'Escape') {
+      // Optional: Logic to close autocomplete if needed, though typing clears it usually
+    }
+  };
+
   // Score State
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
@@ -231,14 +289,18 @@ const MatchEditor: React.FC = () => {
 
   const handleEditEvent = (event: any) => {
     setEditingEventId(event.id);
-    setMinute(event.minute.toString());
+    setMinute(event.minute?.toString() || '');
     setTeam(event.team);
     
     // Handle card types which are subtypes of 'card' in UI logic but distinct types in data
     if (event.type === 'yellow_card' || event.type === 'red_card') {
       setEventType('card');
-      setCardType(event.type);
-    } else if (event.type === 'goal' || event.type === 'goal_disallowed' || event.type === 'missed_penalty') {
+      if (event.type === 'red_card' && event.note && event.note.includes('2. ŽK')) {
+        setCardType('second_yellow');
+      } else {
+        setCardType(event.type as any);
+      }
+    } else if (event.type === 'goal' || event.type === 'goal_disallowed' || event.type === 'missed_penalty' || event.type === 'own_goal') {
       setEventType('goal');
       setGoalType(event.type);
     } else {
@@ -247,7 +309,7 @@ const MatchEditor: React.FC = () => {
     
     setNote(event.note || '');
     
-    if (event.type === 'goal' || event.type === 'goal_disallowed' || event.type === 'missed_penalty') {
+    if (event.type === 'goal' || event.type === 'goal_disallowed' || event.type === 'missed_penalty' || event.type === 'own_goal') {
       setPlayer(event.player?.name || '');
       setAssist(event.assistPlayer?.name || '');
     } else if (event.type === 'yellow_card' || event.type === 'red_card') {
@@ -259,6 +321,11 @@ const MatchEditor: React.FC = () => {
     
     // Scroll to top to see form
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Focus minute input
+    setTimeout(() => {
+      minuteInputRef.current?.focus();
+    }, 100); // Slight delay for scroll
   };
 
   const resetForm = (keepType = false) => {
@@ -276,6 +343,11 @@ const MatchEditor: React.FC = () => {
       setGoalType('goal');
       setCardType('yellow_card');
     }
+
+    // Focus minute input after reset
+    setTimeout(() => {
+      minuteInputRef.current?.focus();
+    }, 0);
   };
 
   const handleCancelEdit = () => {
@@ -299,6 +371,7 @@ const MatchEditor: React.FC = () => {
       
       if (reds > 0) return 'Tento hráč už má červenou kartu';
       if (cardType === 'yellow_card' && yellows >= 2) return 'Tento hráč už má 2 žluté karty';
+      if (cardType === 'second_yellow' && yellows === 0) return 'Tento hráč zatím nemá žádnou žlutou kartu';
     }
 
     return null;
@@ -322,7 +395,14 @@ const MatchEditor: React.FC = () => {
       newEvent.player = { id: `p_${Math.random()}`, name: player };
       if (assist && goalType === 'goal') newEvent.assistPlayer = { id: `p_${Math.random()}`, name: assist };
     } else if (eventType === 'card') {
-      newEvent.type = cardType;
+      if (cardType === 'second_yellow') {
+        newEvent.type = 'red_card';
+        if (!note.includes('2. ŽK')) {
+             newEvent.note = note ? `${note}, 2. ŽK` : '2. ŽK';
+        }
+      } else {
+        newEvent.type = cardType;
+      }
       newEvent.player = { id: `p_${Math.random()}`, name: player };
     } else if (eventType === 'substitution') {
       newEvent.type = 'substitution';
@@ -334,16 +414,16 @@ const MatchEditor: React.FC = () => {
     
     // Helper for sorting events with 90+1 support
     const sortEvents = (a: any, b: any) => {
-       const minA = parseInt(a.minute);
-       const minB = parseInt(b.minute);
+       const minA = parseInt(a.minute || '0');
+       const minB = parseInt(b.minute || '0');
        if (minA !== minB) return minA - minB;
-       const isPlusA = a.minute.toString().includes('+');
-       const isPlusB = b.minute.toString().includes('+');
+       const isPlusA = (a.minute || '').toString().includes('+');
+       const isPlusB = (b.minute || '').toString().includes('+');
        if (isPlusA && !isPlusB) return 1;
        if (!isPlusA && isPlusB) return -1;
        if (isPlusA && isPlusB) {
-         const extraA = parseInt(a.minute.split('+')[1] || '0');
-         const extraB = parseInt(b.minute.split('+')[1] || '0');
+         const extraA = parseInt((a.minute || '').toString().split('+')[1] || '0');
+         const extraB = parseInt((b.minute || '').toString().split('+')[1] || '0');
          return extraA - extraB;
        }
        return 0;
@@ -423,9 +503,16 @@ const MatchEditor: React.FC = () => {
 
           const staticNames = new Set(availablePlayers.map(p => formatPlayerName(p.name)));
           
-          const renderedStatic = availablePlayers.map(p => (
-            <option key={`static-${p.id}`} value={formatPlayerName(p.name)}>{p.position ? `(${p.position})` : ''}</option>
-          ));
+          const renderedStatic = availablePlayers.map(p => {
+            const formatted = formatPlayerName(p.name);
+            const normalized = formatted.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+            const label = p.position ? `(${p.position})` : '';
+            return (
+              <option key={`static-${p.id}`} value={formatted}>
+                {label} {normalized !== formatted ? normalized : ''}
+              </option>
+            );
+          });
 
           const dynamicOptions = allPlayerNames
             .map(name => ({ raw: name, formatted: formatPlayerName(name) }))
@@ -433,9 +520,14 @@ const MatchEditor: React.FC = () => {
             .filter((item, index, self) => 
               index === self.findIndex(t => t.formatted === item.formatted)
             )
-            .map((item) => (
-              <option key={`dynamic-${item.raw}`} value={item.formatted} />
-            ));
+            .map((item) => {
+              const normalized = item.formatted.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+              return (
+                <option key={`dynamic-${item.raw}`} value={item.formatted}>
+                   {normalized !== item.formatted ? normalized : ''}
+                </option>
+              );
+            });
 
           return [...renderedStatic, ...dynamicOptions];
         })()}
@@ -494,7 +586,13 @@ const MatchEditor: React.FC = () => {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
           <FormGroup>
             <Label>Minuta</Label>
-            <Input type="text" value={minute} onChange={(e) => setMinute(e.target.value)} placeholder="např. 45 nebo 90+2" />
+            <Input 
+              ref={minuteInputRef}
+              type="text" 
+              value={minute} 
+              onChange={(e) => setMinute(e.target.value)} 
+              placeholder="např. 45 nebo 90+2" 
+            />
           </FormGroup>
           <FormGroup>
             <Label>Tým</Label>
@@ -511,12 +609,18 @@ const MatchEditor: React.FC = () => {
               <Label>Typ události</Label>
               <Select value={goalType} onChange={(e: any) => setGoalType(e.target.value)}>
                 <option value="goal">Gól</option>
+                <option value="own_goal">Vlastní gól</option>
                 <option value="goal_disallowed">Neuznaný gól</option>
                 <option value="missed_penalty">Neproměněná penalta</option>
               </Select>
             </FormGroup>
+            {goalType === 'own_goal' && (
+              <div style={{ padding: '0.5rem', marginBottom: '1rem', background: '#333', borderLeft: '3px solid #ffa500', color: '#ccc', fontSize: '0.9rem' }}>
+                Pozor: Vyberte <strong>TÝM, KTERÝ SI DAL VLASTNÍ GÓL</strong> (tedy tým hráče), nikoliv tým, který skóroval.
+              </div>
+            )}
             <FormGroup>
-              <Label>{goalType === 'missed_penalty' ? 'Exekutor' : 'Střelec'}</Label>
+              <Label>{goalType === 'missed_penalty' ? 'Exekutor' : goalType === 'own_goal' ? 'Nešťastník' : 'Střelec'}</Label>
               <Input list="player-names" value={player} onChange={(e) => setPlayer(e.target.value)} placeholder={goalType === 'missed_penalty' ? 'Jméno hráče' : 'Jméno střelce'} />
             </FormGroup>
             {goalType === 'goal' && (
@@ -535,6 +639,7 @@ const MatchEditor: React.FC = () => {
               <Select value={cardType} onChange={(e: any) => setCardType(e.target.value)}>
                 <option value="yellow_card">Žlutá</option>
                 <option value="red_card">Červená</option>
+                <option value="second_yellow">Druhá žlutá (ČK)</option>
               </Select>
             </FormGroup>
             <FormGroup>
@@ -577,65 +682,42 @@ const MatchEditor: React.FC = () => {
           <Input 
             value={note} 
             onChange={(e) => setNote(e.target.value)} 
+            onKeyDown={handleNoteKeyDown}
             placeholder="Např. z penalty, hrubost..." 
             autoComplete="off"
           />
-          {(() => {
-             const segments = note.split(/,\s*/);
-             const lastSegment = segments[segments.length - 1];
-             if (!lastSegment || lastSegment.length < 1) return null;
-             
-             // Diacritic sensitive/insensitive? "citlivý na diakritiku" means sensitive.
-             // But usually users want insensitive search (typing "zluta" finds "žlutá").
-             // "Zajisti, že našeptávač je citlivý na diakritiku" -> strictly means sensitive.
-             // But usually "citlivý" means "handles it correctly".
-             // If I type "zluta", should it find "žlutá"? Usually yes.
-             // If I type "č", should it find "červená"? Yes.
-             // If I type "c", should it find "červená"? Usually yes.
-             // But strictly "citlivý" (sensitive) means 'c' != 'č'.
-             // Given the context of "inteligentní", I assume they want it to WORK well.
-             // I'll stick to strict startswith for now to be safe with "citlivý".
-             
-             const matches = NOTE_OPTIONS.filter(opt => 
-               opt.toLowerCase().startsWith(lastSegment.toLowerCase()) && 
-               opt.toLowerCase() !== lastSegment.toLowerCase()
-             );
-             
-             if (matches.length === 0) return null;
-
-             return (
-               <div style={{
-                 position: 'absolute',
-                 top: '100%',
-                 left: 0,
-                 right: 0,
-                 backgroundColor: '#222',
-                 border: '1px solid #444',
-                 zIndex: 1000,
-                 maxHeight: '150px',
-                 overflowY: 'auto',
-                 borderRadius: '4px',
-                 boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
-               }}>
-                 {matches.map(match => (
-                   <div 
-                     key={match}
-                     style={{ padding: '0.75rem', cursor: 'pointer', borderBottom: '1px solid #333', color: '#fff' }}
-                     onClick={() => {
-                       const newSegments = [...segments];
-                       newSegments.pop();
-                       newSegments.push(match);
-                       setNote(newSegments.join(', ') + ', ');
-                     }}
-                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#333'}
-                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                   >
-                     {match}
-                   </div>
-                 ))}
-               </div>
-             );
-          })()}
+          {noteMatches.length > 0 && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              left: 0,
+              right: 0,
+              backgroundColor: '#222',
+              border: '1px solid #444',
+              zIndex: 1000,
+              maxHeight: '150px',
+              overflowY: 'auto',
+              borderRadius: '4px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+            }}>
+              {noteMatches.map((match, index) => (
+                <div 
+                  key={match}
+                  style={{ 
+                    padding: '0.75rem', 
+                    cursor: 'pointer', 
+                    borderBottom: '1px solid #333', 
+                    color: '#fff',
+                    backgroundColor: index === noteHighlightIndex ? '#444' : 'transparent'
+                  }}
+                  onClick={() => selectNoteOption(match)}
+                  onMouseEnter={() => setNoteHighlightIndex(index)}
+                >
+                  {match}
+                </div>
+              ))}
+            </div>
+          )}
         </FormGroup>
 
         <ButtonGroup>
@@ -656,10 +738,24 @@ const MatchEditor: React.FC = () => {
           {match.events.map(event => (
             <EventItem key={event.id}>
               <span>
-                <strong>{event.minute}'</strong> - {event.type === 'commentary' ? 'Komentář' : event.type} 
+                <strong>{event.minute}'</strong> - {(() => {
+                  if (event.type === 'commentary') return 'Komentář';
+                  if (event.type === 'goal') return 'Gól';
+                  if (event.type === 'own_goal') return 'Vlastní gól';
+                  if (event.type === 'yellow_card') return 'Žlutá karta';
+                  if (event.type === 'red_card') {
+                    if (event.note && event.note.includes('2. ŽK')) return '2. Žlutá karta (ČK)';
+                    return 'Červená karta';
+                  }
+                  if (event.type === 'substitution') return 'Střídání';
+                  if (event.type === 'goal_disallowed') return 'Neuznaný gól';
+                  if (event.type === 'missed_penalty') return 'Neproměněná penalta';
+                  return event.type;
+                })()} 
                 ({event.team === 'home' ? match.homeTeam.name : match.awayTeam.name})
                 {' - '}
                 {event.type === 'goal' && `${event.player?.name} ${event.assistPlayer ? `(${event.assistPlayer.name})` : ''}`}
+                {event.type === 'own_goal' && `${event.player?.name} (vlastní)`}
                 {event.type.includes('card') && event.player?.name}
                 {event.type === 'substitution' && `${event.playerIn?.name} -> ${event.playerOut?.name}`}
                 {event.note && ` [${event.note}]`}

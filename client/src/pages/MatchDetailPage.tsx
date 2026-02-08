@@ -435,7 +435,8 @@ const MatchDetailPage: React.FC = () => {
 
 export default MatchDetailPage;
 
-function formatMinute(m: string | number): string {
+function formatMinute(m: string | number | undefined | null): string {
+  if (m === undefined || m === null) return '';
   if (typeof m === 'string' && m.includes('+')) return m;
   const val = Number(m);
   if (isNaN(val)) return String(m);
@@ -446,7 +447,8 @@ function formatMinute(m: string | number): string {
   return String(val);
 }
 
-function isFirstHalf(m: string | number): string | boolean {
+function isFirstHalf(m: string | number | undefined | null): string | boolean {
+  if (m === undefined || m === null) return false;
   // Check explicit 45+ format first
   if (String(m).includes('45+')) return true;
   if (String(m).includes('90+')) return false;
@@ -462,16 +464,16 @@ function isFirstHalf(m: string | number): string | boolean {
 
 function renderHalf(title: string, match: any, half: 'first' | 'second', activeFilter: string) {
   const events = [...match.events].sort((a: any, b: any) => {
-     const minA = parseInt(a.minute);
-     const minB = parseInt(b.minute);
+     const minA = parseInt(a.minute || '0');
+     const minB = parseInt(b.minute || '0');
      if (minA !== minB) return minA - minB;
-     const isPlusA = String(a.minute).includes('+');
-     const isPlusB = String(b.minute).includes('+');
+     const isPlusA = String(a.minute || '').includes('+');
+     const isPlusB = String(b.minute || '').includes('+');
      if (isPlusA && !isPlusB) return 1;
      if (!isPlusA && isPlusB) return -1;
      if (isPlusA && isPlusB) {
-       const extraA = parseInt(String(a.minute).split('+')[1] || '0');
-       const extraB = parseInt(String(b.minute).split('+')[1] || '0');
+       const extraA = parseInt(String(a.minute || '').split('+')[1] || '0');
+       const extraB = parseInt(String(b.minute || '').split('+')[1] || '0');
        return extraA - extraB;
      }
      return 0;
@@ -480,7 +482,7 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
   const filtered = events.filter((e: any) =>
     (half === 'first' ? isFirstHalf(e.minute) : !isFirstHalf(e.minute)) &&
     (activeFilter === 'all' || e.type === activeFilter || 
-      (activeFilter === 'goal' && (e.type === 'goal_disallowed' || e.type === 'missed_penalty')))
+      (activeFilter === 'goal' && (e.type === 'goal_disallowed' || e.type === 'missed_penalty' || e.type === 'own_goal')))
   );
   
   if (filtered.length === 0) return null;
@@ -490,10 +492,14 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
       <HalfHeader>{title}</HalfHeader>
       <div>
         {filtered.map((e: any) => {
-          const isHome = e.team === 'home';
+          let isHome = e.team === 'home';
+          // Own goals should be displayed on the opponent's side (as they count for the opponent)
+          if (e.type === 'own_goal') {
+            isHome = !isHome;
+          }
           
           const icon =
-            e.type === 'goal' ? '⚽' :
+            (e.type === 'goal' || e.type === 'own_goal') ? '⚽' :
             e.type === 'yellow_card' ? '🟨' :
             e.type === 'red_card' ? '🟥' :
             e.type === 'goal_disallowed' ? '🚫' :
@@ -506,6 +512,9 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
             playerText = `${(e.playerIn?.name || e.player?.name || '')}${e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : ''}`;
           } else {
             playerText = e.player?.name ? `${e.player.name}` : '';
+            if (e.type === 'own_goal') {
+              playerText += ' (vlastní)';
+            }
           }
 
           const assistText = e.assistPlayer?.name ? ` (${e.assistPlayer.name})` : '';
