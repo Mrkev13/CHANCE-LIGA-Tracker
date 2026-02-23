@@ -3,6 +3,29 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
+export interface MatchSummary {
+  id: string;
+  homeTeam: {
+    id: string;
+    name: string;
+    logo: string;
+  };
+  awayTeam: {
+    id: string;
+    name: string;
+    logo: string;
+  };
+  score: {
+    home: number;
+    away: number;
+  };
+  status: 'scheduled' | 'live' | 'finished' | 'awarded' | 'canceled' | 'not_played';
+  date: string;
+  stadium: string;
+  competition?: { id: string; name: string };
+  round?: string;
+}
+
 export interface Match {
   id: string;
   homeTeam: {
@@ -54,6 +77,7 @@ interface MatchesState {
   matches: Match[];
   liveMatches: Match[];
   currentMatch: Match | null;
+  summaries: MatchSummary[];
   loading: boolean;
   error: string | null;
 }
@@ -62,6 +86,7 @@ const initialState: MatchesState = {
   matches: [],
   liveMatches: [],
   currentMatch: null,
+  summaries: [],
   loading: false,
   error: null
 };
@@ -5119,13 +5144,43 @@ export const MANUAL_MATCHES: Match[] = [
   }
 ];
 
+export const fetchMatchSummaries = createAsyncThunk(
+  'matches/fetchSummaries',
+  async (_, { rejectWithValue }) => {
+    const start = typeof performance !== 'undefined' ? performance.now() : 0;
+    try {
+      const response = await axios.get(`${API_URL}/matches/summary`);
+      if (start) {
+        const duration = performance.now() - start;
+        console.log('[perf] fetchMatchSummaries', `${duration.toFixed(0)}ms`);
+      }
+      return response.data as MatchSummary[];
+    } catch (error) {
+      if (start) {
+        const duration = performance.now() - start;
+        console.log('[perf] fetchMatchSummaries error', `${duration.toFixed(0)}ms`);
+      }
+      return rejectWithValue('Chyba při načítání zápasů');
+    }
+  }
+);
+
 export const fetchMatches = createAsyncThunk(
   'matches/fetchMatches',
   async (_, { rejectWithValue }) => {
+    const start = typeof performance !== 'undefined' ? performance.now() : 0;
     try {
       const response = await axios.get(`${API_URL}/matches`);
+      if (start) {
+        const duration = performance.now() - start;
+        console.log('[perf] fetchMatches', `${duration.toFixed(0)}ms`);
+      }
       return response.data;
     } catch (error) {
+      if (start) {
+        const duration = performance.now() - start;
+        console.log('[perf] fetchMatches error', `${duration.toFixed(0)}ms`);
+      }
       console.warn('API nedostupné, používám lokální data');
       return MANUAL_MATCHES;
     }
@@ -5211,6 +5266,18 @@ const matchesSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      .addCase(fetchMatchSummaries.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchMatchSummaries.fulfilled, (state, action) => {
+        state.loading = false;
+        state.summaries = action.payload;
+      })
+      .addCase(fetchMatchSummaries.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      })
       .addCase(fetchMatches.pending, (state) => {
         state.loading = true;
         state.error = null;

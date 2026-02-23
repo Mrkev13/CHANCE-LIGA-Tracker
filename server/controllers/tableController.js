@@ -5,24 +5,28 @@ const Match = require('../models/Match');
 
 const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
 
-// Helper to get matches (DB or File)
 const getMatches = async () => {
   try {
     if (mongoose.connection.readyState === 1) {
-      return await Match.find({ status: { $in: ['finished', 'awarded', 'live'] } });
+      return await Match.find({ status: { $in: ['finished', 'awarded', 'live'] } }).lean();
     }
   } catch (e) {
     console.error('Table DB Error:', e);
   }
   
-  // Fallback
   try {
     const local = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
-    return local; // We filter status in compute function anyway
+    return local;
   } catch (e) {
     return [];
   }
 };
+
+let cachedTable = null;
+let cachedHomeTable = null;
+let cachedAwayTable = null;
+let cachedAt = 0;
+const TABLE_CACHE_TTL_MS = 15000;
 
 const teams = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../../client/src/shared/teams.json'), 'utf-8')
@@ -114,16 +118,40 @@ function computeTableFromMatches(ms) {
 }
 
 exports.getTable = async (_req, res) => {
+  const now = Date.now();
+  if (cachedTable && now - cachedAt < TABLE_CACHE_TTL_MS) {
+    res.json(cachedTable);
+    return;
+  }
   const matches = await getMatches();
-  res.json(computeTableFromMatches(matches));
+  const table = computeTableFromMatches(matches);
+  cachedTable = table;
+  cachedAt = now;
+  res.json(table);
 };
 
 exports.getHomeTable = async (_req, res) => {
+  const now = Date.now();
+  if (cachedHomeTable && now - cachedAt < TABLE_CACHE_TTL_MS) {
+    res.json(cachedHomeTable);
+    return;
+  }
   const matches = await getMatches();
-  res.json(computeTableFromMatches(matches)); 
+  const table = computeTableFromMatches(matches); 
+  cachedHomeTable = table;
+  cachedAt = now;
+  res.json(table);
 };
 
 exports.getAwayTable = async (_req, res) => {
+  const now = Date.now();
+  if (cachedAwayTable && now - cachedAt < TABLE_CACHE_TTL_MS) {
+    res.json(cachedAwayTable);
+    return;
+  }
   const matches = await getMatches();
-  res.json(computeTableFromMatches(matches));
+  const table = computeTableFromMatches(matches);
+  cachedAwayTable = table;
+  cachedAt = now;
+  res.json(table);
 };

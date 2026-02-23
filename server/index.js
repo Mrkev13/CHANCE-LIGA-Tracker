@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const compression = require('compression');
 const connectDB = require('./config/db');
 const apiRoutes = require('./api/routes');
 
 const app = express();
 
-// Connect to MongoDB
 if (process.env.MONGODB_URI) {
   connectDB();
 } else {
@@ -15,12 +15,13 @@ if (process.env.MONGODB_URI) {
 }
 
 app.use(cors());
+app.use(compression());
 app.use(express.json());
 
 app.use('/api', apiRoutes);
 
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static(path.join(__dirname, '../client/build'), { maxAge: '1y', etag: true }));
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
   });

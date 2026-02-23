@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowUp } from 'react-icons/fa';
 import styled from 'styled-components';
-import { fetchMatches, Match } from '../redux/slices/matchesSlice';
+import { fetchMatchSummaries, fetchMatches, Match, MatchSummary } from '../redux/slices/matchesSlice';
 import { TEAM_LIST } from '../redux/teamData';
 import { RootState, AppDispatch } from '../redux/store';
 import { theme } from '../styles/theme';
@@ -409,8 +409,8 @@ const DropdownItem = styled.button<{ isSelected: boolean }>`
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { matches, loading, error } = useSelector(
-    (state: RootState) => state.matches
+  const { matches, summaries, loading, error } = useSelector(
+    (state: RootState) => state.matches as any
   );
   
   const [selectedRound, setSelectedRound] = useState<string>(() => sessionStorage.getItem('homeRound') || 'all');
@@ -421,7 +421,7 @@ const HomePage: React.FC = () => {
   const teamRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    dispatch(fetchMatches());
+    dispatch(fetchMatchSummaries());
   }, [dispatch]);
 
   useEffect(() => {
@@ -464,10 +464,11 @@ const HomePage: React.FC = () => {
     sessionStorage.setItem('homeRound', selectedRound);
   }, [selectedRound]);
   
-  // Seskupení podle kola + řazení kol dle požadavku
+  const sourceMatches: Array<Match | MatchSummary> = (summaries && summaries.length > 0 ? summaries : matches) as any[];
+
   const { roundsMap, sortedRoundKeys } = useMemo(() => {
-    const map: Record<string, Match[]> = {};
-    matches.forEach((m: Match) => {
+    const map: Record<string, (Match | MatchSummary)[]> = {};
+    sourceMatches.forEach((m) => {
       if (m.round) {
         const key = String(m.round);
         if (!map[key]) map[key] = [];
@@ -492,7 +493,7 @@ const HomePage: React.FC = () => {
       .sort((a, b) => Number(b) - Number(a));
     const ordered = latestPlayedRound ? [latestPlayedRound, ...remainingDesc] : remainingDesc;
     return { roundsMap: map, sortedRoundKeys: ordered };
-  }, [matches]);
+  }, [sourceMatches]);
   
   useEffect(() => {
     if (!loading) {
@@ -607,7 +608,8 @@ const HomePage: React.FC = () => {
             <div>
               {filteredRoundKeys.map((roundKey: string) => {
                 let roundMatches = roundsMap[roundKey]
-                  .sort((a: Match, b: Match) => new Date(a.date).getTime() - new Date(b.date).getTime());
+                  .slice()
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
                 
                 if (selectedRound === 'all') {
                   roundMatches = roundMatches.slice(0, 8);
@@ -619,9 +621,8 @@ const HomePage: React.FC = () => {
                   <div key={roundKey} style={{ marginBottom: '1.5rem' }}>
                     {selectedRound === 'all' && <SectionTitle>Kolo {roundKey}</SectionTitle>}
                     <MatchesGrid>
-                      {roundMatches.map((match: Match) => {
-                        const hasEvents = match.events && match.events.length > 0;
-                        const effectiveStatus = (match.status === 'scheduled' && hasEvents) ? 'live' : match.status;
+                      {roundMatches.map((match) => {
+                        const effectiveStatus = match.status;
                         
                         return (
                         <MatchCard 

@@ -1,8 +1,8 @@
 const Match = require('../models/Match');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose');
 
-// Load local JSON as fallback/seed source
 const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
 let localMatches = [];
 try {
@@ -11,19 +11,60 @@ try {
   console.error('Error reading local matches file:', err);
 }
 
-// Helper: Ensure DB has data
+let seeded = false;
+
 const ensureData = async () => {
-  if (mongoose.connection.readyState !== 1) return localMatches; // Not connected
+  if (mongoose.connection.readyState !== 1) return localMatches;
   
-  const count = await Match.countDocuments();
-  if (count === 0 && localMatches.length > 0) {
-    console.log('Seeding database from local JSON...');
-    await Match.insertMany(localMatches);
+  if (!seeded) {
+    const count = await Match.countDocuments();
+    if (count === 0 && localMatches.length > 0) {
+      console.log('Seeding database from local JSON...');
+      await Match.insertMany(localMatches);
+    }
+    seeded = true;
   }
-  return await Match.find({});
+
+  return await Match.find({}).lean();
 };
 
-const mongoose = require('mongoose');
+exports.getMatchesSummary = async (_req, res) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const matches = await Match.find(
+        {},
+        'id homeTeam awayTeam score status date stadium competition round',
+      ).lean();
+      res.json(matches);
+    } else {
+      const mapped = localMatches.map((m) => ({
+        id: m.id,
+        homeTeam: m.homeTeam,
+        awayTeam: m.awayTeam,
+        score: m.score,
+        status: m.status,
+        date: m.date,
+        stadium: m.stadium,
+        competition: m.competition,
+        round: m.round,
+      }));
+      res.json(mapped);
+    }
+  } catch (error) {
+    const mapped = localMatches.map((m) => ({
+      id: m.id,
+      homeTeam: m.homeTeam,
+      awayTeam: m.awayTeam,
+      score: m.score,
+      status: m.status,
+      date: m.date,
+      stadium: m.stadium,
+      competition: m.competition,
+      round: m.round,
+    }));
+    res.json(mapped);
+  }
+};
 
 exports.getAllMatches = async (_req, res) => {
   try {
@@ -43,7 +84,7 @@ exports.getLiveMatches = async (_req, res) => {
   try {
     let matches;
     if (mongoose.connection.readyState === 1) {
-      matches = await Match.find({ status: 'live' });
+      matches = await Match.find({ status: 'live' }).lean();
     } else {
       matches = localMatches.filter(m => m.status === 'live');
     }
@@ -57,12 +98,12 @@ exports.getMatchById = async (req, res) => {
   try {
     let match;
     if (mongoose.connection.readyState === 1) {
-      match = await Match.findOne({ id: req.params.id });
+      match = await Match.findOne({ id: req.params.id }).lean();
       if (!match) {
-        // Try to sync if missing (e.g. newly added in code but not in DB)
         const local = localMatches.find(m => m.id === req.params.id);
         if (local) {
-          match = await Match.create(local);
+          const created = await Match.create(local);
+          match = created.toObject();
         }
       }
     } else {
@@ -176,9 +217,8 @@ exports.getRoundsSorted = async (_req, res) => {
 };
 
 exports.getRawMatches = async (_req, res) => {
-  // Just return all
   if (mongoose.connection.readyState === 1) {
-    const matches = await Match.find({});
+    const matches = await Match.find({}).lean();
     res.json(matches);
   } else {
     res.json(localMatches);

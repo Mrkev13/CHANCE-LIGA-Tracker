@@ -25,7 +25,7 @@ const matchSchema = mongoose.Schema({
   events: [{
     id: String,
     type: { type: String },
-    minute: String, // Changed to String to support '90+1'
+    minute: String,
     team: String,
     player: { id: String, name: String },
     assistPlayer: { id: String, name: String },
@@ -36,5 +36,9 @@ const matchSchema = mongoose.Schema({
 }, {
   timestamps: true
 });
+
+matchSchema.index({ status: 1 });
+matchSchema.index({ round: 1 });
+matchSchema.index({ date: -1 });
 
 module.exports = mongoose.model('Match', matchSchema);

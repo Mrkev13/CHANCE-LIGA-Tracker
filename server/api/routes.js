@@ -7,8 +7,8 @@ const teamController = require('../controllers/teamController');
 const tableController = require('../controllers/tableController');
 const competitionController = require('../controllers/competitionController');
 
-// Match routes
 router.get('/matches', matchController.getAllMatches);
+router.get('/matches/summary', matchController.getMatchesSummary);
 router.get('/matches/live', matchController.getLiveMatches);
 router.get('/matches/rounds', matchController.getRoundsSorted);
 router.get('/matches/:id', matchController.getMatchById);
