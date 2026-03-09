@@ -224,3 +224,74 @@ exports.getRawMatches = async (_req, res) => {
     res.json(localMatches);
   }
 };
+
+exports.getRoundMetadata = async (_req, res) => {
+  try {
+    let matches;
+    if (mongoose.connection.readyState === 1) {
+      matches = await ensureData();
+    } else {
+      matches = localMatches;
+    }
+
+    const rounds = [...new Set(matches.map(m => String(m.round)).filter(Boolean))];
+    rounds.sort((a, b) => Number(a) - Number(b));
+
+    // Current round: highest round with 'finished' or 'live'
+    const finishedOrLiveRounds = [...new Set(matches
+      .filter(m => m.status === 'finished' || m.status === 'live')
+      .map(m => String(m.round))
+      .filter(Boolean)
+    )];
+    finishedOrLiveRounds.sort((a, b) => Number(b) - Number(a));
+    
+    const currentRound = finishedOrLiveRounds.length > 0 ? finishedOrLiveRounds[0] : (rounds.length > 0 ? rounds[0] : null);
+    
+    // Next round: the one after current
+    let nextRound = null;
+    if (currentRound) {
+      const idx = rounds.indexOf(currentRound);
+      if (idx !== -1 && idx < rounds.length - 1) {
+        nextRound = rounds[idx + 1];
+      }
+    }
+
+    res.json({
+      rounds,
+      currentRound,
+      nextRound
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getMatchesByRound = async (req, res) => {
+  try {
+    const { round } = req.params;
+    if (mongoose.connection.readyState === 1) {
+      const matches = await Match.find(
+        { round: String(round) },
+        'id homeTeam awayTeam score status date stadium competition round'
+      ).lean();
+      res.json(matches.sort((a, b) => new Date(a.date) - new Date(b.date)));
+    } else {
+      const matches = localMatches
+        .filter(m => String(m.round) === String(round))
+        .map(m => ({
+          id: m.id,
+          homeTeam: m.homeTeam,
+          awayTeam: m.awayTeam,
+          score: m.score,
+          status: m.status,
+          date: m.date,
+          stadium: m.stadium,
+          competition: m.competition,
+          round: m.round
+        }));
+      res.json(matches.sort((a, b) => new Date(a.date) - new Date(b.date)));
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

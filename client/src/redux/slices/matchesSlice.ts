@@ -80,6 +80,16 @@ interface MatchesState {
   summaries: MatchSummary[];
   loading: boolean;
   error: string | null;
+  roundsMetadata: {
+    rounds: string[];
+    currentRound: string | null;
+    nextRound: string | null;
+  } | null;
+  roundsData: Record<string, {
+    matches: MatchSummary[];
+    loading: boolean;
+    loaded: boolean;
+  }>;
 }
 
 const initialState: MatchesState = {
@@ -88,7 +98,9 @@ const initialState: MatchesState = {
   currentMatch: null,
   summaries: [],
   loading: false,
-  error: null
+  error: null,
+  roundsMetadata: null,
+  roundsData: {}
 };
 
 export const MANUAL_MATCHES: Match[] = [
@@ -5227,6 +5239,36 @@ export const fetchMatchById = createAsyncThunk(
   }
 );
 
+export const fetchRoundMetadata = createAsyncThunk(
+  'matches/fetchRoundMetadata',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(`${API_URL}/matches/rounds/metadata`);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue('Chyba při načítání metadat kol');
+    }
+  }
+);
+
+export const fetchMatchesByRound = createAsyncThunk(
+  'matches/fetchMatchesByRound',
+  async (round: string, { rejectWithValue, getState }) => {
+    const state = getState() as any;
+    const matchesState = state.matches as MatchesState;
+    if (matchesState.roundsData[round]?.loaded) {
+      return { round, matches: matchesState.roundsData[round].matches, cached: true };
+    }
+    
+    try {
+      const response = await axios.get(`${API_URL}/matches/round/${round}`);
+      return { round, matches: response.data as MatchSummary[], cached: false };
+    } catch (error) {
+      return rejectWithValue(`Chyba při načítání kola ${round}`);
+    }
+  }
+);
+
 const matchesSlice = createSlice({
   name: 'matches',
   initialState,
@@ -5313,6 +5355,31 @@ const matchesSlice = createSlice({
       .addCase(fetchMatchById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
+      })
+      .addCase(fetchRoundMetadata.fulfilled, (state, action) => {
+        state.roundsMetadata = action.payload;
+      })
+      .addCase(fetchMatchesByRound.pending, (state, action) => {
+        const round = action.meta.arg;
+        if (!state.roundsData[round]) {
+          state.roundsData[round] = { matches: [], loading: true, loaded: false };
+        } else {
+          state.roundsData[round].loading = true;
+        }
+      })
+      .addCase(fetchMatchesByRound.fulfilled, (state, action) => {
+        const { round, matches } = action.payload;
+        state.roundsData[round] = {
+          matches,
+          loading: false,
+          loaded: true
+        };
+      })
+      .addCase(fetchMatchesByRound.rejected, (state, action) => {
+        const round = action.meta.arg;
+        if (state.roundsData[round]) {
+          state.roundsData[round].loading = false;
+        }
       })
       .addCase(saveMatch.fulfilled, (state, action) => {
         const updatedMatch = action.payload;

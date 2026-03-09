@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowUp } from 'react-icons/fa';
 import styled from 'styled-components';
-import { fetchMatchSummaries, fetchMatches, Match, MatchSummary } from '../redux/slices/matchesSlice';
+import { fetchRoundMetadata, fetchMatchesByRound, Match, MatchSummary } from '../redux/slices/matchesSlice';
 import { TEAM_LIST } from '../redux/teamData';
 import { RootState, AppDispatch } from '../redux/store';
 import { theme } from '../styles/theme';
@@ -409,8 +409,8 @@ const DropdownItem = styled.button<{ isSelected: boolean }>`
 const HomePage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { matches, summaries, loading, error } = useSelector(
-    (state: RootState) => state.matches as any
+  const { roundsMetadata, roundsData, loading, error } = useSelector(
+    (state: RootState) => state.matches
   );
   
   const [selectedRound, setSelectedRound] = useState<string>(() => sessionStorage.getItem('homeRound') || 'all');
@@ -421,8 +421,31 @@ const HomePage: React.FC = () => {
   const teamRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    dispatch(fetchMatchSummaries());
+    dispatch(fetchRoundMetadata());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (roundsMetadata) {
+      if (roundsMetadata.currentRound) {
+        dispatch(fetchMatchesByRound(roundsMetadata.currentRound));
+      }
+      if (roundsMetadata.nextRound) {
+        dispatch(fetchMatchesByRound(roundsMetadata.nextRound));
+      }
+      
+      // If a specific round was stored, load it too
+      const stored = sessionStorage.getItem('homeRound');
+      if (stored && stored !== 'all' && stored !== roundsMetadata.currentRound && stored !== roundsMetadata.nextRound) {
+        dispatch(fetchMatchesByRound(stored));
+      }
+    }
+  }, [dispatch, roundsMetadata]);
+
+  useEffect(() => {
+    if (selectedRound !== 'all' && roundsMetadata) {
+      dispatch(fetchMatchesByRound(selectedRound));
+    }
+  }, [dispatch, selectedRound, roundsMetadata]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -464,37 +487,19 @@ const HomePage: React.FC = () => {
     sessionStorage.setItem('homeRound', selectedRound);
   }, [selectedRound]);
   
-  const sourceMatches: Array<Match | MatchSummary> = (summaries && summaries.length > 0 ? summaries : matches) as any[];
+  const sortedRoundKeys = useMemo(() => {
+    if (!roundsMetadata) return [];
+    // Sort descending for display (like original logic)
+    return [...roundsMetadata.rounds].sort((a, b) => Number(b) - Number(a));
+  }, [roundsMetadata]);
 
-  const { roundsMap, sortedRoundKeys } = useMemo(() => {
-    const map: Record<string, (Match | MatchSummary)[]> = {};
-    sourceMatches.forEach((m) => {
-      if (m.round) {
-        const key = String(m.round);
-        if (!map[key]) map[key] = [];
-        map[key].push(m);
-      }
-    });
-    const keys = Object.keys(map);
-    
-    // Find highest round number that has at least one 'finished' or 'live' match
-    const finishedOrLiveRounds = keys.filter(rk => 
-      map[rk].some(m => m.status === 'finished' || m.status === 'live')
-    );
-    
-    // Sort descending by round number
-    finishedOrLiveRounds.sort((a, b) => Number(b) - Number(a));
-    
-    // The "current" round is the highest finished/live round
-    const latestPlayedRound = finishedOrLiveRounds.length > 0 ? finishedOrLiveRounds[0] : null;
+  const filteredRoundKeys = useMemo(() => 
+    selectedRound === 'all' 
+      ? (roundsMetadata ? [roundsMetadata.currentRound, roundsMetadata.nextRound].filter(Boolean) as string[] : [])
+      : [selectedRound],
+    [selectedRound, roundsMetadata]
+  );
 
-    const remainingDesc = keys
-      .filter((rk) => rk !== latestPlayedRound)
-      .sort((a, b) => Number(b) - Number(a));
-    const ordered = latestPlayedRound ? [latestPlayedRound, ...remainingDesc] : remainingDesc;
-    return { roundsMap: map, sortedRoundKeys: ordered };
-  }, [sourceMatches]);
-  
   useEffect(() => {
     if (!loading) {
       const stored = sessionStorage.getItem('homeScroll');
@@ -506,22 +511,15 @@ const HomePage: React.FC = () => {
         sessionStorage.removeItem('homeScroll');
       }
     }
-  }, [loading, sortedRoundKeys.length]);
-  
-  const filteredRoundKeys = useMemo(() => 
-    selectedRound === 'all' 
-      ? sortedRoundKeys 
-      : sortedRoundKeys.filter((key: string) => key === selectedRound),
-    [selectedRound, sortedRoundKeys]
-  );
+  }, [loading, filteredRoundKeys.length]);
 
   return (
     <HomeContainer>
       <Navigation />
 
-      {loading && matches.length === 0 ? (
+      {loading && Object.keys(roundsData).length === 0 ? (
         <LoadingMessage theme={theme}>Načítání zápasů...</LoadingMessage>
-      ) : error && matches.length === 0 ? (
+      ) : error && Object.keys(roundsData).length === 0 ? (
         <ErrorMessage theme={theme}>{error}</ErrorMessage>
       ) : (
         <section>
@@ -554,6 +552,10 @@ const HomePage: React.FC = () => {
                     onClick={() => {
                       setSelectedRound(roundKey);
                       setIsDropdownOpen(false);
+                    }}
+                    onMouseEnter={() => {
+                      // Prefetch data when hovering over a round
+                      dispatch(fetchMatchesByRound(roundKey));
                     }}
                     role="option"
                     aria-selected={selectedRound === roundKey}
@@ -607,79 +609,83 @@ const HomePage: React.FC = () => {
           {filteredRoundKeys.length > 0 ? (
             <div>
               {filteredRoundKeys.map((roundKey: string) => {
-                let roundMatches = roundsMap[roundKey]
-                  .slice()
-                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-                
-                if (selectedRound === 'all') {
-                  roundMatches = roundMatches.slice(0, 8);
-                }
+                const roundInfo = roundsData[roundKey];
+                const roundMatches = roundInfo?.matches || [];
+                const isRoundLoading = roundInfo?.loading;
 
-                if (roundMatches.length === 0) return null;
+                if (!roundInfo && !isRoundLoading) return null;
 
                 return (
-                  <div key={roundKey} style={{ marginBottom: '1.5rem' }}>
-                    {selectedRound === 'all' && <SectionTitle>Kolo {roundKey}</SectionTitle>}
-                    <MatchesGrid>
-                      {roundMatches.map((match) => {
-                        const effectiveStatus = match.status;
-                        
-                        return (
-                        <MatchCard 
-                          key={match.id} 
-                          to={`/match/${match.id}`}
-                          className={effectiveStatus === 'live' ? 'live' : ''}
-                          onClick={() => sessionStorage.setItem('homeScroll', String(window.scrollY))}
-                        >
-                          <MatchHeader>
-                            <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>
-                            <HeaderRight>
-                              <MatchStatus status={effectiveStatus}>
-                                {effectiveStatus === 'live' 
-                                  ? 'ŽIVĚ' 
-                                  : effectiveStatus === 'finished' 
-                                    ? 'KONEC' 
-                                    : effectiveStatus === 'awarded'
-                                      ? 'KONTUMACE'
-                                      : effectiveStatus === 'canceled'
-                                        ? 'ZRUŠENO'
-                                        : effectiveStatus === 'not_played'
-                                          ? 'NEODEHRÁNO'
-                                          : 'NAPLÁNOVÁNO'}
-                              </MatchStatus>
-                            </HeaderRight>
-                          </MatchHeader>
-                          
-                          <MatchContent>
-                            <TeamSide align="left">
-                              <TeamLogo src={getTeamLogo(match.homeTeam.name, match.homeTeam.logo)} alt={match.homeTeam.name} />
-                              <TeamName>{match.homeTeam.name}</TeamName>
-                            </TeamSide>
-                            
-                            <ScoreSection>
-                              <VersusScore>
-                                {effectiveStatus === 'scheduled' || effectiveStatus === 'canceled' || effectiveStatus === 'not_played' 
-                                  ? '-:-' 
-                                  : `${match.score.home}:${match.score.away}`}
-                              </VersusScore>
-                            </ScoreSection>
-                            
-                            <TeamSide align="right">
-                              <TeamLogo src={getTeamLogo(match.awayTeam.name, match.awayTeam.logo)} alt={match.awayTeam.name} />
-                              <TeamName>{match.awayTeam.name}</TeamName>
-                            </TeamSide>
-                          </MatchContent>
+                  <div key={roundKey} style={{ marginBottom: '2.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
+                      <SectionTitle style={{ margin: 0 }}>Kolo {roundKey}</SectionTitle>
+                      {isRoundLoading && <span style={{ color: theme.colors.secondary, fontSize: '0.9rem' }}>Načítání...</span>}
+                    </div>
 
-                          {match.stadium || match.competition?.name ? (
-                            <MatchDate style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                              {match.stadium ? `Stadion: ${match.stadium}` : ''}
-                              {match.competition?.name ? `${match.stadium ? ' • ' : ''}${match.competition.name}` : ''}
-                            </MatchDate>
-                          ) : null}
-                        </MatchCard>
-                        );
-                      })}
-                    </MatchesGrid>
+                    {roundMatches.length > 0 ? (
+                      <MatchesGrid>
+                        {roundMatches.map((match) => {
+                          const effectiveStatus = match.status;
+                          
+                          return (
+                          <MatchCard 
+                            key={match.id} 
+                            to={`/match/${match.id}`}
+                            className={effectiveStatus === 'live' ? 'live' : ''}
+                            onClick={() => sessionStorage.setItem('homeScroll', String(window.scrollY))}
+                          >
+                            <MatchHeader>
+                              <MatchDate>{new Date(match.date).toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'})}</MatchDate>
+                              <HeaderRight>
+                                <MatchStatus status={effectiveStatus}>
+                                  {effectiveStatus === 'live' 
+                                    ? 'ŽIVĚ' 
+                                    : effectiveStatus === 'finished' 
+                                      ? 'KONEC' 
+                                      : effectiveStatus === 'awarded'
+                                        ? 'KONTUMACE'
+                                        : effectiveStatus === 'canceled'
+                                          ? 'ZRUŠENO'
+                                          : effectiveStatus === 'not_played'
+                                            ? 'NEODEHRÁNO'
+                                            : 'NAPLÁNOVÁNO'}
+                                </MatchStatus>
+                              </HeaderRight>
+                            </MatchHeader>
+                            
+                            <MatchContent>
+                              <TeamSide align="left">
+                                <TeamLogo src={getTeamLogo(match.homeTeam.name, match.homeTeam.logo)} alt={match.homeTeam.name} />
+                                <TeamName>{match.homeTeam.name}</TeamName>
+                              </TeamSide>
+                              
+                              <ScoreSection>
+                                <VersusScore>
+                                  {effectiveStatus === 'scheduled' || effectiveStatus === 'canceled' || effectiveStatus === 'not_played' 
+                                    ? '-:-' 
+                                    : `${match.score.home}:${match.score.away}`}
+                                </VersusScore>
+                              </ScoreSection>
+                              
+                              <TeamSide align="right">
+                                <TeamLogo src={getTeamLogo(match.awayTeam.name, match.awayTeam.logo)} alt={match.awayTeam.name} />
+                                <TeamName>{match.awayTeam.name}</TeamName>
+                              </TeamSide>
+                            </MatchContent>
+
+                            {match.stadium || match.competition?.name ? (
+                              <MatchDate style={{ textAlign: 'center', marginTop: 'auto', paddingTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                                {match.stadium ? `Stadion: ${match.stadium}` : ''}
+                                {match.competition?.name ? `${match.stadium ? ' • ' : ''}${match.competition.name}` : ''}
+                              </MatchDate>
+                            ) : null}
+                          </MatchCard>
+                          );
+                        })}
+                      </MatchesGrid>
+                    ) : !isRoundLoading && (
+                      <p style={{ color: theme.colors.gray }}>Pro toto kolo nejsou k dispozici žádné zápasy.</p>
+                    )}
                   </div>
                 );
               })}

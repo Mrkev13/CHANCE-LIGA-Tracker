@@ -130,10 +130,16 @@ const PositionBadge = styled.div<{ $rank: number }>`
   }};
 `;
 
-const TeamCell = styled.div`
+const TeamLink = styled(Link)`
   display: flex;
   align-items: center;
   gap: 12px;
+  text-decoration: none;
+  color: inherit;
+
+  &:hover {
+    text-decoration: none;
+  }
 
   @media (max-width: 768px) {
     gap: 8px;
@@ -142,9 +148,10 @@ const TeamCell = styled.div`
 
 const TeamName = styled.span`
   font-weight: 600;
-  color: #ffffff;
+  color: #ffffff; /* Explicitly set to white */
   font-size: 1rem;
   letter-spacing: 0.01em;
+  text-decoration: none; /* Ensure no underline */
 
   @media (max-width: 768px) {
     font-size: 0.9rem;
@@ -242,10 +249,10 @@ const TablePage: React.FC = () => {
                   </PositionBadge>
                 </Td>
                 <Td>
-                  <TeamCell>
+                  <TeamLink to={`/team/${entry.team.id}`}><TeamLink to={`/team/${entry.team.id}`}>
                     <TeamLogo src={getTeamLogo(entry.team.name, entry.team.logo)} alt={entry.team.name} />
                     <TeamName>{entry.team.name}</TeamName>
-                  </TeamCell>
+                  </TeamLink></TeamLink>
                 </Td>
                 <StatTd>{entry.played}</StatTd>
                 <MobileHiddenStatTd>{entry.won}</MobileHiddenStatTd>

@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { RootState, AppDispatch } from '../../redux/store';
-import { updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice';
+import { fetchMatchById, updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice';
 import { selectAllPlayerNames } from '../../redux/statsSelectors';
 import { TEAM_BY_ID } from '../../redux/teamData';
 import Navigation from '../../components/Navigation';
@@ -150,17 +150,22 @@ const MatchEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const match = useSelector((state: RootState) => 
-    state.matches.matches.find(m => m.id === id)
-  );
+  const { matches, loading } = useSelector((state: RootState) => state.matches);
+  const match = matches.find(m => m.id === id);
   
   // Get all matches to gather historical player data
-  const allMatches = useSelector((state: RootState) => state.matches.matches);
+  const allMatches = matches;
   const allPlayerNames = useSelector(selectAllPlayerNames);
 
   // Get full team data including players from static file
   const homeTeamData = match ? TEAM_BY_ID[match.homeTeam.id] : null;
   const awayTeamData = match ? TEAM_BY_ID[match.awayTeam.id] : null;
+
+  useEffect(() => {
+    if (id && !match) {
+      dispatch(fetchMatchById(id));
+    }
+  }, [id, match, dispatch]);
 
   const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution'>('goal');
   // Subtype for goal tab
@@ -263,6 +268,7 @@ const MatchEditor: React.FC = () => {
     }
   }, [match]);
 
+  if (loading && !match) return <PageContainer>Načítání...</PageContainer>;
   if (!match) return <PageContainer>Zápas nenalezen</PageContainer>;
   
   const handleBack = () => {

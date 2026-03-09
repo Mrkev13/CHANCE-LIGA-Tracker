@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { RootState, AppDispatch } from '../../redux/store';
-import { fetchMatches } from '../../redux/slices/matchesSlice';
+import { fetchMatchSummaries, Match, MatchSummary } from '../../redux/slices/matchesSlice';
 import { logout } from '../../redux/slices/authSlice';
 import Navigation from '../../components/Navigation';
 
@@ -108,7 +108,7 @@ const EditButton = styled.button`
 const AdminDashboard: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { matches, loading } = useSelector((state: RootState) => state.matches);
+  const { summaries, matches, loading } = useSelector((state: RootState) => state.matches as any);
   
   // Initialize state from sessionStorage if available, otherwise 'all'
   const [selectedRound, setSelectedRound] = useState<string>(() => {
@@ -116,10 +116,10 @@ const AdminDashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    if (matches.length === 0) {
-      dispatch(fetchMatches());
+    if (summaries.length === 0 && matches.length === 0) {
+      dispatch(fetchMatchSummaries());
     }
-  }, [dispatch, matches.length]);
+  }, [dispatch, summaries.length, matches.length]);
 
   // Update sessionStorage when selection changes
   useEffect(() => {
@@ -131,11 +131,12 @@ const AdminDashboard: React.FC = () => {
     navigate('/login');
   };
 
-  const rounds = Array.from(new Set(matches.map(m => m.round).filter(Boolean))).sort((a, b) => Number(a) - Number(b));
+  const sourceMatches: Array<Match | MatchSummary> = (summaries && summaries.length > 0) ? summaries : matches;
+  const rounds: string[] = Array.from(new Set(sourceMatches.map((m) => m.round).filter(Boolean) as string[])).sort((a, b) => Number(a) - Number(b));
 
-  const filteredMatches = selectedRound === 'all' 
-    ? matches 
-    : matches.filter(m => m.round === selectedRound);
+  const filteredMatches = (selectedRound === 'all' 
+    ? sourceMatches 
+    : sourceMatches.filter((m) => m.round === selectedRound)) as Array<Match | MatchSummary>;
 
   const handleEdit = (id: string) => {
     navigate(`/admin/match/${id}`);
@@ -175,14 +176,14 @@ const AdminDashboard: React.FC = () => {
       <FilterContainer>
         <Select value={selectedRound} onChange={(e) => setSelectedRound(e.target.value)}>
           <option value="all">Všechna kola</option>
-          {rounds.map(round => (
+          {rounds.map((round: string) => (
             <option key={round} value={round}>{round}. kolo</option>
           ))}
         </Select>
       </FilterContainer>
 
       <MatchList>
-        {filteredMatches.map(match => (
+        {filteredMatches.map((match: Match | MatchSummary) => (
           <MatchCard key={match.id}>
             <MatchInfo>
               <Teams>{match.homeTeam.name} vs {match.awayTeam.name}</Teams>

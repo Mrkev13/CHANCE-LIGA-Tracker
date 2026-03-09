@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '../redux/store';
 import { fetchMatchById } from '../redux/slices/matchesSlice';
@@ -360,7 +360,9 @@ const MatchDetailPage: React.FC = () => {
       <Header>
         <MatchInfo>
           <TeamColumn align="left">
-            <TeamLogo src={getTeamLogo(currentMatch.homeTeam.name)} alt={currentMatch.homeTeam.name} />
+            <Link to={`/team/${currentMatch.homeTeam.id}`}>
+              <TeamLogo src={getTeamLogo(currentMatch.homeTeam.name)} alt={currentMatch.homeTeam.name} />
+            </Link>
             <TeamName>{currentMatch.homeTeam.name}</TeamName>
           </TeamColumn>
           
@@ -380,7 +382,9 @@ const MatchDetailPage: React.FC = () => {
           </ScoreColumn>
 
           <TeamColumn align="right">
-            <TeamLogo src={getTeamLogo(currentMatch.awayTeam.name)} alt={currentMatch.awayTeam.name} />
+            <Link to={`/team/${currentMatch.awayTeam.id}`}>
+              <TeamLogo src={getTeamLogo(currentMatch.awayTeam.name)} alt={currentMatch.awayTeam.name} />
+            </Link>
             <TeamName>{currentMatch.awayTeam.name}</TeamName>
           </TeamColumn>
         </MatchInfo>
