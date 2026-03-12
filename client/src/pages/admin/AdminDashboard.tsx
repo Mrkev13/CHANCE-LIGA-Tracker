@@ -19,6 +19,26 @@ const AdminHeader = styled.div`
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
+  gap: 1rem;
+`;
+
+const HeaderButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+`;
+
+const AddButton = styled.button`
+  background-color: ${({ theme }) => theme.colors.success || '#28a745'};
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+
+  &:hover {
+    opacity: 0.9;
+  }
 `;
 
 const Title = styled.h1`
@@ -142,6 +162,10 @@ const AdminDashboard: React.FC = () => {
     navigate(`/admin/match/${id}`);
   };
 
+  const handleAdd = () => {
+    navigate('/admin/match/new');
+  };
+
   if (loading) return <PageContainer>Načítání...</PageContainer>;
 
   const getStatusLabel = (match: any) => {
@@ -170,7 +194,10 @@ const AdminDashboard: React.FC = () => {
       <Navigation />
       <AdminHeader>
         <Title>Administrace Zápasů</Title>
-        <LogoutButton onClick={handleLogout}>Odhlásit se</LogoutButton>
+        <HeaderButtons>
+          <AddButton onClick={handleAdd}>+ Přidat Zápas</AddButton>
+          <LogoutButton onClick={handleLogout}>Odhlásit se</LogoutButton>
+        </HeaderButtons>
       </AdminHeader>
       
       <FilterContainer>

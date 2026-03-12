@@ -1,5 +1,6 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
+import { RootState } from '../store';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -5156,7 +5157,7 @@ export const MANUAL_MATCHES: Match[] = [
   }
 ];
 
-export const fetchMatchSummaries = createAsyncThunk(
+export const fetchMatchSummaries = createAsyncThunk<MatchSummary[], void>(
   'matches/fetchSummaries',
   async (_, { rejectWithValue }) => {
     const start = typeof performance !== 'undefined' ? performance.now() : 0;
@@ -5177,9 +5178,9 @@ export const fetchMatchSummaries = createAsyncThunk(
   }
 );
 
-export const fetchMatches = createAsyncThunk(
+export const fetchMatches = createAsyncThunk<Match[], void>(
   'matches/fetchMatches',
-  async (_, { rejectWithValue }) => {
+  async () => {
     const start = typeof performance !== 'undefined' ? performance.now() : 0;
     try {
       const response = await axios.get(`${API_URL}/matches`);
@@ -5199,7 +5200,7 @@ export const fetchMatches = createAsyncThunk(
   }
 );
 
-export const saveMatch = createAsyncThunk(
+export const saveMatch = createAsyncThunk<Match, Match>(
   'matches/saveMatch',
   async (match: Match, { rejectWithValue }) => {
     try {
@@ -5211,9 +5212,9 @@ export const saveMatch = createAsyncThunk(
   }
 );
 
-export const fetchLiveMatches = createAsyncThunk(
+export const fetchLiveMatches = createAsyncThunk<Match[], void>(
   'matches/fetchLiveMatches',
-  async (_, { rejectWithValue }) => {
+  async () => {
     try {
       const response = await axios.get(`${API_URL}/matches/live`);
       return response.data;
@@ -5224,7 +5225,7 @@ export const fetchLiveMatches = createAsyncThunk(
   }
 );
 
-export const fetchMatchById = createAsyncThunk(
+export const fetchMatchById = createAsyncThunk<Match, string>(
   'matches/fetchMatchById',
   async (id: string, { rejectWithValue }) => {
     try {
@@ -5239,7 +5240,7 @@ export const fetchMatchById = createAsyncThunk(
   }
 );
 
-export const fetchRoundMetadata = createAsyncThunk(
+export const fetchRoundMetadata = createAsyncThunk<{ rounds: string[], currentRound: string | null, nextRound: string | null }, void>(
   'matches/fetchRoundMetadata',
   async (_, { rejectWithValue }) => {
     try {
@@ -5251,11 +5252,11 @@ export const fetchRoundMetadata = createAsyncThunk(
   }
 );
 
-export const fetchMatchesByRound = createAsyncThunk(
+export const fetchMatchesByRound = createAsyncThunk<{ round: string, matches: MatchSummary[] }, string>(
   'matches/fetchMatchesByRound',
   async (round: string, { rejectWithValue, getState }) => {
-    const state = getState() as any;
-    const matchesState = state.matches as MatchesState;
+    const state = getState() as RootState;
+    const matchesState = state.matches;
     if (matchesState.roundsData[round]?.loaded) {
       return { round, matches: matchesState.roundsData[round].matches, cached: true };
     }
@@ -5276,7 +5277,7 @@ const matchesSlice = createSlice({
     clearCurrentMatch: (state) => {
       state.currentMatch = null;
     },
-    updateLiveMatch: (state, action) => {
+    updateLiveMatch: (state, action: PayloadAction<Match>) => {
       const updatedMatch = action.payload;
       state.liveMatches = state.liveMatches.map(match => 
         match.id === updatedMatch.id ? updatedMatch : match
@@ -5285,7 +5286,7 @@ const matchesSlice = createSlice({
         state.currentMatch = updatedMatch;
       }
     },
-    updateMatchEvents: (state, action) => {
+    updateMatchEvents: (state, action: PayloadAction<{ matchId: string, events: any[] }>) => {
       const { matchId, events } = action.payload;
       const matchIndex = state.matches.findIndex(m => m.id === matchId);
       if (matchIndex !== -1) {
@@ -5295,7 +5296,7 @@ const matchesSlice = createSlice({
         }
       }
     },
-    updateMatchScore: (state, action) => {
+    updateMatchScore: (state, action: PayloadAction<{ matchId: string, score: { home: number, away: number } }>) => {
       const { matchId, score } = action.payload;
       const matchIndex = state.matches.findIndex(m => m.id === matchId);
       if (matchIndex !== -1) {
@@ -5312,7 +5313,7 @@ const matchesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchMatchSummaries.fulfilled, (state, action) => {
+      .addCase(fetchMatchSummaries.fulfilled, (state, action: PayloadAction<MatchSummary[]>) => {
         state.loading = false;
         state.summaries = action.payload;
       })
@@ -5324,7 +5325,7 @@ const matchesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchMatches.fulfilled, (state, action) => {
+      .addCase(fetchMatches.fulfilled, (state, action: PayloadAction<Match[]>) => {
         state.loading = false;
         state.matches = action.payload;
       })
@@ -5336,7 +5337,7 @@ const matchesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchLiveMatches.fulfilled, (state, action) => {
+      .addCase(fetchLiveMatches.fulfilled, (state, action: PayloadAction<Match[]>) => {
         state.loading = false;
         state.liveMatches = action.payload;
       })
@@ -5348,7 +5349,7 @@ const matchesSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchMatchById.fulfilled, (state, action) => {
+      .addCase(fetchMatchById.fulfilled, (state, action: PayloadAction<Match>) => {
         state.loading = false;
         state.currentMatch = action.payload;
       })
@@ -5356,7 +5357,7 @@ const matchesSlice = createSlice({
         state.loading = false;
         state.error = action.payload as string;
       })
-      .addCase(fetchRoundMetadata.fulfilled, (state, action) => {
+      .addCase(fetchRoundMetadata.fulfilled, (state, action: PayloadAction<{ rounds: string[], currentRound: string | null, nextRound: string | null }>) => {
         state.roundsMetadata = action.payload;
       })
       .addCase(fetchMatchesByRound.pending, (state, action) => {
@@ -5367,7 +5368,7 @@ const matchesSlice = createSlice({
           state.roundsData[round].loading = true;
         }
       })
-      .addCase(fetchMatchesByRound.fulfilled, (state, action) => {
+      .addCase(fetchMatchesByRound.fulfilled, (state, action: PayloadAction<{ round: string, matches: MatchSummary[] }>) => {
         const { round, matches } = action.payload;
         state.roundsData[round] = {
           matches,
@@ -5381,7 +5382,7 @@ const matchesSlice = createSlice({
           state.roundsData[round].loading = false;
         }
       })
-      .addCase(saveMatch.fulfilled, (state, action) => {
+      .addCase(saveMatch.fulfilled, (state, action: PayloadAction<Match>) => {
         const updatedMatch = action.payload;
         const index = state.matches.findIndex(m => m.id === updatedMatch.id);
         if (index !== -1) {

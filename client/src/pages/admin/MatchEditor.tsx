@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { RootState, AppDispatch } from '../../redux/store';
-import { fetchMatchById, updateMatchEvents, updateMatchScore, saveMatch } from '../../redux/slices/matchesSlice';
+import { fetchMatchById, updateMatchEvents, updateMatchScore, saveMatch, Match } from '../../redux/slices/matchesSlice';
 import { selectAllPlayerNames } from '../../redux/statsSelectors';
 import { TEAM_BY_ID } from '../../redux/teamData';
 import Navigation from '../../components/Navigation';
@@ -146,57 +146,74 @@ const calculateScoreFromEvents = (events: any[]) => {
   return { home, away };
 };
 
+const DEFAULT_MATCH: Match = {
+  id: '',
+  homeTeam: { id: '', name: '', logo: '' },
+  awayTeam: { id: '', name: '', logo: '' },
+  score: { home: 0, away: 0 },
+  status: 'scheduled',
+  date: new Date().toISOString(),
+  stadium: '',
+  events: []
+};
+
 const MatchEditor: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const isNew = id === 'new';
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
-  const { matches, loading } = useSelector((state: RootState) => state.matches);
-  const match = matches.find(m => m.id === id);
+  const { matches, currentMatch, loading } = useSelector((state: RootState) => state.matches);
   
+  const existingMatch = currentMatch && currentMatch.id === id ? currentMatch : matches.find(m => m.id === id);
+  const [match, setMatch] = useState<Match | null>(null);
+
+  useEffect(() => {
+    if (isNew) {
+      setMatch({ ...DEFAULT_MATCH, id: `match-${Date.now()}` });
+    } else if (existingMatch) {
+      setMatch(existingMatch);
+    } else if (id) {
+      dispatch(fetchMatchById(id));
+    }
+  }, [id, existingMatch, isNew, dispatch]);
+
   // Get all matches to gather historical player data
-  const allMatches = matches;
   const allPlayerNames = useSelector(selectAllPlayerNames);
 
   // Get full team data including players from static file
-  const homeTeamData = match ? TEAM_BY_ID[match.homeTeam.id] : null;
-  const awayTeamData = match ? TEAM_BY_ID[match.awayTeam.id] : null;
+   const homeTeamData = match ? TEAM_BY_ID[match.homeTeam.id] : null;
+   const awayTeamData = match ? TEAM_BY_ID[match.awayTeam.id] : null;
+   
+   const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution'>('goal');
+   // Subtype for goal tab
+   const [goalType, setGoalType] = useState<'goal' | 'goal_disallowed' | 'missed_penalty' | 'own_goal'>('goal');
+   const [isInjury, setIsInjury] = useState(false);
 
-  useEffect(() => {
-    if (id && !match) {
-      dispatch(fetchMatchById(id));
-    }
-  }, [id, match, dispatch]);
+   // Helper for formatting player name: "David Douděra" -> "Douděra D."
+   const formatPlayerName = (fullName: string) => {
+     if (!fullName) return '';
+     const trimmed = fullName.trim();
+     const parts = trimmed.split(/\s+/);
+     
+     if (parts.length < 2) return trimmed;
 
-  const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution'>('goal');
-  // Subtype for goal tab
-  const [goalType, setGoalType] = useState<'goal' | 'goal_disallowed' | 'missed_penalty' | 'own_goal'>('goal');
-  const [isInjury, setIsInjury] = useState(false);
+     // Check if already in "Surname F." format (last part is single letter with dot)
+     const lastPart = parts[parts.length - 1];
+     if (lastPart.length === 2 && lastPart.endsWith('.')) {
+       return trimmed;
+     }
 
-  // Helper for formatting player name: "David Douděra" -> "Douděra D."
-  const formatPlayerName = (fullName: string) => {
-    if (!fullName) return '';
-    const trimmed = fullName.trim();
-    const parts = trimmed.split(/\s+/);
-    
-    if (parts.length < 2) return trimmed;
+     const surname = parts.slice(1).join(' ');
+     const firstname = parts[0];
+     return `${surname} ${firstname.charAt(0)}.`;
+   };
 
-    // Check if already in "Surname F." format (last part is single letter with dot)
-    const lastPart = parts[parts.length - 1];
-    if (lastPart.length === 2 && lastPart.endsWith('.')) {
-      return trimmed;
-    }
-
-    const surname = parts.slice(1).join(' ');
-    const firstname = parts[0];
-    return `${surname} ${firstname.charAt(0)}.`;
-  };
-
-  const NOTE_OPTIONS = [
-    'Gól', 'Penalta', 'Neuznaný gól', 'Faul', 'Ofsajd', 'Ruka', 
-    'Žlutá karta', 'Podražení', 'Držení', 'Nafilmovaný pád', 
-    'Nesportovní chování', 'Hrubost', 'STOP na další zápas', 'Zdržování hry',
-    'Mimo hřiště', 'Neproměněná penalta'
-  ];
+   const NOTE_OPTIONS = [
+     'Gól', 'Penalta', 'Neuznaný gól', 'Faul', 'Ofsajd', 'Ruka', 
+     'Žlutá karta', 'Podražení', 'Držení', 'Nafilmovaný pád', 
+     'Nesportovní chování', 'Hrubost', 'STOP na další zápas', 'Zdržování hry',
+     'Mimo hřiště', 'Neproměněná penalta'
+   ];
   
   const [editingEventId, setEditingEventId] = useState<string | null>(null);
   
@@ -276,18 +293,29 @@ const MatchEditor: React.FC = () => {
   };
 
   const handleUpdateMatchInfo = async () => {
+    if (!match.homeTeam.id || !match.awayTeam.id) {
+      alert('Vyberte prosím oba týmy');
+      return;
+    }
+
     const newScore = { home: homeScore, away: awayScore };
     
-    // Optimistic Update
-    dispatch(updateMatchScore({
-      matchId: match.id,
-      score: newScore
-    }));
+    // Optimistic Update (only if not new)
+    if (!isNew) {
+      dispatch(updateMatchScore({
+        matchId: match.id,
+        score: newScore
+      }));
+    }
     
     // Save to Server
     try {
-      await dispatch(saveMatch({ ...match, score: newScore, status: status })).unwrap();
-      alert('Informace o zápasu uloženy na server');
+      const result = await dispatch(saveMatch({ ...match, score: newScore, status: status })).unwrap();
+      alert(isNew ? 'Zápas vytvořen' : 'Informace o zápasu uloženy na server');
+      
+      if (isNew) {
+        navigate(`/admin/match/${result.id}`, { replace: true });
+      }
     } catch (err) {
       alert('Chyba: Nepodařilo se uložit na server. Zkontrolujte, zda server běží.');
     }
@@ -371,9 +399,9 @@ const MatchEditor: React.FC = () => {
 
     // Only check cards if NOT editing (to avoid blocking edit of existing event)
     if (!editingEventId && eventType === 'card' && match) {
-      const playerCards = match.events.filter(e => e.type.includes('card') && e.player?.name === player);
-      const reds = playerCards.filter(e => e.type === 'red_card').length;
-      const yellows = playerCards.filter(e => e.type === 'yellow_card').length;
+      const playerCards = match.events.filter((e: any) => e.type.includes('card') && e.player?.name === player);
+      const reds = playerCards.filter((e: any) => e.type === 'red_card').length;
+      const yellows = playerCards.filter((e: any) => e.type === 'yellow_card').length;
       
       if (reds > 0) return 'Tento hráč už má červenou kartu';
       if (cardType === 'yellow_card' && yellows >= 2) return 'Tento hráč už má 2 žluté karty';
@@ -416,7 +444,9 @@ const MatchEditor: React.FC = () => {
       newEvent.playerOut = { id: `p_${Math.random()}`, name: playerOut };
     }
 
-    let updatedEvents;
+    if (!match) return;
+
+    let updatedEvents: any[] = [];
     
     // Helper for sorting events with 90+1 support
     const sortEvents = (a: any, b: any) => {
@@ -437,7 +467,7 @@ const MatchEditor: React.FC = () => {
 
     if (editingEventId) {
       newEvent.id = editingEventId;
-      updatedEvents = match.events.map(e => e.id === editingEventId ? { ...e, ...newEvent } : e).sort(sortEvents);
+      updatedEvents = match.events.map((e: any) => e.id === editingEventId ? { ...e, ...newEvent } : e).sort(sortEvents);
     } else {
       newEvent.id = Math.random().toString(36).substr(2, 9);
       updatedEvents = [...match.events, newEvent].sort(sortEvents);
@@ -457,7 +487,7 @@ const MatchEditor: React.FC = () => {
     setHomeScore(newScore.home);
     setAwayScore(newScore.away);
     
-    const updatedMatch = { ...match, events: updatedEvents, score: newScore, status: newStatus };
+    const updatedMatch: Match = { ...match, events: updatedEvents, score: newScore, status: newStatus };
     
     try {
       await dispatch(saveMatch(updatedMatch)).unwrap();
@@ -470,8 +500,8 @@ const MatchEditor: React.FC = () => {
   };
 
   const handleDeleteEvent = async (eventId: string) => {
-    if (window.confirm('Opravdu smazat tuto událost?')) {
-      const updatedEvents = match.events.filter(e => e.id !== eventId);
+    if (window.confirm('Opravdu smazat tuto událost?') && match) {
+      const updatedEvents: any[] = match.events.filter((e: any) => e.id !== eventId);
       
       dispatch(updateMatchEvents({ matchId: match.id, events: updatedEvents }));
       
@@ -480,7 +510,7 @@ const MatchEditor: React.FC = () => {
       setHomeScore(newScore.home);
       setAwayScore(newScore.away);
       
-      const updatedMatch = { ...match, events: updatedEvents, score: newScore };
+      const updatedMatch: Match = { ...match, events: updatedEvents, score: newScore };
       try {
         await dispatch(saveMatch(updatedMatch)).unwrap();
       } catch (err) {
@@ -540,44 +570,113 @@ const MatchEditor: React.FC = () => {
       </datalist>
       <Header>
         <Button onClick={handleBack} variant="secondary">← Zpět na přehled</Button>
-        <SectionTitle>Editace zápasu: {match.homeTeam.name} vs {match.awayTeam.name}</SectionTitle>
+        <SectionTitle>
+          {isNew ? 'Nový zápas' : `Editace zápasu: ${match.homeTeam.name} vs ${match.awayTeam.name}`}
+        </SectionTitle>
       </Header>
 
       <Section>
         <SectionTitle>Základní informace</SectionTitle>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <FormGroup>
-            <Label>Stav</Label>
-            <Select value={status} onChange={(e: any) => setStatus(e.target.value)}>
-              <option value="scheduled">Naplánováno</option>
-              <option value="live">Živě</option>
-              <option value="finished">Konec</option>
-              <option value="awarded">Kontumace</option>
-              <option value="canceled">Zrušeno</option>
-              <option value="not_played">Neodehráno</option>
-            </Select>
-          </FormGroup>
+        <div style={{ display: 'flex', gap: '1rem', flexDirection: 'column' }}>
+          {isNew && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <FormGroup>
+                <Label>Domácí Tým</Label>
+                <Select 
+                  value={match.homeTeam.id} 
+                  onChange={(e) => {
+                    const teamId = e.target.value;
+                    const teamData = TEAM_BY_ID[teamId];
+                    if (teamData) {
+                      setMatch({
+                        ...match,
+                        homeTeam: { id: teamId, name: teamData.name, logo: '' }
+                      });
+                    }
+                  }}
+                >
+                  <option value="">Vyberte tým</option>
+                  {Object.values(TEAM_BY_ID).map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </Select>
+              </FormGroup>
+              <FormGroup>
+                <Label>Hostující Tým</Label>
+                <Select 
+                  value={match.awayTeam.id} 
+                  onChange={(e) => {
+                    const teamId = e.target.value;
+                    const teamData = TEAM_BY_ID[teamId];
+                    if (teamData) {
+                      setMatch({
+                        ...match,
+                        awayTeam: { id: teamId, name: teamData.name, logo: '' }
+                      });
+                    }
+                  }}
+                >
+                  <option value="">Vyberte tým</option>
+                  {Object.values(TEAM_BY_ID).map(t => (
+                    <option key={t.id} value={t.id}>{t.name}</option>
+                  ))}
+                </Select>
+              </FormGroup>
+              <FormGroup>
+                <Label>Datum a čas</Label>
+                <Input 
+                  type="datetime-local" 
+                  value={new Date(match.date).toISOString().slice(0, 16)} 
+                  onChange={(e) => setMatch({ ...match, date: new Date(e.target.value).toISOString() })}
+                />
+              </FormGroup>
+              <FormGroup>
+                <Label>Kolo</Label>
+                <Input 
+                  type="number" 
+                  value={match.round || ''} 
+                  onChange={(e) => setMatch({ ...match, round: e.target.value })}
+                />
+              </FormGroup>
+            </div>
+          )}
+          
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <FormGroup>
+              <Label>Stav</Label>
+              <Select value={status} onChange={(e: any) => setStatus(e.target.value)}>
+                <option value="scheduled">Naplánováno</option>
+                <option value="live">Živě</option>
+                <option value="finished">Konec</option>
+                <option value="awarded">Kontumace</option>
+                <option value="canceled">Zrušeno</option>
+                <option value="not_played">Neodehráno</option>
+              </Select>
+            </FormGroup>
 
-          <FormGroup>
-            <Label>{match.homeTeam.name}</Label>
-            <Input 
-              type="number" 
-              value={homeScore} 
-              onChange={(e) => setHomeScore(Number(e.target.value))} 
-              style={{ width: '60px', textAlign: 'center' }}
-            />
-          </FormGroup>
-          <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>:</span>
-          <FormGroup>
-            <Label>{match.awayTeam.name}</Label>
-            <Input 
-              type="number" 
-              value={awayScore} 
-              onChange={(e) => setAwayScore(Number(e.target.value))} 
-              style={{ width: '60px', textAlign: 'center' }}
-            />
-          </FormGroup>
-          <Button onClick={handleUpdateMatchInfo}>Uložit Změny</Button>
+            <FormGroup>
+              <Label>{match.homeTeam.name || 'Domácí'}</Label>
+              <Input 
+                type="number" 
+                value={homeScore} 
+                onChange={(e) => setHomeScore(Number(e.target.value))} 
+                style={{ width: '60px', textAlign: 'center' }}
+              />
+            </FormGroup>
+            <span style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>:</span>
+            <FormGroup>
+              <Label>{match.awayTeam.name || 'Hosté'}</Label>
+              <Input 
+                type="number" 
+                value={awayScore} 
+                onChange={(e) => setAwayScore(Number(e.target.value))} 
+                style={{ width: '60px', textAlign: 'center' }}
+              />
+            </FormGroup>
+            <Button onClick={handleUpdateMatchInfo}>
+              {isNew ? 'Vytvořit zápas' : 'Uložit Změny'}
+            </Button>
+          </div>
         </div>
       </Section>
 
@@ -741,7 +840,7 @@ const MatchEditor: React.FC = () => {
       <Section>
         <SectionTitle>Seznam Událostí</SectionTitle>
         <EventsList>
-          {match.events.map(event => (
+          {match.events.map((event: any) => (
             <EventItem key={event.id}>
               <span>
                 <strong>{event.minute}'</strong> - {(() => {

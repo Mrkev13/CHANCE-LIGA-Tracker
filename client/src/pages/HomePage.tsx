@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaArrowUp } from 'react-icons/fa';
 import styled from 'styled-components';
-import { fetchRoundMetadata, fetchMatchesByRound, Match, MatchSummary } from '../redux/slices/matchesSlice';
+import { fetchRoundMetadata, fetchMatchesByRound } from '../redux/slices/matchesSlice';
 import { TEAM_LIST } from '../redux/teamData';
 import { RootState, AppDispatch } from '../redux/store';
 import { theme } from '../styles/theme';
