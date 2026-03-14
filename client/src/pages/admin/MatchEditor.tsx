@@ -276,12 +276,14 @@ const MatchEditor: React.FC = () => {
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
   const [status, setStatus] = useState<'scheduled' | 'live' | 'finished' | 'awarded' | 'canceled' | 'not_played'>('scheduled');
+  const [matchUrl, setMatchUrl] = useState('');
 
   useEffect(() => {
     if (match) {
       setHomeScore(match.score.home);
       setAwayScore(match.score.away);
       setStatus(match.status);
+      setMatchUrl(match.url || '');
     }
   }, [match]);
 
@@ -310,7 +312,7 @@ const MatchEditor: React.FC = () => {
     
     // Save to Server
     try {
-      const result = await dispatch(saveMatch({ ...match, score: newScore, status: status })).unwrap();
+      const result = await dispatch(saveMatch({ ...match, score: newScore, status: status, url: matchUrl })).unwrap();
       alert(isNew ? 'Zápas vytvořen' : 'Informace o zápasu uloženy na server');
       
       if (isNew) {
@@ -652,6 +654,16 @@ const MatchEditor: React.FC = () => {
                 <option value="canceled">Zrušeno</option>
                 <option value="not_played">Neodehráno</option>
               </Select>
+            </FormGroup>
+
+            <FormGroup style={{ flex: 1, minWidth: '300px' }}>
+              <Label>Onlajny.com URL (pro automatické scrapování)</Label>
+              <Input 
+                type="text" 
+                value={matchUrl} 
+                onChange={(e) => setMatchUrl(e.target.value)} 
+                placeholder="https://www.onlajny.com/match/id/..."
+              />
             </FormGroup>
 
             <FormGroup>

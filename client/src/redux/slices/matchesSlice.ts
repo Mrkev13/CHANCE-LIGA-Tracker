@@ -25,6 +25,7 @@ export interface MatchSummary {
   stadium: string;
   competition?: { id: string; name: string };
   round?: string;
+  url?: string;
 }
 
 export interface Match {
@@ -48,6 +49,7 @@ export interface Match {
   stadium: string;
   competition?: { id: string; name: string };
   round?: string;
+  url?: string;
   events: Array<{
     id: string;
     type: 'goal' | 'yellow_card' | 'red_card' | 'substitution' | 'goal_disallowed' | 'missed_penalty' | 'own_goal' | 'commentary';

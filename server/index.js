@@ -5,11 +5,13 @@ const path = require('path');
 const compression = require('compression');
 const connectDB = require('./config/db');
 const apiRoutes = require('./api/routes');
+const { startScrapingCron } = require('./cronJobs');
 
 const app = express();
 
 if (process.env.MONGODB_URI) {
   connectDB();
+  startScrapingCron();
 } else {
   console.warn('MONGODB_URI is not defined, running without database connection');
 }

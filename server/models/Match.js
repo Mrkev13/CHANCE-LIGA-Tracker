@@ -1,11 +1,19 @@
 const mongoose = require('mongoose');
 
 const matchSchema = mongoose.Schema({
-  id: { type: String, required: true, unique: true },
-  date: { type: String, required: true },
-  status: { type: String, required: true },
+  // New fields
+  matchId: { type: String, unique: true, index: true },
+  url: String,
+  status: { type: String, enum: ['NS', 'LIVE', 'HT', 'FINISHED', 'live', 'finished', 'scheduled', 'awarded', 'canceled', 'not_played'] },
+  lastScrapeAt: Date,
+  data: { type: mongoose.Schema.Types.Mixed },
+  
+  // Existing fields
+  id: { type: String, unique: true },
+  date: { type: String },
   round: { type: String },
   stadium: { type: String },
+  competition: { id: String, name: String },
   homeTeam: {
     id: String,
     name: String,
