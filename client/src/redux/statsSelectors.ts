@@ -176,6 +176,7 @@ export const selectAllPlayerNames = createSelector(
     const getScore = (name: string, isCanonical: boolean) => {
       let score = name.length;
       // Bonus for accents (non-ascii)
+      // eslint-disable-next-line no-control-regex
       const nonAscii = name.match(/[^\x00-\x7F]/g);
       if (nonAscii) score += nonAscii.length * 2;
       // Huge bonus for canonical
