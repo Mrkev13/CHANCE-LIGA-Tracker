@@ -9,6 +9,7 @@ const competitionController = require('../controllers/competitionController');
 
 // Match routes
 router.get('/matches', matchController.getAllMatches);
+router.post('/matches/import', matchController.importMatchByUrl);
 router.get('/matches/summary', matchController.getMatchesSummary);
 router.get('/matches/live', matchController.getLiveMatches);
 router.get('/matches/rounds', matchController.getRoundsSorted);
@@ -16,6 +17,7 @@ router.get('/matches/rounds/metadata', matchController.getRoundMetadata);
 router.get('/matches/round/:round', matchController.getMatchesByRound);
 router.get('/matches/:id', matchController.getMatchById);
 router.put('/matches/:id', matchController.updateMatch);
+router.delete('/matches/:id', matchController.deleteMatch);
 
 // Team routes
 router.get('/teams', teamController.getAllTeams);

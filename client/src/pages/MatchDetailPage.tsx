@@ -161,9 +161,25 @@ const TimelineSection = styled.div`
   padding: 1rem;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   color: #000;
+  max-height: 800px;
+  overflow-y: auto;
   
   @media (min-width: 768px) {
     padding: 1.5rem;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  /* Custom scrollbar for large lists of cards */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
   }
 `;
 
@@ -325,7 +341,11 @@ const MatchDetailPage: React.FC = () => {
 
   const hasEvents = currentMatch.events && currentMatch.events.length > 0;
   // If match has events but status is scheduled, treat it as live
-  const effectiveStatus = (currentMatch.status === 'scheduled' && hasEvents) ? 'live' : currentMatch.status;
+  // Exception: if match is in the past, it should be 'finished'
+  const isPast = new Date(currentMatch.date) < new Date();
+  const effectiveStatus = (currentMatch.status === 'scheduled' && hasEvents) 
+    ? (isPast ? 'finished' : 'live') 
+    : currentMatch.status;
 
   const statusLabel = effectiveStatus === 'live'
     ? 'ŽIVĚ'
@@ -513,32 +533,34 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
           
           let playerText = '';
           if (e.type === 'substitution') {
-            playerText = `${(e.playerIn?.name || e.player?.name || '')}${e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : ''}`;
+            playerText = e.playerIn?.name || e.player?.name || '';
+            const outText = e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : '';
+            playerText += outText;
           } else {
-            playerText = e.player?.name ? `${e.player.name}` : '';
-            if (e.type === 'own_goal') {
+            playerText = e.player?.name || '';
+            if (e.type === 'own_goal' && !playerText.includes('(vlastní)')) {
               playerText += ' (vlastní)';
             }
           }
 
-          const assistText = e.assistPlayer?.name ? ` (${e.assistPlayer.name})` : '';
-          // Only show note if it's NOT commentary (since we use note as main text for commentary)
-          const noteText = e.note ? ` (${e.note})` : '';
+          const assistText = e.assistPlayer?.name ? ` (as. ${e.assistPlayer.name})` : '';
+          // Only show note if it's NOT already in the playerText or assistText
+          const noteText = (e.note && !playerText.includes(e.note) && !assistText.includes(e.note)) ? ` (${e.note})` : '';
           
           const content = (
-            <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'inherit', width: '100%', justifyContent: isHome ? 'flex-end' : 'flex-start' }}>
               {isHome ? (
                  <>
-                   <span>{playerText}{assistText}{noteText}</span>
+                   <span style={{ flex: 1 }}>{playerText}{assistText}{noteText}</span>
                    <Icon>{icon}</Icon>
                  </>
               ) : (
                  <>
                    <Icon>{icon}</Icon>
-                   <span>{playerText}{assistText}{noteText}</span>
+                   <span style={{ flex: 1 }}>{playerText}{assistText}{noteText}</span>
                  </>
               )}
-            </>
+            </div>
           );
 
           return (

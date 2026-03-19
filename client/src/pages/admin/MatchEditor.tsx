@@ -181,8 +181,10 @@ const MatchEditor: React.FC = () => {
   const allPlayerNames = useSelector(selectAllPlayerNames);
 
   // Get full team data including players from static file
-   const homeTeamData = match ? TEAM_BY_ID[match.homeTeam.id] : null;
-   const awayTeamData = match ? TEAM_BY_ID[match.awayTeam.id] : null;
+   const homeTeamId = match?.homeTeam?.id || '';
+   const awayTeamId = match?.awayTeam?.id || '';
+   const homeTeamData = homeTeamId ? TEAM_BY_ID[homeTeamId] : null;
+   const awayTeamData = awayTeamId ? TEAM_BY_ID[awayTeamId] : null;
    
    const [eventType, setEventType] = useState<'goal' | 'card' | 'substitution'>('goal');
    // Subtype for goal tab

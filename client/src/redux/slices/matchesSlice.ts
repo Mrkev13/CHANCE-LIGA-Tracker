@@ -5272,6 +5272,18 @@ export const fetchMatchesByRound = createAsyncThunk<{ round: string, matches: Ma
   }
 );
 
+export const deleteMatch = createAsyncThunk(
+  'matches/deleteMatch',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await axios.delete(`${API_URL}/matches/${id}`);
+      return { id, message: response.data.message };
+    } catch (err: any) {
+      return rejectWithValue(err.response?.data?.message || 'Chyba při mazání zápasu');
+    }
+  }
+);
+
 const matchesSlice = createSlice({
   name: 'matches',
   initialState,
@@ -5393,6 +5405,18 @@ const matchesSlice = createSlice({
         if (state.currentMatch && state.currentMatch.id === updatedMatch.id) {
           state.currentMatch = updatedMatch;
         }
+      })
+      .addCase(deleteMatch.fulfilled, (state, action: PayloadAction<{ id: string }>) => {
+        const id = action.payload.id;
+        state.matches = state.matches.filter(m => m.id !== id);
+        state.summaries = state.summaries.filter(m => m.id !== id);
+        if (state.currentMatch && state.currentMatch.id === id) {
+          state.currentMatch = null;
+        }
+        // Also remove from roundsData
+        Object.keys(state.roundsData).forEach(round => {
+          state.roundsData[round].matches = state.roundsData[round].matches.filter(m => m.id !== id);
+        });
       });
   }
 });

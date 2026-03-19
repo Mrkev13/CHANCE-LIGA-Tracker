@@ -3,9 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { RootState, AppDispatch } from '../../redux/store';
-import { fetchMatchSummaries, Match, MatchSummary } from '../../redux/slices/matchesSlice';
+import { fetchMatchSummaries, Match, MatchSummary, deleteMatch } from '../../redux/slices/matchesSlice';
 import { logout } from '../../redux/slices/authSlice';
 import Navigation from '../../components/Navigation';
+import MatchImporter from './MatchImporter';
 
 const PageContainer = styled.div`
   max-width: 1200px;
@@ -112,6 +113,11 @@ const Details = styled.div`
   color: #ccc; /* Lighter gray for readability on dark */
 `;
 
+const ActionButtons = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
 const EditButton = styled.button`
   background: ${({ theme }) => theme.colors.primary};
   color: white;
@@ -122,6 +128,19 @@ const EditButton = styled.button`
 
   &:hover {
     background: ${({ theme }) => theme.colors.accent};
+  }
+`;
+
+const DeleteButton = styled.button`
+  background: ${({ theme }) => theme.colors.danger};
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
   }
 `;
 
@@ -162,6 +181,12 @@ const AdminDashboard: React.FC = () => {
     navigate(`/admin/match/${id}`);
   };
 
+  const handleDelete = async (id: string, teams: string) => {
+    if (window.confirm(`Opravdu chcete smazat zápas ${teams}?`)) {
+      await dispatch(deleteMatch(id));
+    }
+  };
+
   const handleAdd = () => {
     navigate('/admin/match/new');
   };
@@ -200,6 +225,8 @@ const AdminDashboard: React.FC = () => {
         </HeaderButtons>
       </AdminHeader>
       
+      <MatchImporter onImportSuccess={() => dispatch(fetchMatchSummaries())} />
+
       <FilterContainer>
         <Select value={selectedRound} onChange={(e) => setSelectedRound(e.target.value)}>
           <option value="all">Všechna kola</option>
@@ -210,19 +237,45 @@ const AdminDashboard: React.FC = () => {
       </FilterContainer>
 
       <MatchList>
-        {filteredMatches.map((match: Match | MatchSummary) => (
-          <MatchCard key={match.id}>
-            <MatchInfo>
-              <Teams>{match.homeTeam.name} vs {match.awayTeam.name}</Teams>
-              <Details>
-                {new Date(match.date).toLocaleDateString()} | {match.score.home}:{match.score.away} | {getStatusLabel(match)}
-              </Details>
-            </MatchInfo>
-            <EditButton onClick={() => handleEdit(match.id)}>
-              Upravit
-            </EditButton>
-          </MatchCard>
-        ))}
+        {filteredMatches.map((match: Match | MatchSummary) => {
+          if (!match.homeTeam || !match.awayTeam) {
+            return (
+              <MatchCard key={match.id}>
+                <MatchInfo>
+                  <Teams>Neúplná data zápasu (ID: {match.id})</Teams>
+                  <Details>Tento zápas má chybějící informace o týmech.</Details>
+                </MatchInfo>
+                <ActionButtons>
+                  <EditButton onClick={() => handleEdit(match.id)}>
+                    Opravit
+                  </EditButton>
+                  <DeleteButton onClick={() => handleDelete(match.id, 's neznámými týmy')}>
+                    Smazat
+                  </DeleteButton>
+                </ActionButtons>
+              </MatchCard>
+            );
+          }
+          
+          return (
+            <MatchCard key={match.id}>
+              <MatchInfo>
+                <Teams>{match.homeTeam.name} vs {match.awayTeam.name}</Teams>
+                <Details>
+                  {new Date(match.date).toLocaleDateString()} | {match.score.home}:{match.score.away} | {getStatusLabel(match)}
+                </Details>
+              </MatchInfo>
+              <ActionButtons>
+                <EditButton onClick={() => handleEdit(match.id)}>
+                  Upravit
+                </EditButton>
+                <DeleteButton onClick={() => handleDelete(match.id, `${match.homeTeam.name} vs ${match.awayTeam.name}`)}>
+                  Smazat
+                </DeleteButton>
+              </ActionButtons>
+            </MatchCard>
+          );
+        })}
       </MatchList>
     </PageContainer>
   );

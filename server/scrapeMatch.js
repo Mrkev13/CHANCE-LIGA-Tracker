@@ -33,223 +33,213 @@ async function scrapeMatch(url) {
     });
 
     const $ = cheerio.load(html);
+    const bodyText = $('body').text();
     
-    // Extract matchId from URL or data attribute or meta tags
+    // Extract matchId
     const matchIdMatch = cleanUrl.match(/\/id\/(\d+)/) || 
                          cleanUrl.match(/id=(\d+)/) || 
                          cleanUrl.match(/-(\d+)\/?$/) ||
                          cleanUrl.match(/\/zapas\/(\d+)/);
     let matchId = matchIdMatch ? matchIdMatch[1] : null;
-    
     if (!matchId) {
-      matchId = $('[data-match-id]').attr('data-match-id') || 
-                $('meta[property="og:url"]').attr('content')?.match(/id=(\d+)/)?.[1] ||
-                'unknown';
+      matchId = $('[data-match-id]').attr('data-match-id') || 'unknown';
+    }
+
+    const cleanStr = (s) => {
+      if (!s) return '';
+      return s
+        .replace(/\s+/g, ' ')
+        .replace(/\d+\s*:\s*\d+.*/g, '')
+        .replace(/\([^)]*liga[^)]*\)/gi, '')
+        .replace(/\|.*/g, '')
+        .replace(/:$/g, '')
+        .trim();
+    };
+
+    // Find team names from Meta tags first (as requested by user)
+    let homeName = '';
+    let awayName = '';
+    
+    const ogTitle = $('meta[property="og:title"]').attr('content') || $('title').text();
+    // Usually "LIB 1:1 TEP | FC Slovan Liberec - FK Teplice (Chance Liga) | Onlajny.com"
+    // We want the part after | and before -
+    const fullTitleParts = ogTitle.split('|');
+    if (fullTitleParts.length >= 2) {
+        const teamPart = fullTitleParts[1].trim();
+        const teams = teamPart.split(/[\-\–\—]|vs\.?|–/);
+        if (teams.length >= 2) {
+            homeName = cleanStr(teams[0]);
+            awayName = cleanStr(teams[1]);
+        }
+    }
+
+    // Fallback: try to find in H1 or labels
+    if (!homeName || !awayName) {
+        $('p, div, li, h2, h3').each((_, el) => {
+            const text = $(el).text().trim();
+            if (text.endsWith(':') && text.length > 5 && text.length < 50 && !/Branky|Karty|Střídání|Rozhodčí|Diváci|Sestavy|Penalta|Rozstřel/i.test(text)) {
+                if (!homeName) homeName = cleanStr(text);
+                else if (!awayName) awayName = cleanStr(text);
+            }
+        });
+    }
+
+    // Final fallback
+    if (!homeName || !awayName) {
+        const titleParts = ogTitle.split(/[\-\–\—]|vs\.?|–/);
+        if (titleParts.length >= 2) {
+            if (!homeName) homeName = cleanStr(titleParts[0]);
+            if (!awayName) awayName = cleanStr(titleParts[1]);
+        }
     }
 
     const homeTeam = {
-      name: $('.team-home .name').text().trim() || $('.team-home-name').text().trim(),
-      goals: parseInt($('.score-home').text()) || 0,
+      name: homeName,
+      goals: 0,
       scorers: [],
       cards: [],
       substitutions: []
     };
 
     const awayTeam = {
-      name: $('.team-away .name').text().trim() || $('.team-away-name').text().trim(),
-      goals: parseInt($('.score-away').text()) || 0,
+      name: awayName,
+      goals: 0,
       scorers: [],
       cards: [],
       substitutions: []
     };
 
-    // Extract events from summary boxes first (more reliable)
-    $('.match-info-box, .score-box-summary, .stats-summary, .obsah.goals').each((_, box) => {
-      const $box = $(box);
-      
-      // Look for cards
-      $box.find('.yellowCards, .redCards, p[class*="cards_item"]').each((_, cardEl) => {
-        const $cardEl = $(cardEl);
-        const isYellow = $cardEl.hasClass('yellowCards') || $cardEl.find('.yellowCards').length > 0 || $cardEl.parent().find('.yellowCards').length > 0;
-        const isRed = $cardEl.hasClass('redCards') || $cardEl.find('.redCards').length > 0 || $cardEl.parent().find('.redCards').length > 0;
-        
-        const container = $cardEl.closest('p, .match-info-box, .score-box-summary, .stats-summary, .obsah.goals');
-        const fullText = container.text().trim();
-        
-        // Split by comma or multiple spaces
-        const entries = fullText.split(/[,;\s\u00A0]{2,}/); 
+    // Robust score extraction
+    const scoreMatch = bodyText.match(/(\d+)\s*:\s*(\d+)/);
+    if (scoreMatch) {
+      homeTeam.goals = parseInt(scoreMatch[1]);
+      awayTeam.goals = parseInt(scoreMatch[2]);
+    }
 
-        entries.forEach(entry => {
-          // Regex for "90+3. Kohút (OVA)" or "10. Kohút"
-          const cardMatch = entry.match(/(\d+(?:\+\d+)?)\.\s*([^(\n,]+)(?:\s*\(([^)]+)\))?/);
-          if (cardMatch) {
-            const minute = cardMatch[1];
-            const playerName = cardMatch[2].trim();
-            const teamShortcut = cardMatch[3] ? cardMatch[3].trim() : null;
-            
-            let isHome = true; // Default to home if no shortcut
-            if (teamShortcut) {
-              const upperShortcut = teamShortcut.toUpperCase();
-              isHome = homeTeam.name.toUpperCase().includes(upperShortcut) || 
-                       (homeTeam.shortName && homeTeam.shortName.toUpperCase() === upperShortcut);
-              
-              // If shortcut doesn't match home, check if it matches away
-              const isAway = awayTeam.name.toUpperCase().includes(upperShortcut) || 
-                             (awayTeam.shortName && awayTeam.shortName.toUpperCase() === upperShortcut);
-              
-              if (isAway) isHome = false;
-            }
-
-            const targetTeam = isHome ? homeTeam : awayTeam;
-            
-            if (playerName && !/Karty|Branky|Střídání/i.test(playerName)) {
-              if (!targetTeam.cards.find(c => c.minute === minute && c.player === playerName)) {
-                targetTeam.cards.push({ player: playerName, minute, type: isYellow ? 'Y' : 'R' });
-              }
-            }
-          }
-        });
-      });
-
-      // Look for goals
-      $box.find('span[data-field="scorers"], p[class*="goals_item"]').each((_, scorerEl) => {
-        const container = $(scorerEl).closest('p, .obsah.goals');
-        const fullText = container.text().trim();
-        const entries = fullText.split(/[,;\s\u00A0]{2,}/);
-        
-        entries.forEach(entry => {
-          // Support for "90+3." format
-          const goalMatch = entry.match(/(\d+(?:\+\d+)?)\.\s*([^(\n,]+)(?:\s*\(([^)]+)\))?/);
-          if (goalMatch) {
-            const minute = goalMatch[1];
-            const playerName = goalMatch[2].trim();
-            const teamShortcut = goalMatch[3] ? goalMatch[3].trim() : null;
-            const penalty = /pen\./i.test(entry);
-            const ownGoal = /vlastní|own/i.test(entry);
-
-            let isHome = true;
-            if (teamShortcut) {
-              const upperShortcut = teamShortcut.toUpperCase();
-              isHome = homeTeam.name.toUpperCase().includes(upperShortcut);
-              const isAway = awayTeam.name.toUpperCase().includes(upperShortcut);
-              if (isAway) isHome = false;
-            }
-
-            const targetTeam = isHome ? homeTeam : awayTeam;
-            
-            if (playerName && !/Branky|Karty|Střídání/i.test(playerName)) {
-              if (!targetTeam.scorers.find(s => s.minute === minute && s.player === playerName)) {
-                targetTeam.scorers.push({ player: playerName, minute, penalty, ownGoal });
-              }
-            }
-          }
-        });
-      });
-
-      // Original img-based extraction as fallback
-      $box.find('img, span[class*="icon-"]').each((_, icon) => {
-        const $icon = $(icon);
-        const iconSrc = $icon.attr('src') || '';
-        const iconClass = $icon.attr('class') || '';
-        const parentText = $icon.parent().text().trim();
-        const minuteMatch = parentText.match(/(\d+)\./);
-        const minute = minuteMatch ? parseInt(minuteMatch[1]) : 0;
-        const playerName = parentText.replace(/^\d+\.\s*/, '').split('(')[0].trim();
-
-        const isHome = text.toLowerCase().includes(homeTeam.name.toLowerCase()) || 
-                       (teamShort && homeTeam.name.toLowerCase().includes(teamShort.toLowerCase()));
-        const targetTeam = isHome ? homeTeam : awayTeam;
-
-        if (iconSrc.includes('goal') || iconClass.includes('goal') || iconClass.includes('icon-goal')) {
-          targetTeam.scorers.push({ player: playerName, minute, penalty: parentText.includes('pen.') });
-        } else if (iconSrc.includes('yellow-card') || iconClass.includes('card-y') || iconClass.includes('icon-card-y')) {
-          targetTeam.cards.push({ player: playerName, minute, type: 'Y' });
-        } else if (iconSrc.includes('red-card') || iconClass.includes('card-r') || iconClass.includes('icon-card-r')) {
-          targetTeam.cards.push({ player: playerName, minute, type: 'R' });
-        }
-      });
-    });
-
-    // Fallback/Supplement: Extract events from commentary rows
-    $('.onlajn .row, .commentary .entry, .event').each((_, el) => {
-      const $el = $(el);
-      const minute = parseInt($el.find('.time, .minute').text()) || 0;
-      const text = $el.find('.text, .content').text().trim();
-      const iconImg = $el.find('.icon img, .icon-card-y, .icon-card-r, .icon-goal');
-      
-      if (iconImg.length > 0 || text.includes('žlutou kartu') || text.includes('vstřelil branku')) {
-        const isYellow = iconImg.attr('src')?.includes('yellow') || iconImg.hasClass('icon-card-y') || text.includes('žlutou kartu');
-        const isRed = iconImg.attr('src')?.includes('red') || iconImg.hasClass('icon-card-r') || text.includes('červenou kartu');
-        const isGoal = iconImg.attr('src')?.includes('goal') || iconImg.hasClass('icon-goal') || text.includes('vstřelil branku');
-        const isSubst = iconImg.attr('src')?.includes('subst') || iconImg.hasClass('icon-subst') || text.includes('střídání');
-
-        // Identify team from text shortcuts like (OVA), (HKR)
-        const teamMatch = text.match(/\(([A-Z]{2,4})\)/);
-        const teamShortcut = teamMatch ? teamMatch[1] : null;
-        const isHome = teamShortcut ? homeTeam.name.toUpperCase().includes(teamShortcut) : $el.closest('.home').length > 0;
-        const targetTeam = isHome ? homeTeam : awayTeam;
-
-        if (isGoal) {
-          const player = text.match(/([A-Z][a-zčřžšýáíé]+ [A-Z][a-zčřžšýáíé]+)/)?.[1] || 'Neznámý střelec';
-          if (!targetTeam.scorers.find(s => s.minute === minute)) {
-            targetTeam.scorers.push({ player, minute, penalty: text.includes('pen.') });
-          }
-        } else if (isYellow || isRed) {
-          const player = text.match(/([A-Z][a-zčřžšýáíé]+ [A-Z][a-zčřžšýáíé]+)/)?.[1] || 'Neznámý hráč';
-          if (!targetTeam.cards.find(c => c.minute === minute)) {
-            targetTeam.cards.push({ player, minute, type: isYellow ? 'Y' : 'R' });
-          }
-        } else if (isSubst) {
-          const outMatch = text.match(/odchází ([^,]+)/);
-          const inMatch = text.match(/přichází ([^,.]+)/);
-          if (outMatch && inMatch) {
-            targetTeam.substitutions.push({ out: outMatch[1].trim(), in: inMatch[1].trim(), minute });
-          }
-        }
-      }
-    });
-
-    // Remove duplicates that might have been caught by both methods
-    const uniqueEvents = (arr) => arr.filter((v, i, a) => a.findIndex(t => JSON.stringify(t) === JSON.stringify(v)) === i);
-    homeTeam.scorers = uniqueEvents(homeTeam.scorers);
-    homeTeam.cards = uniqueEvents(homeTeam.cards);
-    awayTeam.scorers = uniqueEvents(awayTeam.scorers);
-    awayTeam.cards = uniqueEvents(awayTeam.cards);
-
-    // Match status and minute
-    const statusText = $('.match-status').text().trim().toUpperCase();
+    // Status and Date
     let matchStatus = 'NS';
-    if (statusText.includes('LIVE') || statusText.includes('PROBÍHÁ')) matchStatus = 'LIVE';
-    else if (statusText.includes('FINISHED') || statusText.includes('KONEC')) matchStatus = 'FINISHED';
-    else if (statusText.includes('HT') || statusText.includes('PŘESTÁVKA')) matchStatus = 'HT';
+    if (bodyText.includes('Konec utkání') || bodyText.includes('zápas skončil')) matchStatus = 'FINISHED';
+    else if (bodyText.includes('Právě probíhá') || bodyText.includes('LIVE')) matchStatus = 'LIVE';
 
-    const currentMinute = parseInt($('.current-minute').text()) || null;
+    let date = null;
+    const dateStrMatch = bodyText.match(/(\d{1,2})\.\s*(\d{1,2})\.\s*(\d{4})/);
+    if (dateStrMatch) {
+      date = `${dateStrMatch[3]}-${dateStrMatch[2].padStart(2, '0')}-${dateStrMatch[1].padStart(2, '0')}T15:00:00Z`;
+    }
+
+    // Helper to parse entries (goals/cards)
+    const parseLine = (line, isGoals) => {
+      const results = [];
+      const sides = line.split(/\s*[\-\–\—]\s*(?=\d)/);
+      sides.forEach((sideText, sideIndex) => {
+        let defaultSide = (sideIndex === 0 && sides.length > 1) ? 'home' : 'away';
+        const entries = sideText.split(/\s*[,;]\s*|\s{2,}/);
+        entries.forEach(entry => {
+          if (!entry.trim() || entry === '-' || entry === '–') return;
+          if (!isGoals && /asistent trenéra|trenér|trenér brankářů|vedoucí mužstva/i.test(entry)) return;
+
+          const match = entry.match(/(\d+(?:\+\d+)?)(?:'|\.)?\s*([^(\n,\-\–\—]+)(?:\s*\(([^)]+)\))?/);
+          if (match) {
+            const minute = match[1];
+            let player = match[2].trim().replace(/\s*\([A-Z]{2,4}\)/g, '').trim();
+            const note = match[3] ? match[3].trim() : '';
+
+            let finalSide = defaultSide;
+            if (note && note.length <= 4 && /^[A-Z]+$/.test(note)) {
+              if (homeTeam.name.toUpperCase().includes(note.toUpperCase())) finalSide = 'home';
+              else if (awayTeam.name.toUpperCase().includes(note.toUpperCase())) finalSide = 'away';
+            }
+
+            if (isGoals) {
+              const isPenalty = /pen\./i.test(entry) || /pen\./i.test(note);
+              const isOwnGoal = /vlastní/i.test(entry) || /vlastní/i.test(note);
+              const assist = (!isPenalty && !isOwnGoal && note && note.length > 3) ? note : null;
+              player = player.replace(/\s*\(?pen\.?\)?/gi, '').replace(/\s*\(?vlastní\)?/gi, '').trim();
+              results.push({ player, minute, side: finalSide, penalty: isPenalty, ownGoal: isOwnGoal, assist });
+            } else {
+              results.push({ player, minute, side: finalSide, entry });
+            }
+          }
+        });
+      });
+      return results;
+    };
+
+    // Extract Goals & Cards from any element containing them
+    $('p, div, li').each((_, el) => {
+        const $el = $(el);
+        const text = $el.text().trim();
+        
+        if (text.toLowerCase().includes('branky:') && text.length < 2000) {
+            const line = text.match(/Branky:\s*(.*?)(?=\n|Karty:|$)/si)?.[1] || text.replace(/.*Branky:\s*/i, '');
+            const goals = parseLine(line.trim(), true);
+            goals.forEach(g => {
+                const target = g.side === 'home' ? homeTeam : awayTeam;
+                if (!target.scorers.find(s => s.minute === g.minute && s.player === g.player)) {
+                    logger.info('Goal detected', g);
+                    target.scorers.push({ player: g.player, minute: g.minute, penalty: g.penalty, ownGoal: g.ownGoal, assist: g.assist });
+                }
+            });
+        }
+        
+        if (text.toLowerCase().includes('karty:') && text.length < 2000) {
+            const line = text.match(/Karty:\s*(.*?)(?=\n|Sestavy|Neproměněná|$)/si)?.[1] || text.replace(/.*Karty:\s*/i, '');
+            const cards = parseLine(line.trim(), false);
+            const html = $el.html() || '';
+            cards.forEach(c => {
+                const target = c.side === 'home' ? homeTeam : awayTeam;
+                const nameEscaped = c.player.replace(/[-\/\^$*+?.()|[\]{}]/g, '\$&');
+                // Red card detection: more aggressive check in HTML and text
+                const isRed = c.entry.toLowerCase().includes('červená') || 
+                            c.entry.toLowerCase().includes('2.žk') ||
+                            c.entry.toLowerCase().includes('čk') ||
+                            line.toLowerCase().includes(`${c.player.toLowerCase()} (2.žk=čk)`) ||
+                            /card-(r|yr|y2r)/i.test(html) && new RegExp(`${nameEscaped}.*?card-(r|yr|y2r)|card-(r|yr|y2r).*?${nameEscaped}`, 'i').test(html);
+                if (!target.cards.find(card => card.minute === c.minute && card.player === c.player)) {
+                    logger.info('Card detected', { player: c.player, minute: c.minute, type: isRed ? 'R' : 'Y', side: c.side });
+                    target.cards.push({ player: c.player, minute: c.minute, type: isRed ? 'R' : 'Y' });
+                }
+            });
+        }
+    });
+
+    // Supplement/Fix red cards from ANY element in the body
+    $('p, div, li, span, tr').each((_, el) => {
+        const text = $(el).text().trim();
+        // Look for things like "87. Fully (2.ŽK=ČK)" or "87. min: Fully vyloučen"
+        if ((text.includes('2.ŽK=ČK') || text.includes('ČK') || text.includes('vyloučen')) && text.length < 500) {
+            const minuteMatch = text.match(/(\d+)/);
+            if (minuteMatch) {
+                const minute = minuteMatch[1];
+                [homeTeam, awayTeam].forEach(team => {
+                    team.cards.forEach(card => {
+                        if (card.minute === minute) {
+                            card.type = 'R';
+                            logger.info('Red card fixed from reportage', { player: card.player, minute });
+                        }
+                    });
+                });
+            }
+        }
+    });
 
     const result = {
       matchId,
       homeTeam,
       awayTeam,
       matchStatus,
-      currentMinute,
+      currentMinute: parseInt($('.current-minute').text()) || null,
+      date,
+      stadium: cleanStr($('.match-stadium').text() || bodyText.match(/Stadion.*?,(.*?)(?=\n|$)/)?.[1]),
+      round: (bodyText.match(/(\d+)\.\s*kolo/) || [])[1],
       lastScrapeAt: new Date().toISOString()
     };
 
-    logger.info('Scrape successful', {
-      matchId,
-      httpStatus,
-      duration: Date.now() - start,
-      timestamp: new Date().toISOString()
-    });
-
+    logger.info('Scrape successful', { matchId, home: homeTeam.name, away: awayTeam.name, score: `${homeTeam.goals}:${awayTeam.goals}` });
     return result;
 
   } catch (error) {
-    logger.error('Scrape failed', {
-      url,
-      error: error.message,
-      duration: Date.now() - start,
-      timestamp: new Date().toISOString()
-    });
+    logger.error('Scrape failed', { url, error: error.message });
     return null;
   }
 }
