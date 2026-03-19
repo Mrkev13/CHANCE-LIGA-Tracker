@@ -22,12 +22,10 @@ app.use(express.json());
 
 app.use('/api', apiRoutes);
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build'), { maxAge: '1y', etag: true }));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
-  });
-}
+// Health check
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
