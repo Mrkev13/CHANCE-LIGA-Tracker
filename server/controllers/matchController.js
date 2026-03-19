@@ -68,15 +68,21 @@ exports.getMatchesSummary = async (_req, res) => {
 
 exports.getAllMatches = async (_req, res) => {
   try {
+    let matches;
     if (mongoose.connection.readyState === 1) {
-      const matches = await ensureData();
-      res.json(matches);
+      // Fetch all from DB first
+      matches = await Match.find({}).lean();
+      
+      // If DB is empty, use localMatches as fallback
+      if (matches.length === 0) {
+        matches = localMatches;
+      }
     } else {
-      res.json(localMatches);
+      matches = localMatches;
     }
+    res.json(matches);
   } catch (error) {
-    console.error(error);
-    res.json(localMatches);
+    res.status(500).json({ message: error.message });
   }
 };
 

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const matchSchema = mongoose.Schema({
   // New fields
-  matchId: { type: String, unique: true, index: true },
+  matchId: { type: String, unique: true, index: true, sparse: true },
   url: String,
   status: { type: String, enum: ['NS', 'LIVE', 'HT', 'FINISHED', 'live', 'finished', 'scheduled', 'awarded', 'canceled', 'not_played'] },
   lastScrapeAt: Date,
