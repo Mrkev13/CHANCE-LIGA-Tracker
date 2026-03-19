@@ -5,10 +5,12 @@ const mongoose = require('mongoose');
 
 const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
 let localMatches = [];
-try {
-  localMatches = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
-} catch (err) {
-  console.error('Error reading local matches file:', err);
+if (fs.existsSync(localMatchesPath)) {
+  try {
+    localMatches = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
+  } catch (err) {
+    console.error('Error parsing local matches file:', err);
+  }
 }
 
 let seeded = false;

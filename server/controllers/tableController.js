@@ -14,12 +14,15 @@ const getMatches = async () => {
     console.error('Table DB Error:', e);
   }
   
-  try {
-    const local = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
-    return local;
-  } catch (e) {
-    return [];
+  if (fs.existsSync(localMatchesPath)) {
+    try {
+      const local = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
+      return local;
+    } catch (e) {
+      return [];
+    }
   }
+  return [];
 };
 
 let cachedTable = null;
