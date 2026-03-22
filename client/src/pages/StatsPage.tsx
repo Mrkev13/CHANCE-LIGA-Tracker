@@ -9,7 +9,7 @@ import {
 } from '../redux/statsSelectors';
 import Navigation from '../components/Navigation';
 import { getTeamLogo } from '../utils/teamLogos';
-import { fetchMatches } from '../redux/slices/matchesSlice';
+import { fetchPlayerStats } from '../redux/slices/statsSlice';
 import { RootState, AppDispatch } from '../redux/store';
 
 const PageContainer = styled.div`
@@ -96,17 +96,18 @@ const Count = styled.span`
 
 const StatsPage: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const matchesLoaded = useSelector((state: RootState) => state.matches.matches.length > 0);
+  const { loading, error } = useSelector((state: RootState) => state.stats);
   const topScorers = useSelector(selectTopScorers);
   const topAssists = useSelector(selectTopAssists);
   const yellowCards = useSelector(selectTopYellowCards);
   const redCards = useSelector(selectTopRedCards);
 
   useEffect(() => {
-    if (!matchesLoaded) {
-      dispatch(fetchMatches());
-    }
-  }, [dispatch, matchesLoaded]);
+    dispatch(fetchPlayerStats());
+  }, [dispatch]);
+
+  if (loading && topScorers.length === 0) return <PageContainer><Navigation /><Title>Načítání statistik...</Title></PageContainer>;
+  if (error) return <PageContainer><Navigation /><Title>Chyba: {error}</Title></PageContainer>;
 
   return (
     <PageContainer>

@@ -2,28 +2,8 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const Match = require('../models/Match');
-
-const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
-
-const getMatches = async () => {
-  try {
-    if (mongoose.connection.readyState === 1) {
-      return await Match.find({ status: { $in: ['finished', 'awarded', 'live'] } }).lean();
-    }
-  } catch (e) {
-    console.error('Table DB Error:', e);
-  }
-  
-  if (fs.existsSync(localMatchesPath)) {
-    try {
-      const local = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
-      return local;
-    } catch (e) {
-      return [];
-    }
-  }
-  return [];
-};
+const logger = require('../utils/logger');
+const { getAllMatchesMerged } = require('../utils/matchFetcher');
 
 let cachedTable = null;
 let cachedHomeTable = null;
@@ -126,7 +106,7 @@ exports.getTable = async (_req, res) => {
     res.json(cachedTable);
     return;
   }
-  const matches = await getMatches();
+  const matches = await getAllMatchesMerged();
   const table = computeTableFromMatches(matches);
   cachedTable = table;
   cachedAt = now;
@@ -139,7 +119,7 @@ exports.getHomeTable = async (_req, res) => {
     res.json(cachedHomeTable);
     return;
   }
-  const matches = await getMatches();
+  const matches = await getAllMatchesMerged();
   const table = computeTableFromMatches(matches); 
   cachedHomeTable = table;
   cachedAt = now;
@@ -152,7 +132,7 @@ exports.getAwayTable = async (_req, res) => {
     res.json(cachedAwayTable);
     return;
   }
-  const matches = await getMatches();
+  const matches = await getAllMatchesMerged();
   const table = computeTableFromMatches(matches);
   cachedAwayTable = table;
   cachedAt = now;

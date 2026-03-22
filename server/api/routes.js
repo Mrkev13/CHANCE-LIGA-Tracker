@@ -6,6 +6,7 @@ const matchController = require('../controllers/matchController');
 const teamController = require('../controllers/teamController');
 const tableController = require('../controllers/tableController');
 const competitionController = require('../controllers/competitionController');
+const statsController = require('../controllers/statsController');
 
 // Match routes
 router.get('/matches', matchController.getAllMatches);
@@ -29,6 +30,9 @@ router.get('/teams/:id/matches', teamController.getTeamMatches);
 router.get('/table', tableController.getTable);
 router.get('/table/home', tableController.getHomeTable);
 router.get('/table/away', tableController.getAwayTable);
+
+// Stats routes
+router.get('/stats/players', statsController.getPlayerStats);
 
 // Competitions routes
 router.get('/competitions', competitionController.getCompetitions);

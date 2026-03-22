@@ -15,7 +15,10 @@
       {"id": "p_sla_8", "name": "Petr Ševčík", "position": "MID"},
       {"id": "p_sla_9", "name": "Christos Zafeiris", "position": "MID"},
       {"id": "p_sla_10", "name": "David Douděra", "position": "DEF"},
-      {"id": "p_sla_11", "name": "Lukáš Masopust", "position": "MID"}
+      {"id": "p_sla_11", "name": "Lukáš Masopust", "position": "MID"},
+      {"id": "p_sla_12", "name": "Tomáš Chorý", "position": "FWD"},
+      {"id": "p_sla_13", "name": "Lukáš Provod", "position": "MID"},
+      {"id": "p_sla_14", "name": "David Zima", "position": "DEF"}
     ]
   },
   { 

@@ -13,6 +13,71 @@ export interface PlayerStat {
 }
 
 const selectMatches = (state: RootState) => state.matches.matches;
+const selectServerStats = (state: RootState) => state.stats;
+
+// Shared Helper Logic
+const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+
+const toShort = (s: string) => {
+    const parts = s.trim().split(/\s+/);
+    if (parts.length < 2) return s;
+    const surname = parts.slice(1).join(' ');
+    const firstname = parts[0];
+    return `${surname} ${firstname.charAt(0)}.`; 
+};
+
+// Pre-calculate canonical map and player-to-team mapping
+const canonicalMap = new Map<string, string>();
+const playerTeamMap = new Map<string, { id: string, name: string }>();
+
+TEAM_LIST.forEach(team => {
+  const teamInfo = { id: team.id, name: team.name };
+  team.players?.forEach(p => {
+    if (p.name) {
+      const normFull = normalize(p.name);
+      const normShort = normalize(toShort(p.name));
+      const parts = p.name.split(/\s+/);
+      const surname = parts[parts.length - 1];
+      const normSurname = normalize(surname);
+
+      canonicalMap.set(normFull, p.name);
+      canonicalMap.set(normShort, p.name);
+      if (normShort.endsWith('.')) {
+          canonicalMap.set(normShort.slice(0, -1), p.name);
+      }
+      
+      // Add surname-only if not already present (to avoid ambiguity)
+      if (!canonicalMap.has(normSurname)) {
+          canonicalMap.set(normSurname, p.name);
+      }
+
+      // Store team info for this player
+      playerTeamMap.set(normalize(p.name), teamInfo);
+    }
+  });
+});
+
+const resolveName = (name: string) => {
+    if (!name) return '';
+    const norm = normalize(name);
+    if (canonicalMap.has(norm)) return canonicalMap.get(norm)!;
+    
+    // Try swapping words for 2-word names (e.g. "Chorý Tomáš" -> "Tomáš Chorý")
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 2) {
+        const swapped = normalize(`${parts[1]} ${parts[0]}`);
+        if (canonicalMap.has(swapped)) return canonicalMap.get(swapped)!;
+    }
+    
+    return name.trim();
+};
+
+const getPlayerTeam = (playerName: string, eventTeam?: { id: string, name: string }) => {
+    const canonicalName = resolveName(playerName);
+    const mappedTeam = playerTeamMap.get(normalize(canonicalName));
+    if (mappedTeam) return mappedTeam;
+    return eventTeam; // Fallback to match event team
+};
 
 const selectPlayerStatsRaw = createSelector(
   [selectMatches],
@@ -23,93 +88,88 @@ const selectPlayerStatsRaw = createSelector(
     const redCards = new Map<string, PlayerStat>();
     const allNames = new Set<string>();
 
-    // Canonical Name Resolution Logic
-    const canonicalMap = new Map<string, string>();
-    const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-    const toShort = (s: string) => {
-        const parts = s.trim().split(/\s+/);
-        if (parts.length < 2) return s;
-        const surname = parts.slice(1).join(' ');
-        const firstname = parts[0];
-        return `${surname} ${firstname.charAt(0)}.`; 
-    };
-
-    TEAM_LIST.forEach(team => {
-      team.players?.forEach(p => {
-        if (p.name) {
-          const normFull = normalize(p.name);
-          const normShort = normalize(toShort(p.name));
-          canonicalMap.set(normFull, p.name);
-          canonicalMap.set(normShort, p.name);
-          if (normShort.endsWith('.')) {
-              canonicalMap.set(normShort.slice(0, -1), p.name);
-          }
-        }
-      });
-    });
-
-    const resolveName = (name: string) => {
-        if (!name) return '';
-        const norm = normalize(name);
-        return canonicalMap.get(norm) || name.trim();
-    };
-
     const updateStat = (
       map: Map<string, PlayerStat>,
-      originalId: string, // ID z eventu (může být náhodné)
+      originalId: string,
       name: string,
+      roundNum: number,
       teamId?: string,
       teamName?: string,
-      roundNum?: number,
       dateIso?: string
     ) => {
-      // Použijeme jméno jako klíč pro agregaci, aby se sloučily statistiky 
-      // hráče i když má v různých zápasech různé vygenerované ID.
-      const key = resolveName(name); 
-      allNames.add(key);
+      const canonicalName = resolveName(name);
+      const key = normalize(canonicalName); // Use normalized canonical name as stable key
+      allNames.add(canonicalName);
       
+      const correctTeam = getPlayerTeam(name, teamId && teamName ? { id: teamId, name: teamName } : undefined);
+      const finalTeamId = correctTeam?.id || teamId;
+      const finalTeamName = correctTeam?.name || teamName;
+
       const existing = map.get(key);
       if (existing) {
         existing.count += 1;
+        
+        // Update to the latest round/date, but keep soupiska team if found
         const prevRound = existing.lastRound ?? -1;
         const prevDate = existing.lastDate ?? '';
-        const isNewerRound = (roundNum ?? -1) > prevRound;
-        const isSameRoundNewerDate = (roundNum ?? -1) === prevRound && (dateIso ?? '') > prevDate;
-        if (isNewerRound || isSameRoundNewerDate) {
-          existing.teamId = teamId;
-          existing.teamName = teamName;
-          existing.lastRound = roundNum;
-          existing.lastDate = dateIso;
+        
+        const isNewer = roundNum > prevRound || (roundNum === prevRound && (dateIso ?? '') > prevDate);
+        
+        if (isNewer || correctTeam) {
+          existing.teamId = finalTeamId || existing.teamId;
+          existing.teamName = finalTeamName || existing.teamName;
+          if (isNewer) {
+            existing.lastRound = roundNum;
+            existing.lastDate = dateIso || existing.lastDate;
+          }
+        }
+        
+        // Keep the "fullest" name (e.g. "Jan Novák" is better than "Novák J.")
+        if (name.length > existing.name.length || (canonicalName !== name && existing.name === name)) {
+            existing.name = canonicalName;
         }
       } else {
-        // Použijeme originalId, ale pokud jich bude víc, zůstane to první.
-        // To nevadí, pro zobrazení potřebujeme hlavně jméno a počet.
-        map.set(key, { id: originalId, name, count: 1, teamId, teamName, lastRound: roundNum, lastDate: dateIso });
+        map.set(key, { 
+          id: originalId, 
+          name: canonicalName, 
+          count: 1, 
+          teamId: finalTeamId, 
+          teamName: finalTeamName, 
+          lastRound: roundNum, 
+          lastDate: dateIso 
+        });
       }
     };
 
     matches.forEach((match) => {
-      const roundNum = match.round ? Number(match.round) : 0;
+      // Only count stats from matches that have actually started or finished
+      // Include 'scheduled' if it has events (some old data might be 'scheduled' but have events)
+      // Or just check if there are events at all.
+      const hasEvents = match.events && match.events.length > 0;
+      if (!['finished', 'awarded', 'live'].includes(match.status) && !hasEvents) return;
+
+      const roundNum = match.round ? parseInt(String(match.round), 10) || 0 : 0;
       const dateIso = match.date;
+      
       match.events.forEach((event) => {
         const tId = event.team === 'home' ? match.homeTeam.id : match.awayTeam.id;
         const tName = event.team === 'home' ? match.homeTeam.name : match.awayTeam.name;
 
-        // Collect names from all events
+        // Collect names from all events for the name search index
         if (event.player?.name) allNames.add(resolveName(event.player.name));
         if (event.assistPlayer?.name) allNames.add(resolveName(event.assistPlayer.name));
         if (event.playerIn?.name) allNames.add(resolveName(event.playerIn.name));
         if (event.playerOut?.name) allNames.add(resolveName(event.playerOut.name));
 
         if (event.type === 'goal' && event.player) {
-          updateStat(goals, event.player.id, event.player.name, tId, tName, roundNum, dateIso);
+          updateStat(goals, event.player.id, event.player.name, roundNum, tId, tName, dateIso);
           if (event.assistPlayer) {
-            updateStat(assists, event.assistPlayer.id, event.assistPlayer.name, tId, tName, roundNum, dateIso);
+            updateStat(assists, event.assistPlayer.id, event.assistPlayer.name, roundNum, tId, tName, dateIso);
           }
         } else if (event.type === 'yellow_card' && event.player) {
-          updateStat(yellowCards, event.player.id, event.player.name, tId, tName, roundNum, dateIso);
+          updateStat(yellowCards, event.player.id, event.player.name, roundNum, tId, tName, dateIso);
         } else if (event.type === 'red_card' && event.player) {
-          updateStat(redCards, event.player.id, event.player.name, tId, tName, roundNum, dateIso);
+          updateStat(redCards, event.player.id, event.player.name, roundNum, tId, tName, dateIso);
         }
       });
     });
@@ -126,28 +186,121 @@ const selectPlayerStatsRaw = createSelector(
 
 const sortAndSlice = (map: Map<string, PlayerStat>, limit: number = 10) => {
   return Array.from(map.values())
-    .sort((a, b) => b.count - a.count)
+    .sort((a, b) => {
+      if (b.count !== a.count) return b.count - a.count;
+      return a.name.localeCompare(b.name, 'cs'); // Stable secondary sort by name
+    })
     .slice(0, limit);
 };
 
 export const selectTopScorers = createSelector(
-  [selectPlayerStatsRaw],
-  (stats) => sortAndSlice(stats.goals)
+  [selectPlayerStatsRaw, selectServerStats],
+  (stats, serverStats) => {
+    const merged = new Map<string, PlayerStat>();
+    
+    // 1. Add server stats (Source of Truth)
+    serverStats.goals.forEach(ps => {
+      const canonicalName = resolveName(ps.name);
+      const key = normalize(canonicalName);
+      const existing = merged.get(key);
+      if (existing) {
+        existing.count = Math.max(existing.count, ps.count);
+      } else {
+        merged.set(key, { ...ps, name: canonicalName });
+      }
+    });
+    
+    // 2. Add client stats (only if they provide MORE info, e.g. live updates)
+    stats.goals.forEach((ps, key) => {
+      const existing = merged.get(key);
+      if (!existing || ps.count > existing.count) {
+        merged.set(key, ps);
+      }
+    });
+    
+    return sortAndSlice(merged);
+  }
 );
 
 export const selectTopAssists = createSelector(
-  [selectPlayerStatsRaw],
-  (stats) => sortAndSlice(stats.assists)
+  [selectPlayerStatsRaw, selectServerStats],
+  (stats, serverStats) => {
+    const merged = new Map<string, PlayerStat>();
+    
+    serverStats.assists.forEach(ps => {
+      const canonicalName = resolveName(ps.name);
+      const key = normalize(canonicalName);
+      const existing = merged.get(key);
+      if (existing) {
+        existing.count = Math.max(existing.count, ps.count);
+      } else {
+        merged.set(key, { ...ps, name: canonicalName });
+      }
+    });
+    
+    stats.assists.forEach((ps, key) => {
+      const existing = merged.get(key);
+      if (!existing || ps.count > existing.count) {
+        merged.set(key, ps);
+      }
+    });
+    
+    return sortAndSlice(merged);
+  }
 );
 
 export const selectTopYellowCards = createSelector(
-  [selectPlayerStatsRaw],
-  (stats) => sortAndSlice(stats.yellowCards)
+  [selectPlayerStatsRaw, selectServerStats],
+  (stats, serverStats) => {
+    const merged = new Map<string, PlayerStat>();
+    
+    serverStats.yellowCards.forEach(ps => {
+      const canonicalName = resolveName(ps.name);
+      const key = normalize(canonicalName);
+      const existing = merged.get(key);
+      if (existing) {
+        existing.count = Math.max(existing.count, ps.count);
+      } else {
+        merged.set(key, { ...ps, name: canonicalName });
+      }
+    });
+    
+    stats.yellowCards.forEach((ps, key) => {
+      const existing = merged.get(key);
+      if (!existing || ps.count > existing.count) {
+        merged.set(key, ps);
+      }
+    });
+    
+    return sortAndSlice(merged);
+  }
 );
 
 export const selectTopRedCards = createSelector(
-  [selectPlayerStatsRaw],
-  (stats) => sortAndSlice(stats.redCards)
+  [selectPlayerStatsRaw, selectServerStats],
+  (stats, serverStats) => {
+    const merged = new Map<string, PlayerStat>();
+    
+    serverStats.redCards.forEach(ps => {
+      const canonicalName = resolveName(ps.name);
+      const key = normalize(canonicalName);
+      const existing = merged.get(key);
+      if (existing) {
+        existing.count = Math.max(existing.count, ps.count);
+      } else {
+        merged.set(key, { ...ps, name: canonicalName });
+      }
+    });
+    
+    stats.redCards.forEach((ps, key) => {
+      const existing = merged.get(key);
+      if (!existing || ps.count > existing.count) {
+        merged.set(key, ps);
+      }
+    });
+    
+    return sortAndSlice(merged);
+  }
 );
 
 export const selectAllPlayerNames = createSelector(

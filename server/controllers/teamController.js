@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const Match = require('../models/Match');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
 
 const teams = JSON.parse(
   fs.readFileSync(path.join(__dirname, '../../client/src/shared/teams.json'), 'utf-8')
@@ -13,7 +14,7 @@ if (fs.existsSync(localMatchesPath)) {
   try {
     localMatches = JSON.parse(fs.readFileSync(localMatchesPath, 'utf-8'));
   } catch (err) {
-    console.error('Error parsing local matches file:', err);
+    logger.error('Error parsing local matches file', { error: err.message });
   }
 }
 
@@ -40,6 +41,7 @@ exports.getTeamMatches = async (req, res) => {
       res.json(teamMatches);
     }
   } catch (error) {
+    logger.error('Error in getTeamMatches', { teamId: id, error: error.message });
     res.status(500).json({ message: error.message });
   }
 };

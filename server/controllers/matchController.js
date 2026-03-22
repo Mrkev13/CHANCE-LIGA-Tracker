@@ -2,6 +2,9 @@ const Match = require('../models/Match');
 const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
+const logger = require('../utils/logger');
+const { TEAM_ALIASES, ALLOWED_SCRAPE_HOSTS } = require('../utils/constants');
+const { getAllMatchesMerged } = require('../utils/matchFetcher');
 
 const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
 let localMatches = [];
@@ -16,44 +19,13 @@ if (fs.existsSync(localMatchesPath)) {
 let seeded = false;
 
 const ensureData = async () => {
-  if (mongoose.connection.readyState !== 1) return localMatches;
-  
-  if (!seeded) {
-    const count = await Match.countDocuments();
-    if (count === 0 && localMatches.length > 0) {
-      console.log('Seeding database from local JSON...');
-      await Match.insertMany(localMatches);
-    }
-    seeded = true;
-  }
-
-  return await Match.find({}).lean();
+  return await getAllMatchesMerged();
 };
 
 exports.getMatchesSummary = async (_req, res) => {
   try {
-    if (mongoose.connection.readyState === 1) {
-      const matches = await Match.find(
-        {},
-        'id homeTeam awayTeam score status date stadium competition round',
-      ).lean();
-      res.json(matches);
-    } else {
-      const mapped = localMatches.map((m) => ({
-        id: m.id,
-        homeTeam: m.homeTeam,
-        awayTeam: m.awayTeam,
-        score: m.score,
-        status: m.status,
-        date: m.date,
-        stadium: m.stadium,
-        competition: m.competition,
-        round: m.round,
-      }));
-      res.json(mapped);
-    }
-  } catch (error) {
-    const mapped = localMatches.map((m) => ({
+    const matches = await getAllMatchesMerged();
+    const mapped = matches.map((m) => ({
       id: m.id,
       homeTeam: m.homeTeam,
       awayTeam: m.awayTeam,
@@ -65,23 +37,14 @@ exports.getMatchesSummary = async (_req, res) => {
       round: m.round,
     }));
     res.json(mapped);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
 exports.getAllMatches = async (_req, res) => {
   try {
-    let matches;
-    if (mongoose.connection.readyState === 1) {
-      // Fetch all from DB first
-      matches = await Match.find({}).lean();
-      
-      // If DB is empty, use localMatches as fallback
-      if (matches.length === 0) {
-        matches = localMatches;
-      }
-    } else {
-      matches = localMatches;
-    }
+    const matches = await getAllMatchesMerged();
     res.json(matches);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -107,7 +70,7 @@ async function findPlayerData(scrapedName, teamId) {
   if (!scrapedName) return { id: null, name: null };
   const normScraped = normalizeName(scrapedName);
   
-  console.log(`Hledám hráče: "${scrapedName}" pro tým ID: ${teamId}`);
+  logger.debug(`Hledám hráče: "${scrapedName}" pro tým ID: ${teamId}`);
 
   // 1. Search in teams.json first
   const team = TEAMS_DATA.find(t => t.id === teamId);
@@ -117,7 +80,7 @@ async function findPlayerData(scrapedName, teamId) {
       return normP.includes(normScraped) || normScraped.includes(normP);
     });
     if (p) {
-      console.log(`Nalezen v soupisce: "${scrapedName}" -> "${p.name}" (${p.id})`);
+      logger.info(`Nalezen v soupisce: "${scrapedName}" -> "${p.name}" (${p.id})`);
       return { id: p.id, name: p.name };
     }
   }
@@ -154,88 +117,91 @@ async function findPlayerData(scrapedName, teamId) {
         if (candidates.size > 0) {
           const sorted = [...candidates.entries()].sort((a, b) => (b[1].count - a[1].count) || (b[1].length - a[1].length));
           const [bestName, bestData] = sorted[0];
-          console.log(`Nalezen v historii: "${scrapedName}" -> "${bestName}" (${bestData.id})`);
+          logger.info(`Nalezen v historii: "${scrapedName}" -> "${bestName}" (${bestData.id})`);
           return { id: bestData.id, name: bestName };
         }
       }
     } catch (err) {
-      console.error('Chyba při vyhledávání v DB:', err);
+      logger.error('Chyba při vyhledávání v DB:', err);
     }
   }
 
-  console.log(`Hráč nenalezen, vracím původní: "${scrapedName}"`);
+  logger.warn(`Hráč nenalezen, vracím původní: "${scrapedName}"`);
   return { id: null, name: scrapedName };
 }
 
 exports.importMatchByUrl = async (req, res) => {
   try {
     const { url } = req.body;
-    console.log('Přijat požadavek na import URL:', url);
+    logger.info('Přijat požadavek na import URL', { url });
 
-    if (!url || !url.includes('onlajny.com')) {
-      console.log('Neplatná URL:', url);
-      return res.status(400).json({ error: 'Musíš zadat platný odkaz z onlajny.com' });
+    if (!url) {
+      return res.status(400).json({ error: 'URL je povinná' });
     }
 
-    console.log('Spouštím scraper pro:', url);
+    // SSRF Protection & URL Validation
+    try {
+      const parsedUrl = new URL(url);
+      if (!ALLOWED_SCRAPE_HOSTS.includes(parsedUrl.hostname)) {
+        logger.warn('Nepovolený hostname pro import', { hostname: parsedUrl.hostname });
+        return res.status(400).json({ error: 'Import je povolen pouze z www.onlajny.com' });
+      }
+    } catch (err) {
+      return res.status(400).json({ error: 'Neplatný formát URL' });
+    }
+
+    logger.info('Spouštím scraper', { url });
     const scrapedData = await scrapeMatch(url);
 
     if (!scrapedData) {
-      console.log('Scraper nevrátil žádná data');
+      logger.error('Scraper nevrátil žádná data', { url });
       return res.status(500).json({ error: 'Nepodařilo se stáhnout data ze zápasu.' });
     }
-    console.log('Data úspěšně stažena pro zápas ID:', scrapedData.matchId);
-
-    // Find the match in our DB to get its IDs
-    const teamAliases = {
-      'OVA': 'FC Baník Ostrava',
-      'SPA': 'Sparta Praha',
-      'SLA': 'Slavia Praha',
-      'PLZ': 'FC Viktoria Plzeň',
-      'OLO': 'SK Sigma Olomouc',
-      'LIB': 'Slovan Liberec',
-      'JAB': 'FK Jablonec',
-      'TEP': 'FK Teplice',
-      'BOH': 'Bohemians Praha 1905',
-      'MBO': 'FK Mladá Boleslav',
-      'HKR': 'Hradec Králové',
-      'ZLI': 'FC Zlín',
-      'KAR': 'MFK Karviná',
-      'PCE': 'FK Pardubice',
-      'PAR': 'FK Pardubice',
-      'SLO': '1. FC Slovácko',
-      'DUK': 'Dukla Praha',
-      'CBJ': 'Dynamo Č. Budějovice',
-      'BVB': 'Dynamo Č. Budějovice'
-    };
+    logger.info('Data úspěšně stažena', { matchId: scrapedData.matchId });
 
     const findTeamId = (name) => {
       if (!name) return null;
       
       // Normalize function for more aggressive matching
       const aggressiveNormalize = (s) => {
-        return normalizeName(s)
+        let normalized = normalizeName(s)
           .replace(/^(ac|fk|sk|mfk|1\.)\s*/gi, '') // Remove prefixes
-          .replace(/\s+(praha|plzen|ostrava|budejovice|boleslav|hradec|kralove|zlin)$/gi, '') // Remove city suffixes
           .replace(/\.fc\s*/gi, 'fc') // Handle 1.FC -> 1. FC
-          .replace(/\s+/g, '') // Remove all spaces
           .trim();
+        
+        // Remove city suffixes ONLY if it's not the entire name
+        const citySuffixes = ['praha', 'plzen', 'ostrava', 'budejovice', 'boleslav', 'hradec', 'kralove', 'zlin'];
+        for (const city of citySuffixes) {
+          const regex = new RegExp(`\\s+${city}$`, 'i');
+          if (regex.test(normalized) && normalized.length > city.length + 2) {
+            normalized = normalized.replace(regex, '');
+          }
+        }
+        
+        return normalized.replace(/\s+/g, '').trim();
       };
 
       const normalized = aggressiveNormalize(name);
       
-      // 1. Check aliases first
-      for (const [alias, fullName] of Object.entries(teamAliases)) {
-        if (aggressiveNormalize(alias) === normalized) {
+      // 0. Exact match on shortName/ID if it's already an ID
+      if (name.startsWith('t_')) return name;
+
+      // 1. Check aliases first from constants
+      for (const [alias, fullName] of Object.entries(TEAM_ALIASES)) {
+        if (aggressiveNormalize(alias) === normalized || aggressiveNormalize(fullName) === normalized) {
           const team = TEAMS_DATA.find(t => aggressiveNormalize(t.name) === aggressiveNormalize(fullName));
           if (team) return team.id;
         }
       }
 
-      // 2. Try match on TEAMS_DATA
-      const team = TEAMS_DATA.find(t => {
+      // 2. Try match on TEAMS_DATA - Exact match first
+      let team = TEAMS_DATA.find(t => aggressiveNormalize(t.name) === normalized);
+      if (team) return team.id;
+
+      // 3. Partial match (contains)
+      team = TEAMS_DATA.find(t => {
         const normT = aggressiveNormalize(t.name);
-        return normT === normalized || normT.includes(normalized) || normalized.includes(normT);
+        return normT.includes(normalized) || normalized.includes(normT);
       });
       
       return team ? team.id : null;
@@ -245,7 +211,7 @@ exports.importMatchByUrl = async (req, res) => {
     const awayTeamId = findTeamId(scrapedData.awayTeam.name);
 
     if (!homeTeamId || !awayTeamId) {
-      console.log('Týmy nenalezeny v TEAMS_DATA:', { home: scrapedData.homeTeam.name, away: scrapedData.awayTeam.name });
+      logger.warn('Týmy nenalezeny v databázi', { home: scrapedData.homeTeam.name, away: scrapedData.awayTeam.name });
       return res.status(404).json({ 
         error: `Týmy nenalezeny v databázi. Domácí: ${scrapedData.homeTeam.name || '?'}, Hosté: ${scrapedData.awayTeam.name || '?'}` 
       });
@@ -255,95 +221,79 @@ exports.importMatchByUrl = async (req, res) => {
     const awayTeamData = TEAMS_DATA.find(t => t.id === awayTeamId);
 
     if (!homeTeamData || !awayTeamData) {
-      console.log('Chyba: Data týmu nenalezena v TEAMS_DATA pro ID:', { homeTeamId, awayTeamId });
+      logger.error('Data týmu nenalezena v TEAMS_DATA pro ID', { homeTeamId, awayTeamId });
       return res.status(500).json({ error: 'Data o týmech nebyla nalezena v konfiguračním souboru.' });
     }
 
-    // Map events asynchronously with verification
-    const mappedEvents = [];
-    
-    // Process scorers
-    for (const s of scrapedData.homeTeam.scorers) {
-      const player = await findPlayerData(s.player, homeTeamId);
-      const assist = s.assist ? await findPlayerData(s.assist, homeTeamId) : null;
-      mappedEvents.push({
+    // Map events asynchronously with verification - using Promise.all for performance
+    const mapGoal = async (s, teamSide, teamId) => {
+      const [player, assist] = await Promise.all([
+        findPlayerData(s.player, teamId),
+        s.assist ? findPlayerData(s.assist, teamId) : Promise.resolve(null)
+      ]);
+      return {
         type: 'goal',
         minute: s.minute,
-        team: 'home',
+        team: teamSide,
         player: { id: player.id, name: player.name || s.player },
         assistPlayer: assist ? { id: assist.id, name: assist.name || s.assist } : undefined,
         note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''),
         eventKey: `goal-${s.minute}-${(player.name || s.player || "").substring(0, 3).toLowerCase()}`
-      });
-    }
-    for (const s of scrapedData.awayTeam.scorers) {
-      const player = await findPlayerData(s.player, awayTeamId);
-      const assist = s.assist ? await findPlayerData(s.assist, awayTeamId) : null;
-      mappedEvents.push({
-        type: 'goal',
-        minute: s.minute,
-        team: 'away',
-        player: { id: player.id, name: player.name || s.player },
-        assistPlayer: assist ? { id: assist.id, name: assist.name || s.assist } : undefined,
-        note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''),
-        eventKey: `goal-${s.minute}-${(player.name || s.player || "").substring(0, 3).toLowerCase()}`
-      });
-    }
+      };
+    };
 
-    // Process cards
-    for (const c of scrapedData.homeTeam.cards) {
-      const player = await findPlayerData(c.player, homeTeamId);
+    const mapCard = async (c, teamSide, teamId) => {
+      const player = await findPlayerData(c.player, teamId);
       const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
-      mappedEvents.push({
+      return {
         type,
         minute: c.minute,
-        team: 'home',
+        team: teamSide,
         player: { id: player.id, name: player.name || c.player },
         eventKey: `${type}-${c.minute}-${(player.name || c.player || "").substring(0, 3).toLowerCase()}`
-      });
-    }
-    for (const c of scrapedData.awayTeam.cards) {
-      const player = await findPlayerData(c.player, awayTeamId);
-      const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
-      mappedEvents.push({
-        type,
-        minute: c.minute,
-        team: 'away',
-        player: { id: player.id, name: player.name || c.player },
-        eventKey: `${type}-${c.minute}-${(player.name || c.player || "").substring(0, 3).toLowerCase()}`
-      });
-    }
+      };
+    };
 
-    // Process substitutions
-    for (const s of scrapedData.homeTeam.substitutions) {
-      const playerIn = await findPlayerData(s.in, homeTeamId);
-      const playerOut = await findPlayerData(s.out, homeTeamId);
-      mappedEvents.push({
+    const mapSub = async (s, teamSide, teamId) => {
+      const [playerIn, playerOut] = await Promise.all([
+        findPlayerData(s.in, teamId),
+        findPlayerData(s.out, teamId)
+      ]);
+      return {
         type: 'substitution',
         minute: s.minute,
-        team: 'home',
+        team: teamSide,
         playerIn: { id: playerIn.id, name: playerIn.name || s.in },
         playerOut: { id: playerOut.id, name: playerOut.name || s.out },
         eventKey: `sub-${s.minute}-${(playerIn.name || s.in || "").substring(0, 3).toLowerCase()}-${(playerOut.name || s.out || "").substring(0, 3).toLowerCase()}`
-      });
-    }
-    for (const s of scrapedData.awayTeam.substitutions) {
-      const playerIn = await findPlayerData(s.in, awayTeamId);
-      const playerOut = await findPlayerData(s.out, awayTeamId);
-      mappedEvents.push({
-        type: 'substitution',
-        minute: s.minute,
-        team: 'away',
-        playerIn: { id: playerIn.id, name: playerIn.name || s.in },
-        playerOut: { id: playerOut.id, name: playerOut.name || s.out },
-        eventKey: `sub-${s.minute}-${(playerIn.name || s.in || "").substring(0, 3).toLowerCase()}-${(playerOut.name || s.out || "").substring(0, 3).toLowerCase()}`
-      });
-    }
+      };
+    };
+
+    // Process all events in parallel
+    const [
+      homeGoals, awayGoals,
+      homeCards, awayCards,
+      homeSubs, awaySubs
+    ] = await Promise.all([
+      Promise.all(scrapedData.homeTeam.scorers.map(s => mapGoal(s, 'home', homeTeamId))),
+      Promise.all(scrapedData.awayTeam.scorers.map(s => mapGoal(s, 'away', awayTeamId))),
+      Promise.all(scrapedData.homeTeam.cards.map(c => mapCard(c, 'home', homeTeamId))),
+      Promise.all(scrapedData.awayTeam.cards.map(c => mapCard(c, 'away', awayTeamId))),
+      Promise.all(scrapedData.homeTeam.substitutions.map(s => mapSub(s, 'home', homeTeamId))),
+      Promise.all(scrapedData.awayTeam.substitutions.map(s => mapSub(s, 'away', awayTeamId)))
+    ]);
+
+    const mappedEvents = [
+      ...homeGoals, ...awayGoals,
+      ...homeCards, ...awayCards,
+      ...homeSubs, ...awaySubs
+    ];
 
     // Add generated IDs for each event if not present
     mappedEvents.forEach((e, idx) => {
       if (!e.id) {
-        e.id = e.player?.id || e.playerIn?.id || `scrape-${scrapedData.matchId}-${idx}`;
+        const uniqueSuffix = e.player?.id || e.playerIn?.id || idx;
+        e.id = `scrape-${scrapedData.matchId}-${e.type}-${e.minute}-${uniqueSuffix}`;
       }
     });
 
@@ -374,12 +324,8 @@ exports.importMatchByUrl = async (req, res) => {
       round: scrapedData.round || "1"
     };
 
-    // 1. Vyhledávání zápasů: Implementujte vyhledávání zápasů výhradně na základě identifikace domácího a hostujícího týmu
-    // Ale musíme se vyhnout chybě E11000, pokud v DB existuje jiný zápas se stejným matchId.
-    
     const scrapedMatchId = scrapedData.matchId !== 'unknown' ? scrapedData.matchId : null;
     
-    // Najdeme VŠECHNY zápasy, které by mohly odpovídat (buď týmy, nebo matchId)
     const possibleMatches = await Match.find({
       $or: [
         { 'homeTeam.id': homeTeamId, 'awayTeam.id': awayTeamId },
@@ -389,38 +335,30 @@ exports.importMatchByUrl = async (req, res) => {
 
     let existingMatch = null;
     if (possibleMatches.length > 0) {
-      // Prioritně vybereme ten, který už má správné matchId
       existingMatch = possibleMatches.find(m => m.matchId === scrapedMatchId) || possibleMatches[0];
       
-      // Pokud jsme našli více zápasů (duplicity v DB), ty ostatní smažeme, aby nekolidovaly
       if (possibleMatches.length > 1) {
-        console.log(`Nalezeno ${possibleMatches.length} možných shod, čistím duplicity...`);
+        logger.info(`Nalezeno ${possibleMatches.length} možných shod, čistím duplicity...`);
         const otherIds = possibleMatches
           .filter(m => m._id.toString() !== existingMatch._id.toString())
           .map(m => m._id);
         await Match.deleteMany({ _id: { $in: otherIds } });
       }
-      
-      console.log('Nalezen existující zápas v DB, provádím aktualizaci:', existingMatch.id);
+
       // Zachovat původní datum ze zápasu v DB, pokud scraper nevrátil nové
       if (existingMatch.date && updateFields.date && updateFields.date.endsWith('T15:00:00Z')) {
         updateFields.date = existingMatch.date;
       }
-    } else {
-      console.log('Zápas v DB nenalezen, bude vytvořen nový.');
     }
 
     if (scrapedMatchId) {
       updateFields.matchId = scrapedMatchId;
     }
 
-    // Generate internal ID if not present
     const datePart = (scrapedData.date || new Date().toISOString()).split('T')[0];
     const internalId = existingMatch ? existingMatch.id : `${datePart}-${homeTeamId}-${awayTeamId}`;
     updateFields.id = internalId;
 
-    // Force status "finished" if match is in the past or user is importing it manually
-    // Many users want imported matches to be marked as finished immediately
     if (scrapedData.matchStatus === 'FINISHED' || (scrapedData.date && new Date(scrapedData.date) < new Date())) {
       updateFields.status = 'finished';
     } else if (scrapedData.matchStatus === 'LIVE' || scrapedData.matchStatus === 'HT') {
@@ -429,7 +367,11 @@ exports.importMatchByUrl = async (req, res) => {
       updateFields.status = 'scheduled';
     }
 
-    // Finální dotaz pro update - VŽDY použijeme unikátní _id z DB, pokud jsme zápas našli
+    // Force 'finished' status for imported matches if user requested
+    if (scrapedData.matchStatus === 'FINISHED') {
+      updateFields.status = 'finished';
+    }
+
     const finalQuery = existingMatch ? { _id: existingMatch._id } : { id: internalId };
 
     const match = await Match.findOneAndUpdate(
@@ -438,15 +380,12 @@ exports.importMatchByUrl = async (req, res) => {
       { new: true, upsert: true }
     );
 
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Zápas úspěšně importován!', 
-      match 
-    });
+    logger.info('Upserted document', { matchId: match.matchId, status: match.status });
+    res.json(match);
 
   } catch (error) {
-    console.error('Chyba při importu:', error);
-    return res.status(500).json({ error: 'Chyba serveru při importu zápasu: ' + error.message });
+    logger.error('Chyba při importu zápasu:', error);
+    res.status(500).json({ error: error.message });
   }
 };
 
