@@ -91,19 +91,42 @@ async function scrapeMatch(url) {
       logger.info('Searching lineups for subs', { hNorm, aNorm });
 
       const extractFromText = (t, side) => {
-        const matches = t.matchAll(/([^,–—:\n\r()]+)\s*\((\d{1,2}(?:\+\d+)?)\.?\s*([^)]+)\)/g);
+        // Handle cases like "Player (C) (45. Sub)" or "Player (45. Sub1, 90. Sub2)"
+        // First, normalize names by removing (C) temporarily for matching if needed, 
+        // or just allow (C) in the name part
+        const matches = t.matchAll(/([^,–—:\n\r]+?)\s*(?:\(C\))?\s*\((\d{1,2}(?:\+\d+)?)\.?\s*([^)]+)\)/g);
         for (const m of matches) {
           let pOut = cleanStr(m[1]);
-          const min = m[2];
-          let pIn = cleanStr(m[3]);
-          if (/^(GK|C|B|ŽK|ČK|trenér|rozhodčí|diváci)$/i.test(pIn) || pIn.length < 2) continue;
-          if (pOut.includes(':')) pOut = pOut.split(':').pop().trim();
-          if (pOut && pIn && min) {
-            if (!subs[side].find(s => s.minute === min && s.out === pOut)) {
-              logger.info('Lineup sub found', { side, min, pOut, pIn });
-              subs[side].push({ minute: min, out: pOut, in: pIn });
+          const minPart = m[2];
+          const inPart = m[3];
+          
+          // inPart could be "Nyarko, 90. Auta"
+          const inMatches = inPart.split(/[,;]\s*/);
+          let currentOut = pOut;
+          
+          inMatches.forEach((inEntry, idx) => {
+            // Check if this entry itself has a minute (sub of a sub)
+            const subSubMatch = inEntry.match(/(\d{1,2}(?:\+\d+)?)\.?\s*(.*)/);
+            if (subSubMatch) {
+              const subMin = subSubMatch[1];
+              const subIn = cleanStr(subSubMatch[2]);
+              if (subIn && subIn.length > 2) {
+                if (!subs[side].find(s => s.minute === subMin && s.in === subIn)) {
+                  subs[side].push({ minute: subMin, out: currentOut, in: subIn });
+                }
+                currentOut = subIn; // Next sub in this chain will be from this player
+              }
+            } else if (idx === 0) {
+              // First entry in parenthesis, use the outer minute
+              const subIn = cleanStr(inEntry);
+              if (subIn && subIn.length > 2) {
+                if (!subs[side].find(s => s.minute === minPart && s.in === subIn)) {
+                  subs[side].push({ minute: minPart, out: currentOut, in: subIn });
+                }
+                currentOut = subIn;
+              }
             }
-          }
+          });
         }
       };
 
@@ -173,54 +196,59 @@ async function scrapeMatch(url) {
 
     const parseLine = (line, isGoals) => {
       const results = [];
-      // Splits teams by - or –
-      // Important: handle cases where only one team is listed or separator is missing
-      const sides = line.split(/\s*[\-\–\—]\s*(?=\d)/);
+      line = line.replace(/&nbsp;/g, ' ').trim();
+      
+      // Split by sides first
+      const sides = line.split(/\s+[\-\–\—]\s+(?=\d)/);
       
       sides.forEach((sideText, sideIndex) => {
-        let defaultSide = (sideIndex === 0 && sides.length > 1) ? 'home' : 'away';
-        const entries = sideText.split(/\s*[,;]\s*|\s{2,}/);
+        let defaultSide = (sideIndex === 0 && sides.length > 1) ? 'home' : (sides.length === 1 ? 'home' : 'away');
+        
+        // NEW: Robust splitting by commas, multiple spaces OR by a minute pattern (e.g., " 60." or " 90+7.")
+        // This ensures that even if commas are missing, we split the players correctly.
+        const entries = sideText.split(/\s*[,;]\s*|\s{2,}|(?=\s\d{1,2}(?:\+\d+)?(?:\.|'))/).filter(e => e.trim());
         
         entries.forEach(entry => {
-          if (!entry.trim() || entry === '-' || entry === '–') return;
+          entry = entry.trim();
+          if (!entry || entry === '-' || entry === '–') return;
           if (!isGoals && /asistent trenéra|trenér|trenér brankářů|vedoucí mužstva/i.test(entry)) return;
 
-          const match = entry.match(/(\d+(?:\+\d+)?)(?:'|\.)?\s*([^(\n,\-\–\—]+)(?:\s*\(([^)]+)\))?/);
+          const match = entry.match(/^(\d{1,2}(?:\+\d+)?)(?:'|\.)?\s*(.*)/);
           if (match) {
             const minute = match[1];
-            let player = match[2].trim().replace(/\s*\([A-Z]{2,4}\)/g, '').trim();
-            const note = match[3] ? match[3].trim() : '';
+            let rest = match[2].trim();
+            rest = rest.replace(/^(\(?\d+\s*:\s*\d+\)?\.?\s*)/, '').trim();
 
-            let finalSide = defaultSide;
-            
-            // IMPROVED SIDE DETECTION: Look for (ZLN) or (SLA) in the entry or note
-            const teamIdMatch = entry.match(/\(([A-Z]{3})\)/) || (note && note.match(/^([A-Z]{3})$/));
-            if (teamIdMatch) {
-                const teamCode = teamIdMatch[1].toUpperCase();
-                // Check against TEAM_ALIASES to find full name, then check if it's home or away
-                const { TEAM_ALIASES } = require('./utils/constants');
-                const fullName = TEAM_ALIASES[teamCode];
-                if (fullName) {
-                    if (homeTeam.name.includes(fullName) || fullName.includes(homeTeam.name)) finalSide = 'home';
-                    else if (awayTeam.name.includes(fullName) || fullName.includes(awayTeam.name)) finalSide = 'away';
-                } else {
-                    // Fallback to simple string match
-                    if (homeTeam.name.toUpperCase().includes(teamCode)) finalSide = 'home';
-                    else if (awayTeam.name.toUpperCase().includes(teamCode)) finalSide = 'away';
+            const playerMatch = rest.match(/^([^(\n,\-\–\—]+)(?:\s*\(([^)]+)\))?/);
+            if (!playerMatch) return;
+
+            let player = cleanStr(playerMatch[1]);
+            const note = playerMatch[2] ? playerMatch[2].trim() : '';
+
+            if (player && player.length > 2 && !/^\d+\s*:\s*\d+$/.test(player)) {
+                let finalSide = defaultSide;
+                
+                const teamIdMatch = entry.match(/\(([A-Z]{3,4})\)/) || (note && note.match(/^([A-Z]{3,4})$/));
+                if (teamIdMatch) {
+                    const teamCode = teamIdMatch[1].toUpperCase();
+                    const { TEAM_ALIASES } = require('./utils/constants');
+                    const fullName = TEAM_ALIASES[teamCode];
+                    if (fullName) {
+                        if (homeName.includes(fullName) || fullName.includes(homeName)) finalSide = 'home';
+                        else if (awayName.includes(fullName) || fullName.includes(awayName)) finalSide = 'away';
+                    }
                 }
-            } else if (note && note.length <= 4 && /^[A-Z]+$/.test(note)) {
-                if (homeTeam.name.toUpperCase().includes(note.toUpperCase())) finalSide = 'home';
-                else if (awayTeam.name.toUpperCase().includes(note.toUpperCase())) finalSide = 'away';
-            }
 
-            if (isGoals) {
-              const isPenalty = /pen\./i.test(entry) || /pen\./i.test(note) || entry.includes('pk');
-              const isOwnGoal = /vlastní/i.test(entry) || /vlastní/i.test(note) || entry.includes('vl.');
-              const assist = (!isPenalty && !isOwnGoal && note && note.length > 3) ? note : null;
-              player = player.replace(/\s*\(?pen\.?\)?/gi, '').replace(/\s*\(?vlastní\)?/gi, '').trim();
-              results.push({ player, minute, side: finalSide, penalty: isPenalty, ownGoal: isOwnGoal, assist });
-            } else {
-              results.push({ player, minute, side: finalSide, entry });
+                if (isGoals) {
+                  const isPenalty = /pen\./i.test(entry) || /pen\./i.test(note) || entry.includes('pk');
+                  const isOwnGoal = /vlastní/i.test(entry) || /vlastní/i.test(note) || entry.includes('vl.');
+                  const assist = (!isPenalty && !isOwnGoal && note && note.length > 3) ? note : null;
+                  player = player.replace(/\s*\(?pen\.?\)?/gi, '').replace(/\s*\(?vlastní\)?/gi, '').trim();
+                  results.push({ player, minute, side: finalSide, penalty: isPenalty, ownGoal: isOwnGoal, assist });
+                } else {
+                  // For cards, we also include the entry text to check for ŽK/ČK later
+                  results.push({ player, minute, side: finalSide, entry });
+                }
             }
           }
         });
@@ -230,34 +258,40 @@ async function scrapeMatch(url) {
 
     const parseSubs = (line) => {
       const results = [];
-      // Splits teams by - or –
-      const sides = line.split(/\s*[\-\–\—]\s*(?=\d|\()/);
+      const sides = line.split(/\s+[\-\–\—]\s+(?=\d)/);
       sides.forEach((sideText, sideIndex) => {
-        let defaultSide = (sideIndex === 0 && sides.length > 1) ? 'home' : 'away';
-        // Splits individual subs: 60. Out (In)
+        let defaultSide = (sideIndex === 0 && sides.length > 1) ? 'home' : (sides.length === 1 ? 'home' : 'away');
         const entries = sideText.split(/\s*[,;]\s*|\s{2,}/);
+        
         entries.forEach(entry => {
           if (!entry.trim() || entry === '-' || entry === '–') return;
           
           let finalSide = defaultSide;
-          // Team ID check from (LIB) note or at start of entry
           const teamPrefixMatch = entry.match(/^\s*\(([A-Z]{2,4})\)\s*/);
           if (teamPrefixMatch) {
              const teamId = teamPrefixMatch[1];
              entry = entry.replace(/^\s*\(([A-Z]{2,4})\)\s*/, '');
-             if (homeTeam.name.toUpperCase().includes(teamId)) finalSide = 'home';
-             else if (awayTeam.name.toUpperCase().includes(teamId)) finalSide = 'away';
+             if (homeName.toUpperCase().includes(teamId)) finalSide = 'home';
+             else if (awayName.toUpperCase().includes(teamId)) finalSide = 'away';
           }
 
-          // Match 60. Out (In)
-          const subMatch = entry.match(/(\d+(?:\+\d+)?)(?:'|\.)?\s*([^(\n,\-\–\—]+)(?:\s*\(([^)]+)\))?/);
+          // Format: "Minute. In (odchod: Out)" OR "Minute. In (Out)"
+          const subMatch = entry.match(/(\d{1,2}(?:\+\d+)?)(?:'|\.)?\s*([^(\n,\-\–\—]+)(?:\s*\(([^)]+)\))?/);
           if (subMatch) {
               const minute = subMatch[1];
-              let out = subMatch[2].trim();
-              let in_ = subMatch[3] ? subMatch[3].trim() : '';
+              // Improved name cleaning: remove leading/embedded minutes like "84. Name"
+              let p1 = cleanStr(subMatch[2]).replace(/^\d+\.?\s*/, '').trim();
+              let p2 = subMatch[3] ? cleanStr(subMatch[3]).replace(/odchod:\s*/i, '').replace(/^\d+\.?\s*/, '').trim() : '';
               
-              if (in_) {
-                  results.push({ minute, out, in: in_, side: finalSide });
+              // Clarification from user: First name is IN, Second (parenthesis) is OUT
+              let in_ = p1;
+              let out = p2;
+
+              if (in_ && out && in_.length > 2 && out.length > 2) {
+                  results.push({ minute, in: in_, out, side: finalSide });
+              } else if (in_ && in_.length > 2) {
+                  // Fallback for cases with only one name
+                  results.push({ minute, in: in_, out: '?', side: finalSide });
               }
           }
         });
@@ -265,55 +299,267 @@ async function scrapeMatch(url) {
       return results;
     };
 
-    // Extract Goals, Cards & Subs from any element containing them
+    const processedTexts = new Set();
+
     $('p, div, li').each((_, el) => {
         const $el = $(el);
         const text = $el.text().trim();
+        if (!text || text.length > 2000 || processedTexts.has(text)) return;
         
-        if (text.toLowerCase().includes('branky:') && text.length < 2000) {
-            const line = text.match(/Branky:\s*(.*?)(?=\n|Karty:|Střídání|$)/si)?.[1] || text.replace(/.*Branky:\s*/i, '');
-            const goals = parseLine(line.trim(), true);
-            goals.forEach(g => {
-                const target = g.side === 'home' ? homeTeam : awayTeam;
-                if (!target.scorers.find(s => s.minute === g.minute && s.player === g.player)) {
-                    logger.info('Goal detected', g);
-                    target.scorers.push({ player: g.player, minute: g.minute, penalty: g.penalty, ownGoal: g.ownGoal, assist: g.assist });
-                }
-            });
+        const textLower = text.toLowerCase();
+        let foundSomething = false;
+
+        if (textLower.includes('branky:')) {
+            const lineMatch = text.match(/Branky:\s*(.*?)(?=\n|Karty:|ŽK:|ČK:|Střídání|Sestavy|$)/si);
+            if (lineMatch) {
+                const goals = parseLine(lineMatch[1].trim(), true);
+                goals.forEach(g => {
+                    const target = g.side === 'home' ? homeTeam : awayTeam;
+                    if (!target.scorers.find(s => s.minute === g.minute && s.player === g.player)) {
+                        target.scorers.push({ player: g.player, minute: g.minute, penalty: g.penalty, ownGoal: g.ownGoal, assist: g.assist });
+                    }
+                });
+                foundSomething = true;
+            }
         }
         
-        if (text.toLowerCase().includes('karty:') && text.length < 2000) {
-            const line = text.match(/Karty:\s*(.*?)(?=\n|Sestavy|Střídání|Neproměněná|$)/si)?.[1] || text.replace(/.*Karty:\s*/i, '');
-            const cards = parseLine(line.trim(), false);
-            const html = $el.html() || '';
-            cards.forEach(c => {
-                const target = c.side === 'home' ? homeTeam : awayTeam;
-                const nameEscaped = c.player.replace(/[-\/\^$*+?.()|[\]{}]/g, '\$&');
-                // Red card detection: more aggressive check in HTML and text
-                const isRed = c.entry.toLowerCase().includes('červená') || 
-                            c.entry.toLowerCase().includes('2.žk') ||
-                            c.entry.toLowerCase().includes('čk') ||
-                            line.toLowerCase().includes(`${c.player.toLowerCase()} (2.žk=čk)`) ||
-                            /card-(r|yr|y2r)/i.test(html) && new RegExp(`${nameEscaped}.*?card-(r|yr|y2r)|card-(r|yr|y2r).*?${nameEscaped}`, 'i').test(html);
-                if (!target.cards.find(card => card.minute === c.minute && card.player === c.player)) {
-                    logger.info('Card detected', { player: c.player, minute: c.minute, type: isRed ? 'R' : 'Y', side: c.side });
-                    target.cards.push({ player: c.player, minute: c.minute, type: isRed ? 'R' : 'Y' });
-                }
-            });
+        if (textLower.includes('karty:') || textLower.includes('žk:') || textLower.includes('čk:')) {
+            const lineMatch = text.match(/(?:Karty|ŽK|ČK):\s*(.*?)(?=\n|Sestavy|Střídání|Neproměněná|Branky|$)/si);
+            if (lineMatch) {
+                const cardEntries = parseLine(lineMatch[1].trim(), false);
+                const html = $el.html() || '';
+                
+                cardEntries.forEach(c => {
+                    const target = c.side === 'home' ? homeTeam : awayTeam;
+                    
+                    // Robust check for card types in summary text
+                    const entryLower = c.entry.toLowerCase();
+                    const explicitRed = entryLower.includes('červená') || entryLower.includes('2.žk') || entryLower.includes('čk');
+                    const explicitYellow = entryLower.includes('žlutá') || entryLower.includes('žk');
+                    
+                    let isRed = explicitRed;
+                    let isYellow = explicitYellow;
+                    
+                    // If no explicit text, find the icon closest to the name in the summary HTML
+                    if (!isRed && !isYellow) {
+                        const namePos = html.indexOf(c.player);
+                        if (namePos !== -1) {
+                            const iconPattern = /card-(y|r|yr|y2r)/gi;
+                            const window = html.substring(Math.max(0, namePos - 40), Math.min(html.length, namePos + 40));
+                            const matches = [...window.matchAll(iconPattern)];
+                            if (matches.length > 0) {
+                                let closest = matches[0];
+                                let minDist = Math.abs(closest.index - 40);
+                                matches.forEach(m => {
+                                    const dist = Math.abs(m.index - 40);
+                                    if (dist < minDist) {
+                                        minDist = dist;
+                                        closest = m;
+                                    }
+                                });
+                                const type = closest[1].toLowerCase();
+                                isRed = type === 'r' || type === 'yr' || type === 'y2r';
+                                isYellow = !isRed;
+                            }
+                        }
+                    }
+
+                    if (!target.cards.find(card => card.minute === c.minute && card.player === c.player)) {
+                        target.cards.push({ 
+                            player: c.player, 
+                            minute: c.minute, 
+                            type: isRed ? 'R' : 'Y', 
+                            isExplicit: explicitRed || explicitYellow,
+                            isSummary: true // Mark as summary so timeline can override it later
+                        });
+                    }
+                });
+                foundSomething = true;
+            }
         }
 
-        if (text.toLowerCase().includes('střídání:') && text.length < 2000) {
-            const line = text.match(/Střídání:\s*(.*?)(?=\n|Sestavy|Rozhodčí|$)/si)?.[1] || text.replace(/.*Střídání:\s*/i, '');
-            const subs = parseSubs(line.trim());
-            subs.forEach(s => {
-                const target = s.side === 'home' ? homeTeam : awayTeam;
-                if (!target.substitutions.find(sub => sub.minute === s.minute && sub.out === s.out)) {
-                    logger.info('Substitution detected', s);
-                    target.substitutions.push({ minute: s.minute, in: s.in, out: s.out });
-                }
-            });
+        if (textLower.includes('střídání:')) {
+            const lineMatch = text.match(/Střídání:\s*(.*?)(?=\n|Sestavy|Rozhodčí|Branky|Karty|ŽK:|ČK:|$)/si);
+            if (lineMatch) {
+                const subs = parseSubs(lineMatch[1].trim());
+                subs.forEach(s => {
+                    const target = s.side === 'home' ? homeTeam : awayTeam;
+                    if (!target.substitutions.find(sub => sub.minute === s.minute && sub.out === s.out)) {
+                        target.substitutions.push({ minute: s.minute, in: s.in, out: s.out });
+                    }
+                });
+                foundSomething = true;
+            }
+        }
+
+        if (foundSomething) {
+            processedTexts.add(text);
+            $el.find('p, div, li').each((_, child) => processedTexts.add($(child).text().trim()));
         }
     });
+
+    // 2. LIVE Fallback: Parse from the reportage timeline if summary is incomplete
+    if (matchStatus === 'LIVE' || (homeTeam.scorers.length === 0 && awayTeam.scorers.length === 0)) {
+        $('.onlajn, .event').each((_, el) => {
+            const $el = $(el);
+            // Extract ONLY the time part (usually XX. or XX')
+            let timeText = $el.find('.time').text().trim();
+            const timeMatch = timeText.match(/^(\d{1,2}(?:\+\d+)?)/);
+            if (!timeMatch) return;
+            const time = timeMatch[1];
+
+            const text = $el.text().trim();
+            const textLower = text.toLowerCase();
+            
+            // Detect side from icon class, alignment, OR team names in text
+            let side = 'home';
+            const isAwayClass = $el.hasClass('away') || $el.hasClass('onlajn-away') || $el.find('.away, .onlajn-away, .event-right, .event-away').length > 0 || $el.css('text-align') === 'right' || $el.parent().hasClass('away') || $el.parent().hasClass('onlajn-away');
+            
+            if (isAwayClass) {
+                side = 'away';
+            }
+
+            // Refine side detection using team names or codes if possible
+            if (awayName && text.includes(awayName)) side = 'away';
+            else if (homeName && text.includes(homeName)) side = 'home';
+
+            // Special case: check for team codes like (SPA) or SPA
+            const teamCodeMatch = text.match(/\(?\b([A-Z]{3,4})\b\)?/);
+            if (teamCodeMatch) {
+                const teamCode = teamCodeMatch[1].toUpperCase();
+                const { TEAM_ALIASES } = require('./utils/constants');
+                const fullName = TEAM_ALIASES[teamCode];
+                if (fullName) {
+                    if (homeName.includes(fullName) || fullName.includes(homeName)) side = 'home';
+                    else if (awayName.includes(fullName) || fullName.includes(awayName)) side = 'away';
+                }
+            }
+
+            const target = side === 'home' ? homeTeam : awayTeam;
+
+            // Goal detection - check for goal icons or "Gól!" text
+            const goalIcon = $el.find('.icon-goal, .soccer-ball, .ball-goal, [class*="goal"]:not([class*="card"]):not([class*="yellow"]):not([class*="red"])');
+            const isGoal = (goalIcon.length > 0 || text.includes('Gól!')) && !text.includes('ŽK') && !text.includes('ČK');
+            if (isGoal) {
+                // Try to find player name - avoid score and minutes
+                let player = text.replace(timeText, '').replace(/^\s*[:\-\–\—\.]\s*/, '').trim();
+                // Clean team code at the start (e.g., "TEP 2:2 Auta")
+                player = player.replace(/^[A-Z]{3,4}\s+/, '').trim();
+                // Clean score like 1:0
+                player = player.replace(/^(\(?\d+\s*:\s*\d+\)?\.?\s*)/, '').trim();
+                // Extract only the name part - stop at common card or sub keywords
+                const nameMatch = player.match(/^([^(\n:ŽK|ČK|střídání|nastupuje|přichází|vyloučen)]+)/);
+                if (nameMatch) {
+                    player = cleanStr(nameMatch[1]);
+                    // Final check: must not be just a team name and must be reasonably long
+                    if (player && player.length > 2 && player !== homeName && player !== awayName) {
+                        // Global deduplication: check both home and away team
+                        const alreadyExists = homeTeam.scorers.find(s => s.minute === time && s.player === player) || 
+                                             awayTeam.scorers.find(s => s.minute === time && s.player === player);
+                        if (!alreadyExists) {
+                            target.scorers.push({ player, minute: time });
+                        }
+                    }
+                }
+            }
+
+            // Card detection
+            const cardIcon = $el.find('.icon-card, .yellow-card, .red-card, [class*="card"]');
+            const hasExplicitText = textLower.includes('žk') || textLower.includes('čk') || 
+                                    textLower.includes('vyloučen') || textLower.includes('2.žk') || 
+                                    textLower.includes('žlutá karta') || textLower.includes('červená karta');
+            const isCard = (cardIcon.length > 0 || hasExplicitText) && !text.includes('Gól!');
+            
+            if (isCard) {
+                const explicitRed = textLower.includes('čk') || textLower.includes('vyloučen') || 
+                                    textLower.includes('2.žk') || textLower.includes('červená karta');
+                const explicitYellow = textLower.includes('žk') || textLower.includes('žlutá karta');
+                
+                // Trust text over icons if text is present
+                let isRed = false;
+                if (explicitRed) isRed = true;
+                else if (explicitYellow) isRed = false;
+                else isRed = $el.find('.red-card, [class*="red"]').length > 0;
+                
+                let player = text.replace(timeText, '').replace(/^\s*[:\-\–\—\.]\s*/, '').trim();
+                // Clean team code at the start
+                player = player.replace(/^[A-Z]{3,4}\s+/, '').trim();
+                // Clean common card prefixes
+                player = player.replace(/^(?:ŽK|ČK|Karta|Žlutá karta|Červená karta)\s*[:\-\–\—]?\s*/i, '').trim();
+                const nameMatch = player.match(/^([^(\n:gól|branka|střídání|nastupuje|přichází)]+)/);
+                if (nameMatch) {
+                    player = cleanStr(nameMatch[1]);
+                    if (player && player.length > 2 && player !== homeName && player !== awayName) {
+                        // Global search for existing card to upgrade/deduplicate
+                        let existingCard = homeTeam.cards.find(c => c.minute === time && c.player === player) || 
+                                           awayTeam.cards.find(c => c.minute === time && c.player === player);
+                        
+                        if (!existingCard) {
+                            target.cards.push({ player, minute: time, type: isRed ? 'R' : 'Y', isExplicit: explicitRed || explicitYellow, isTimeline: true });
+                        } else {
+                            // Timeline always overrides summary or upgrades type
+                            if (explicitRed) {
+                                existingCard.type = 'R';
+                                existingCard.isExplicit = true;
+                            } else if (explicitYellow) {
+                                existingCard.type = 'Y';
+                                existingCard.isExplicit = true;
+                            } else if (isRed && !existingCard.isExplicit) {
+                                existingCard.type = 'R';
+                            }
+                            existingCard.isTimeline = true;
+                        }
+                    }
+                }
+            }
+
+            // Substitution detection
+            if ((textLower.includes('střídání') || $el.find('.icon-sub, [class*="sub"]').length > 0) && !isGoal && !isCard) {
+                // Split by newline or lookahead for new minutes
+                const subLines = text.split(/\n|(?=\d{1,2}\.?\s*[^(\n]+\s*\()/);
+                subLines.forEach(subLine => {
+                    // Try standard format: "Minute. In (Out)" or "Minute. Out (In)"
+                    const subMatch = subLine.match(/(\d{1,2}(?:\+\d+)?)\.?\s*([^(\n,]+)\s*\(([^)]+)\)/);
+                    if (subMatch) {
+                        const minute = subMatch[1];
+                        let p1 = cleanStr(subMatch[2]);
+                        let p2 = cleanStr(subMatch[3]);
+                        
+                        p1 = p1.replace(/^\d+\.?\s*/, '').replace(/^(\(?\d+\s*:\s*\d+\)?\.?\s*)/, '').trim();
+                        p2 = p2.replace(/^\d+\.?\s*/, '').replace(/^(\(?\d+\s*:\s*\d+\)?\.?\s*)/, '').replace(/odchod:\s*/i, '').trim();
+                        
+                        let pIn = p1;
+                        let pOut = p2;
+
+                        if (subLine.toLowerCase().includes('odchází') || subLine.toLowerCase().includes('odchod:')) {
+                            pIn = p2; pOut = p1;
+                        } else if (subLine.toLowerCase().includes('přichází') || subLine.toLowerCase().includes('nastupuje')) {
+                            pIn = p1; pOut = p2;
+                        }
+                        
+                        if (pIn && pOut && pIn.length > 2 && pOut.length > 2 && pIn !== homeName && pIn !== awayName && pOut !== homeName && pOut !== awayName && !pOut.toLowerCase().includes('střídání')) {
+                            if (!target.substitutions.find(s => s.minute === minute && s.out === pOut)) {
+                                target.substitutions.push({ minute, in: pIn, out: pOut });
+                            }
+                        }
+                    } else {
+                        // Try alternative format: "Minute. -Out +In"
+                        const altMatch = subLine.match(/(\d{1,2}(?:\+\d+)?)\.?\s*-(.+?)\s*\+(.+?)(?:\s|$|\()/);
+                        if (altMatch) {
+                            const minute = altMatch[1];
+                            const pOut = cleanStr(altMatch[2]);
+                            const pIn = cleanStr(altMatch[3]);
+                            if (pIn && pOut && pIn.length > 2 && pOut.length > 2) {
+                                if (!target.substitutions.find(s => s.minute === minute && s.out === pOut)) {
+                                    target.substitutions.push({ minute, in: pIn, out: pOut });
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    }
 
     // Fallback: Parse lineups if no subs were found in the summary
     if (homeTeam.substitutions.length === 0 && awayTeam.substitutions.length === 0) {

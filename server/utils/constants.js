@@ -21,7 +21,7 @@ const TEAM_ALIASES = {
   'ZLN': 'FC Zlín'
 };
 
-const ALLOWED_SCRAPE_HOSTS = ['www.onlajny.com', 'onlajny.com'];
+const ALLOWED_SCRAPE_HOSTS = ['www.onlajny.com', 'onlajny.com', 'archive.onlajny.com'];
 
 module.exports = {
   TEAM_ALIASES,

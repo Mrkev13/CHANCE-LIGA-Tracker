@@ -45,9 +45,40 @@
   { "id": "t_lib", "name": "Slovan Liberec", "logo": "", "stadium": "Stadion U Nisy" },
   { "id": "t_plz", "name": "FC Viktoria Plzeň", "logo": "", "stadium": "Doosan Arena" },
   { "id": "t_kar", "name": "MFK Karviná", "logo": "", "stadium": "Městský stadion Karviná" },
-  { "id": "t_hrk", "name": "Hradec Králové", "logo": "", "stadium": "Malšovická aréna" },
+  { 
+    "id": "t_hrk", 
+    "name": "Hradec Králové", 
+    "logo": "", 
+    "stadium": "Malšovická aréna",
+    "players": [
+      {"id": "p_hrk_1", "name": "Ondřej Mihálik", "position": "FWD"},
+      {"id": "p_hrk_2", "name": "Daniel Kučera", "position": "MID"},
+      {"id": "p_hrk_3", "name": "Mick van Buren", "position": "FWD"},
+      {"id": "p_hrk_4", "name": "Samuel Dancák", "position": "MID"},
+      {"id": "p_hrk_5", "name": "Daniel Trubač", "position": "MID"},
+      {"id": "p_hrk_6", "name": "Adam Vlkanova", "position": "MID"},
+      {"id": "p_hrk_7", "name": "Matej Regža", "position": "FWD"}
+    ]
+  },
   { "id": "t_zli", "name": "FC Zlín", "logo": "", "stadium": "Stadion Letná Zlín" },
-  { "id": "t_boh", "name": "Bohemians Praha 1905", "logo": "", "stadium": "Ďolíček" },
+  { 
+    "id": "t_boh", 
+    "name": "Bohemians Praha 1905", 
+    "logo": "", 
+    "stadium": "Ďolíček",
+    "players": [
+      {"id": "p_boh_1", "name": "Aleš Čermák", "position": "MID"},
+      {"id": "p_boh_2", "name": "Jan Kovařík", "position": "MID"},
+      {"id": "p_boh_3", "name": "Abdalláh Hilál", "position": "FWD"},
+      {"id": "p_boh_4", "name": "Jonathan Banda", "position": "MID"},
+      {"id": "p_boh_5", "name": "Václav Pleštil", "position": "MID"},
+      {"id": "p_boh_6", "name": "Václav Drchal", "position": "FWD"},
+      {"id": "p_boh_7", "name": "Milan Ristovski", "position": "FWD"},
+      {"id": "p_boh_8", "name": "James Sosseh", "position": "MID"},
+      {"id": "p_boh_9", "name": "Jan Matoušek", "position": "MID"},
+      {"id": "p_boh_10", "name": "Vojtěch Mirvald", "position": "DEF"}
+    ]
+  },
   { "id": "t_tep", "name": "FK Teplice", "logo": "", "stadium": "Stadion Na Stínadlech" },
   { "id": "t_duk", "name": "Dukla Praha", "logo": "", "stadium": "Juliska" },
   { "id": "t_mbo", "name": "FK Mladá Boleslav", "logo": "", "stadium": "Městský stadion Mladá Boleslav" },

@@ -533,8 +533,15 @@ function renderHalf(title: string, match: any, half: 'first' | 'second', activeF
           
           let playerText = '';
           if (e.type === 'substitution') {
-            playerText = e.playerIn?.name || e.player?.name || '';
-            const outText = e.playerOut?.name ? ` (odchod: ${e.playerOut.name})` : '';
+            const pIn = e.playerIn?.name || '';
+            const pOut = e.playerOut?.name || '';
+            
+            // Clean up pIn if it contains the minute (e.g. "84. Mirvald")
+            const cleanIn = pIn.replace(/^\d{1,2}(?:\+\d+)?\.?\s*/, '').trim();
+            const cleanOut = pOut.replace(/^\d{1,2}(?:\+\d+)?\.?\s*/, '').trim();
+            
+            playerText = cleanIn;
+            const outText = cleanOut ? ` (odchod: ${cleanOut})` : '';
             playerText += outText;
           } else {
             playerText = e.player?.name || '';

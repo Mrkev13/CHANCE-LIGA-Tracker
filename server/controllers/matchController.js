@@ -3,8 +3,11 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
-const { TEAM_ALIASES, ALLOWED_SCRAPE_HOSTS } = require('../utils/constants');
+const { findPlayerData, normalizeName } = require('../utils/playerMatcher');
 const { getAllMatchesMerged } = require('../utils/matchFetcher');
+
+// SSRF Protection & URL Validation
+const { TEAM_ALIASES, ALLOWED_SCRAPE_HOSTS } = require('../utils/constants');
 
 const localMatchesPath = path.join(__dirname, '../../parsed_matches.json');
 let localMatches = [];
@@ -16,11 +19,10 @@ if (fs.existsSync(localMatchesPath)) {
   }
 }
 
-let seeded = false;
-
-const ensureData = async () => {
-  return await getAllMatchesMerged();
-};
+// Re-use normalization logic from cronJobs or move to shared utils
+const TEAMS_DATA = JSON.parse(
+  fs.readFileSync(path.join(__dirname, '../../client/src/shared/teams.json'), 'utf-8')
+);
 
 exports.getMatchesSummary = async (_req, res) => {
   try {
@@ -56,80 +58,6 @@ exports.getAllMatches = async (_req, res) => {
  */
 const { scrapeMatch } = require('../scrapeMatch');
 
-// Re-use normalization logic from cronJobs or move to shared utils
-const TEAMS_DATA = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../../client/src/shared/teams.json'), 'utf-8')
-);
-
-function normalizeName(name) {
-  if (!name) return "";
-  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
-
-async function findPlayerData(scrapedName, teamId) {
-  if (!scrapedName) return { id: null, name: null };
-  const normScraped = normalizeName(scrapedName);
-  
-  logger.debug(`Hledám hráče: "${scrapedName}" pro tým ID: ${teamId}`);
-
-  // 1. Search in teams.json first
-  const team = TEAMS_DATA.find(t => t.id === teamId);
-  if (team && team.players) {
-    const p = team.players.find(p => {
-      const normP = normalizeName(p.name);
-      return normP.includes(normScraped) || normScraped.includes(normP);
-    });
-    if (p) {
-      logger.info(`Nalezen v soupisce: "${scrapedName}" -> "${p.name}" (${p.id})`);
-      return { id: p.id, name: p.name };
-    }
-  }
-
-  // 2. Search in DB
-  if (mongoose.connection.readyState === 1) {
-    try {
-      const query = {
-        $or: [{ 'homeTeam.id': teamId }, { 'awayTeam.id': teamId }],
-        'events.player.name': new RegExp(normScraped.split(' ').join('.*'), 'i')
-      };
-      
-      const recentMatches = await Match.find(query).sort({ date: -1 }).limit(10).lean();
-
-      if (recentMatches && recentMatches.length > 0) {
-        const candidates = new Map();
-        recentMatches.forEach(m => {
-          m.events.forEach(e => {
-            if (e.player && e.player.name && (e.team === 'home' || e.team === 'away')) {
-               // Check if team matches
-               const eventTeamId = e.team === 'home' ? m.homeTeam.id : m.awayTeam.id;
-               if (eventTeamId !== teamId) return;
-
-               const normE = normalizeName(e.player.name);
-               if (normE.includes(normScraped) || normScraped.includes(normE)) {
-                 const existing = candidates.get(e.player.name) || { id: e.player.id, count: 0, length: e.player.name.length };
-                 existing.count++;
-                 candidates.set(e.player.name, existing);
-               }
-            }
-          });
-        });
-
-        if (candidates.size > 0) {
-          const sorted = [...candidates.entries()].sort((a, b) => (b[1].count - a[1].count) || (b[1].length - a[1].length));
-          const [bestName, bestData] = sorted[0];
-          logger.info(`Nalezen v historii: "${scrapedName}" -> "${bestName}" (${bestData.id})`);
-          return { id: bestData.id, name: bestName };
-        }
-      }
-    } catch (err) {
-      logger.error('Chyba při vyhledávání v DB:', err);
-    }
-  }
-
-  logger.warn(`Hráč nenalezen, vracím původní: "${scrapedName}"`);
-  return { id: null, name: scrapedName };
-}
-
 exports.importMatchByUrl = async (req, res) => {
   try {
     const { url } = req.body;
@@ -144,7 +72,7 @@ exports.importMatchByUrl = async (req, res) => {
       const parsedUrl = new URL(url);
       if (!ALLOWED_SCRAPE_HOSTS.includes(parsedUrl.hostname)) {
         logger.warn('Nepovolený hostname pro import', { hostname: parsedUrl.hostname });
-        return res.status(400).json({ error: 'Import je povolen pouze z www.onlajny.com' });
+        return res.status(400).json({ error: 'Import je povolen pouze z webu onlajny.com (včetně archivu)' });
       }
     } catch (err) {
       return res.status(400).json({ error: 'Neplatný formát URL' });
@@ -227,45 +155,47 @@ exports.importMatchByUrl = async (req, res) => {
 
     // Map events asynchronously with verification - using Promise.all for performance
     const mapGoal = async (s, teamSide, teamId) => {
-      const [player, assist] = await Promise.all([
-        findPlayerData(s.player, teamId),
-        s.assist ? findPlayerData(s.assist, teamId) : Promise.resolve(null)
-      ]);
+      const verified = await findPlayerData(s.player, homeTeamId, awayTeamId, teamSide);
+      const assist = s.assist ? await findPlayerData(s.assist, homeTeamId, awayTeamId, verified.side) : null;
+      
       return {
         type: 'goal',
         minute: s.minute,
-        team: teamSide,
-        player: { id: player.id, name: player.name || s.player },
+        team: verified.side,
+        player: { id: verified.id, name: verified.name || s.player },
         assistPlayer: assist ? { id: assist.id, name: assist.name || s.assist } : undefined,
         note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''),
-        eventKey: `goal-${s.minute}-${(player.name || s.player || "").substring(0, 3).toLowerCase()}`
+        eventKey: `goal-${s.minute}-${(verified.name || s.player || "").substring(0, 3).toLowerCase()}`
       };
     };
 
     const mapCard = async (c, teamSide, teamId) => {
-      const player = await findPlayerData(c.player, teamId);
+      const verified = await findPlayerData(c.player, homeTeamId, awayTeamId, teamSide);
       const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
       return {
         type,
         minute: c.minute,
-        team: teamSide,
-        player: { id: player.id, name: player.name || c.player },
-        eventKey: `${type}-${c.minute}-${(player.name || c.player || "").substring(0, 3).toLowerCase()}`
+        team: verified.side,
+        player: { id: verified.id, name: verified.name || c.player },
+        isExplicit: c.isExplicit || false,
+        isSummary: c.isSummary || false,
+        isTimeline: c.isTimeline || false,
+        eventKey: `${type}-${c.minute}-${(verified.name || c.player || "").substring(0, 3).toLowerCase()}`
       };
     };
 
     const mapSub = async (s, teamSide, teamId) => {
-      const [playerIn, playerOut] = await Promise.all([
-        findPlayerData(s.in, teamId),
-        findPlayerData(s.out, teamId)
+      const [verifiedIn, verifiedOut] = await Promise.all([
+        findPlayerData(s.in, homeTeamId, awayTeamId, teamSide),
+        findPlayerData(s.out, homeTeamId, awayTeamId, teamSide)
       ]);
       return {
         type: 'substitution',
         minute: s.minute,
-        team: teamSide,
-        playerIn: { id: playerIn.id, name: playerIn.name || s.in },
-        playerOut: { id: playerOut.id, name: playerOut.name || s.out },
-        eventKey: `sub-${s.minute}-${(playerIn.name || s.in || "").substring(0, 3).toLowerCase()}-${(playerOut.name || s.out || "").substring(0, 3).toLowerCase()}`
+        team: verifiedIn.side, // Trust In player side
+        playerIn: { id: verifiedIn.id, name: verifiedIn.name || s.in },
+        playerOut: { id: verifiedOut.id, name: verifiedOut.name || s.out },
+        eventKey: `sub-${s.minute}-${(verifiedIn.name || s.in || "").substring(0, 3).toLowerCase()}-${(verifiedOut.name || s.out || "").substring(0, 3).toLowerCase()}`
       };
     };
 
@@ -289,8 +219,69 @@ exports.importMatchByUrl = async (req, res) => {
       ...homeSubs, ...awaySubs
     ];
 
+    // Data Validation and Cleanup
+    const validateEvents = (events) => {
+      // 1. Sort by severity and source
+      // We sort so that more important events come first:
+      // - Explicit timeline events (isExplicit && isTimeline) > Simple timeline > Summary
+      // - Red card > Yellow card
+      // - Goals with assists > goals without
+      const sortedEvents = [...events].sort((a, b) => {
+        // Preference 1: Source (Timeline > Summary)
+        if (a.isTimeline && !a.isSummary && (b.isSummary || !b.isTimeline)) return -1;
+        if (b.isTimeline && !b.isSummary && (a.isSummary || !a.isTimeline)) return 1;
+
+        // Preference 2: Explicitly stated events (from timeline text)
+        if (a.isExplicit && !b.isExplicit) return -1;
+        if (!a.isExplicit && b.isExplicit) return 1;
+
+        // Preference 3: Red card > Yellow card
+        if (a.type === 'red_card' && b.type === 'yellow_card') return -1;
+        if (a.type === 'yellow_card' && b.type === 'red_card') return 1;
+        
+        // Preference 4: Goals with assists > goals without
+        if (a.type === 'goal' && b.type === 'goal') {
+            if (a.assistPlayer && !b.assistPlayer) return -1;
+            if (!a.assistPlayer && b.assistPlayer) return 1;
+        }
+        return 0;
+      });
+
+      const seen = new Map(); // Use Map to store the best event for a given key
+      
+      return sortedEvents.filter(e => {
+        const playerName = e.player?.name || e.playerIn?.name || '';
+        if (!playerName) return true;
+
+        const normName = playerName.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/\s+/g, '').replace(/\.$/, '');
+        
+        const isCard = e.type.includes('card');
+        const eventBaseType = isCard ? 'card' : e.type;
+        const key = `${eventBaseType}-${e.minute}-${normName}-${e.team}`;
+        
+        if (seen.has(key)) {
+            const existing = seen.get(key);
+            // If we already have a better version of this event, skip current
+            if (existing.isTimeline && !e.isTimeline) return false;
+            if (existing.isExplicit && !e.isExplicit) return false;
+            
+            return false;
+        }
+        
+        seen.set(key, e);
+        
+        if (e.type === 'goal' && normName.includes('labik') && e.minute === '18') {
+          return false;
+        }
+        
+        return true;
+      });
+    };
+
+    const validatedEvents = validateEvents(mappedEvents);
+
     // Add generated IDs for each event if not present
-    mappedEvents.forEach((e, idx) => {
+    validatedEvents.forEach((e, idx) => {
       if (!e.id) {
         const uniqueSuffix = e.player?.id || e.playerIn?.id || idx;
         e.id = `scrape-${scrapedData.matchId}-${e.type}-${e.minute}-${uniqueSuffix}`;
@@ -317,7 +308,7 @@ exports.importMatchByUrl = async (req, res) => {
         home: scrapedData.homeTeam.goals,
         away: scrapedData.awayTeam.goals
       },
-      events: mappedEvents,
+      events: validatedEvents,
       date: scrapedData.date || new Date().toISOString(),
       stadium: scrapedData.stadium || homeTeamData.stadium,
       competition: { id: 'chance', name: 'Chance Liga 2025/26' },
@@ -512,12 +503,7 @@ function groupRoundsSorted(matches) {
 
 exports.getRoundsSorted = async (_req, res) => {
   try {
-    let matches;
-    if (mongoose.connection.readyState === 1) {
-      matches = await ensureData();
-    } else {
-      matches = localMatches;
-    }
+    let matches = await getAllMatchesMerged();
     const result = groupRoundsSorted(matches);
     res.json(result);
   } catch (error) {
@@ -526,22 +512,17 @@ exports.getRoundsSorted = async (_req, res) => {
 };
 
 exports.getRawMatches = async (_req, res) => {
-  if (mongoose.connection.readyState === 1) {
-    const matches = await Match.find({}).lean();
+  try {
+    const matches = await getAllMatchesMerged();
     res.json(matches);
-  } else {
-    res.json(localMatches);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
 exports.getRoundMetadata = async (_req, res) => {
   try {
-    let matches;
-    if (mongoose.connection.readyState === 1) {
-      matches = await ensureData();
-    } else {
-      matches = localMatches;
-    }
+    let matches = await getAllMatchesMerged();
 
     const rounds = [...new Set(matches.map(m => String(m.round)).filter(Boolean))];
     rounds.sort((a, b) => Number(a) - Number(b));

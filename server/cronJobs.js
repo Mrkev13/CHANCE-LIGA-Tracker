@@ -4,68 +4,7 @@ const { scrapeMatch } = require('./scrapeMatch');
 const winston = require('winston');
 const fs = require('fs');
 const path = require('path');
-
-// Load team data for player verification
-const TEAMS_DATA = JSON.parse(
-  fs.readFileSync(path.join(__dirname, '../client/src/shared/teams.json'), 'utf-8')
-);
-
-/**
- * Normalizes string for robust comparison
- * Removes diacritics, lowercase, trim
- */
-function normalizeName(name) {
-  if (!name) return "";
-  return name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-}
-
-/**
- * Team Aliases for robust mapping
- */
-const teamAliases = {
-  "t_spa": ["sparta", "ac sparta praha", "sparta praha"],
-  "t_sla": ["slavia", "sk slavia praha", "slavia praha"],
-  "t_plz": ["viktoria plzen", "viktorka", "plzen"],
-  "t_ban": ["banik", "fc banik ostrava", "ostrava", "ova"],
-  "t_hrk": ["hradec kralove", "votroci", "hradec", "hkr"],
-  "t_duk": ["dukla", "dukla praha"],
-  "t_jab": ["jablonec", "fk jablonec", "jab"],
-  "t_zli": ["zlin", "fc zlin"],
-  "t_boh": ["bohemians", "bohemians praha 1905", "klokani"],
-  "t_tep": ["teplice", "fk teplice"],
-  "t_lib": ["liberec", "slovan liberec"],
-  "t_kar": ["karvina", "mfk karvina"],
-  "t_mbo": ["boleslav", "mlada boleslav", "fk mlada boleslav"],
-  "t_par": ["pardubice", "fk pardubice"],
-  "t_slo": ["slovacko", "1. fc slovacko"],
-  "t_olo": ["olomouc", "sigma olomouc", "sk sigma olomouc"]
-};
-
-/**
- * Normalizes player name and finds team
- * e.g. "Kohút" -> "Kohút D." if found in Ostrava roster
- */
-function findPlayerData(scrapedName, homeTeamId, awayTeamId) {
-  const normScraped = normalizeName(scrapedName);
-  const homeTeam = TEAMS_DATA.find(t => t.id === homeTeamId);
-  const awayTeam = TEAMS_DATA.find(t => t.id === awayTeamId);
-
-  const findInTeam = (team, normName) => {
-    if (!team || !team.players) return null;
-    return team.players.find(p => {
-      const normP = normalizeName(p.name);
-      return normP.includes(normName) || normName.includes(normP);
-    });
-  };
-
-  const homePlayer = findInTeam(homeTeam, normScraped);
-  const awayPlayer = findInTeam(awayTeam, normScraped);
-
-  if (homePlayer && !awayPlayer) return { name: homePlayer.name, team: 'home' };
-  if (awayPlayer && !homePlayer) return { name: awayPlayer.name, team: 'away' };
-  
-  return { name: scrapedName, team: null };
-}
+const { findPlayerData, normalizeName } = require('./utils/playerMatcher');
 
 // Logger configuration
 const logger = winston.createLogger({
@@ -120,15 +59,81 @@ function startScrapingCron() {
         if (scrapedData) {
           try {
             // Helper to get correct team and name
-            const getEventData = (scrapedPlayer, scrapedTeam) => {
-              const verified = findPlayerData(scrapedPlayer, match.homeTeam.id, match.awayTeam.id);
+            const getEventData = async (scrapedPlayer, scrapedTeam) => {
+              const verified = await findPlayerData(scrapedPlayer, match.homeTeam.id, match.awayTeam.id, scrapedTeam);
               return {
+                id: verified.id,
                 name: verified.name || scrapedPlayer,
-                team: verified.team || scrapedTeam
+                team: verified.side
               };
             };
 
-            // Atomic upsert - use original DB ID as primary identifier
+            // Process all events in parallel with Promise.all
+            const homeGoals = await Promise.all(scrapedData.homeTeam.scorers.map(async s => {
+              const d = await getEventData(s.player, 'home');
+              const eventKey = `goal-${s.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
+              return { type: 'goal', minute: s.minute, team: d.team, player: { id: d.id, name: d.name }, note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''), eventKey };
+            }));
+
+            const awayGoals = await Promise.all(scrapedData.awayTeam.scorers.map(async s => {
+              const d = await getEventData(s.player, 'away');
+              const eventKey = `goal-${s.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
+              return { type: 'goal', minute: s.minute, team: d.team, player: { id: d.id, name: d.name }, note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''), eventKey };
+            }));
+
+            const homeCards = await Promise.all(scrapedData.homeTeam.cards.map(async c => {
+              const d = await getEventData(c.player, 'home');
+              const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
+              const eventKey = `${type}-${c.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
+              return { type, minute: c.minute, team: d.team, player: { id: d.id, name: d.name }, eventKey };
+            }));
+
+            const awayCards = await Promise.all(scrapedData.awayTeam.cards.map(async c => {
+              const d = await getEventData(c.player, 'away');
+              const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
+              const eventKey = `${type}-${c.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
+              return { type, minute: c.minute, team: d.team, player: { id: d.id, name: d.name }, eventKey };
+            }));
+
+            const homeSubs = await Promise.all(scrapedData.homeTeam.substitutions.map(async s => {
+              const dIn = await getEventData(s.in, 'home');
+              const dOut = await getEventData(s.out, 'home');
+              const eventKey = `sub-${s.minute}-${(dIn.name || "").substring(0, 3).toLowerCase()}-${(dOut.name || "").substring(0, 3).toLowerCase()}`;
+              return { type: 'substitution', minute: s.minute, team: dIn.team, playerIn: { id: dIn.id, name: dIn.name }, playerOut: { id: dOut.id, name: dOut.name }, eventKey };
+            }));
+
+            const awaySubs = await Promise.all(scrapedData.awayTeam.substitutions.map(async s => {
+              const dIn = await getEventData(s.in, 'away');
+              const dOut = await getEventData(s.out, 'away');
+              const eventKey = `sub-${s.minute}-${(dIn.name || "").substring(0, 3).toLowerCase()}-${(dOut.name || "").substring(0, 3).toLowerCase()}`;
+              return { type: 'substitution', minute: s.minute, team: dIn.team, playerIn: { id: dIn.id, name: dIn.name }, playerOut: { id: dOut.id, name: dOut.name }, eventKey };
+            }));
+
+            const mappedEvents = [
+              ...homeGoals, ...awayGoals,
+              ...homeCards, ...awayCards,
+              ...homeSubs, ...awaySubs
+            ].map((e, idx) => ({ 
+              ...e, 
+              id: e.id || `scrape-${scrapedData.matchId}-${e.type}-${e.minute}-${idx}` 
+            }));
+
+            // Data Validation and Cleanup
+            const seen = new Set();
+            const validatedEvents = mappedEvents.filter(e => {
+              const playerName = e.player?.name || e.playerIn?.name || '';
+              const key = `${e.type}-${e.minute}-${playerName}-${e.team}`;
+              if (seen.has(key)) return false;
+              seen.add(key);
+
+              // Programmatic fix for known errors
+              if (e.type === 'goal' && playerName.includes('Labik') && e.minute === '18') {
+                return false;
+              }
+              return true;
+            });
+
+            // Atomic upsert
             const updateFields = {
               data: scrapedData,
               lastScrapeAt: new Date(),
@@ -136,43 +141,7 @@ function startScrapingCron() {
                 home: scrapedData.homeTeam.goals,
                 away: scrapedData.awayTeam.goals
               },
-              // Map scraped events to the standard events format for the frontend
-              events: [
-                ...scrapedData.homeTeam.scorers.map(s => {
-                  const d = getEventData(s.player, 'home');
-                  const eventKey = `goal-${s.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
-                  return { type: 'goal', minute: s.minute, team: d.team, player: d.name, note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''), eventKey };
-                }),
-                ...scrapedData.awayTeam.scorers.map(s => {
-                  const d = getEventData(s.player, 'away');
-                  const eventKey = `goal-${s.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
-                  return { type: 'goal', minute: s.minute, team: d.team, player: d.name, note: s.penalty ? 'pen.' : (s.ownGoal ? 'vlastní' : ''), eventKey };
-                }),
-                ...scrapedData.homeTeam.cards.map(c => {
-                  const d = getEventData(c.player, 'home');
-                  const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
-                  const eventKey = `${type}-${c.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
-                  return { type, minute: c.minute, team: d.team, player: d.name, eventKey };
-                }),
-                ...scrapedData.awayTeam.cards.map(c => {
-                  const d = getEventData(c.player, 'away');
-                  const type = c.type === 'Y' ? 'yellow_card' : 'red_card';
-                  const eventKey = `${type}-${c.minute}-${(d.name || "").substring(0, 3).toLowerCase()}`;
-                  return { type, minute: c.minute, team: d.team, player: d.name, eventKey };
-                }),
-                ...scrapedData.homeTeam.substitutions.map(s => {
-                  const dIn = getEventData(s.in, 'home');
-                  const dOut = getEventData(s.out, 'home');
-                  const eventKey = `sub-${s.minute}-${(dIn.name || "").substring(0, 3).toLowerCase()}-${(dOut.name || "").substring(0, 3).toLowerCase()}`;
-                  return { type: 'substitution', minute: s.minute, team: dIn.team, playerIn: dIn.name, playerOut: dOut.name, eventKey };
-                }),
-                ...scrapedData.awayTeam.substitutions.map(s => {
-                  const dIn = getEventData(s.in, 'away');
-                  const dOut = getEventData(s.out, 'away');
-                  const eventKey = `sub-${s.minute}-${(dIn.name || "").substring(0, 3).toLowerCase()}-${(dOut.name || "").substring(0, 3).toLowerCase()}`;
-                  return { type: 'substitution', minute: s.minute, team: dIn.team, playerIn: dIn.name, playerOut: dOut.name, eventKey };
-                })
-              ].map((e, idx) => ({ ...e, id: e.id || `scrape-${scrapedData.matchId}-${idx}` }))
+              events: validatedEvents
             };
 
             // Only change status if it's explicitly live or finished on source
