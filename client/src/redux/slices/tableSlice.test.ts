@@ -1,4 +1,12 @@
-import { test, expect } from '@jest/globals';
+import { test, expect, jest } from '@jest/globals';
+
+jest.mock('axios', () => ({
+  __esModule: true,
+  default: {
+    get: () => Promise.resolve({ data: null })
+  }
+}));
+
 import { computeTableFromMatches } from './tableSlice';
 
 const sample = [

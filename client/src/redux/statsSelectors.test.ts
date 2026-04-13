@@ -112,6 +112,6 @@ describe('statsSelectors', () => {
 
     const scorers = selectTopScorers(mixedState);
     expect(scorers).toHaveLength(1);
-    expect(scorers[0]).toMatchObject({ name: 'Chorý', count: 2 });
+    expect(scorers[0]).toMatchObject({ name: 'Tomáš Chorý', count: 2 });  
   });
 });

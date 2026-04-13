@@ -12,8 +12,17 @@ export interface PlayerStat {
   lastDate?: string;
 }
 
+type ServerStatsLike = {
+  goals: PlayerStat[];
+  assists: PlayerStat[];
+  yellowCards: PlayerStat[];
+  redCards: PlayerStat[];
+};
+
 const selectMatches = (state: RootState) => state.matches.matches;
-const selectServerStats = (state: RootState) => state.stats;
+const emptyServerStats: ServerStatsLike = { goals: [], assists: [], yellowCards: [], redCards: [] };
+const selectServerStats = (state: RootState): ServerStatsLike =>
+  (state as any).stats ?? emptyServerStats;
 
 // Shared Helper Logic
 const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
@@ -24,6 +33,17 @@ const toShort = (s: string) => {
     const surname = parts.slice(1).join(' ');
     const firstname = parts[0];
     return `${surname} ${firstname.charAt(0)}.`; 
+};
+
+const isOwnGoalPlaceholder = (name: string) => {
+  const norm = normalize(name).replace(/\.+$/, '');
+  if (!norm) return false;
+  if (norm === 'vla') return true;
+  if (norm === 'vlastni') return true;
+  if (norm.includes('vlastni')) return true;
+  if (norm === 'own goal') return true;
+  if (norm === 'og') return true;
+  return false;
 };
 
 // Pre-calculate canonical map and player-to-team mapping
@@ -97,6 +117,7 @@ const selectPlayerStatsRaw = createSelector(
       teamName?: string,
       dateIso?: string
     ) => {
+      if (isOwnGoalPlaceholder(name)) return;
       const canonicalName = resolveName(name);
       const key = normalize(canonicalName); // Use normalized canonical name as stable key
       allNames.add(canonicalName);
@@ -186,6 +207,7 @@ const selectPlayerStatsRaw = createSelector(
 
 const sortAndSlice = (map: Map<string, PlayerStat>, limit: number = 10) => {
   return Array.from(map.values())
+    .filter(ps => !isOwnGoalPlaceholder(ps.name))
     .sort((a, b) => {
       if (b.count !== a.count) return b.count - a.count;
       return a.name.localeCompare(b.name, 'cs'); // Stable secondary sort by name
@@ -200,6 +222,7 @@ export const selectTopScorers = createSelector(
     
     // 1. Add server stats (Source of Truth)
     serverStats.goals.forEach(ps => {
+      if (isOwnGoalPlaceholder(ps.name)) return;
       const canonicalName = resolveName(ps.name);
       const key = normalize(canonicalName);
       const existing = merged.get(key);
@@ -228,6 +251,7 @@ export const selectTopAssists = createSelector(
     const merged = new Map<string, PlayerStat>();
     
     serverStats.assists.forEach(ps => {
+      if (isOwnGoalPlaceholder(ps.name)) return;
       const canonicalName = resolveName(ps.name);
       const key = normalize(canonicalName);
       const existing = merged.get(key);
